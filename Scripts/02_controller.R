@@ -1,23 +1,24 @@
 # Load in required packages
 library(rmarkdown)
 library(tidyverse)
+library(readxl)
 
 #Determine which scripts should be run
-process_data = F #Runs data analysis 
-make_report = F #Runs project summary
+process_all_data = T #Runs data analysis 
+make_report = T #Runs project summary
 knit_manuscript = F #Compiles manuscript draft
 
 ############################
 ### Read in the RAW data ###
 ############################
 
-if(process_data == T){
-  source(file = "Scripts/01_data_processing.R")
-}
+source(file = "Scripts/01_data_processing.R")
 
 ##################################
 ### Read in the PROCESSED data ###
 ##################################
+
+full_data = read.csv(file = "Output/Data/full_data.csv")
 
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
@@ -28,6 +29,7 @@ if(make_report == T){
 ##################################
 ### Read in the PROCESSED data ###
 ##################################
+
 
 if(knit_manuscript == T){
   render(input = "Manuscript/manuscript_name.Rmd", #Input the path to your .Rmd file here

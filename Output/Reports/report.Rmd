@@ -1,5 +1,5 @@
 ---
-title: TITLE HERE
+title: Seasonality in Lake Champlain Copepod Thermal Limits
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -49,3 +49,54 @@ theme_matt = function(base_size = 18,
     )
 }
 ```
+
+## Temperature Variation 
+
+```{r}
+
+```
+
+
+## Trait Variation 
+
+```{r}
+ggplot(full_data, aes(x = size)) + 
+  facet_wrap(.~species, ncol = 1) + 
+  geom_histogram(binwidth = 0.2) + 
+  theme_matt()
+
+ggplot(full_data, aes(x = ctmax)) + 
+  facet_wrap(.~species, ncol = 1) + 
+  geom_histogram(binwidth = 1) + 
+  theme_matt()
+```
+
+### Variation with temperature 
+
+```{r}
+ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = species)) + 
+  geom_point(size = 3) + 
+  labs(x = "Collection Temperature (°C)", 
+       y = "CTmax (°C)") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+
+ggplot(full_data, aes(x = collection_temp, y = size, colour = species)) + 
+  geom_point(size = 3) + 
+  labs(x = "Collection Temperature (°C)", 
+       y = "Length (mm)") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+```
+
+## Trait Correlations 
+
+```{r}
+ggplot(full_data, aes(x = size, y = ctmax, colour = species)) + 
+  geom_point(size = 3) + 
+  labs(x = "Length (mm)", 
+       y = "CTmax (°C)") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+```
+
