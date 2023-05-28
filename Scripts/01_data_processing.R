@@ -1,3 +1,8 @@
+### TO DO ###
+
+
+
+
 # This script cycles through the time, temperature, and length data files collected for each individual replicate
 # and combines them to estimate thermal limits (as CTmax)
 
@@ -41,11 +46,16 @@ if(length(new_runs) > 0){ # If there are new data files to process...
       pivot_longer(cols = c(Temp1, Temp2, Temp3), # Pivots data set so there's only one column of temperature data
                    names_to = "sensor",
                    values_to = "temp_C") %>% ungroup()
+  
+    name_split = str_split_fixed(file_name, pattern = "_", n = 4)
+    date = paste(name_split[1], name_split[2], name_split[3], sep = "-")
     
     time_data = read_excel(paste("Raw_data/pheno_obs/", file_name, "_obs.xlsx", collapse = "", sep = "")) %>% 
       drop_na(ctmax_minute) %>%
       mutate(time = (ctmax_minute + (ctmax_second / 60)) - 2, # Accounts for the two minute start up delay in the temperature logger
-             "rank" = dense_rank(desc(time)))
+             "rank" = dense_rank(desc(time)),
+             exp_date = lubridate::as_datetime(date),
+             days_in_lab = as.numeric(exp_date - collection_date))
 
     min_ramp = temp_data  %>% 
       group_by(sensor, minute_interval) %>% 
@@ -62,8 +72,9 @@ if(length(new_runs) > 0){ # If there are new data files to process...
                 "ramp_rate" = mean(filter(min_ramp, minute_interval > (time - 5) & minute_interval < time)$ramp_per_minute))
     
     ct_data = inner_join(time_data, ind_measurements, by = c("tube")) %>% 
-      mutate(run = run_id) %>% 
-      select(collection_date, collection_temp, run, experiment, replicate, species, tube, rank, size, time, ramp_rate, ctmax)
+      mutate(run = run_id, 
+             warming_tol = ctmax - collection_temp) %>% 
+      select(collection_date, collection_temp, exp_date, days_in_lab, run, experiment, replicate, species, tube, rank, size, fecundity, time, ramp_rate, ctmax, warming_tol)
     
     write.csv(ct_data, file = paste("Output/Data/", file_name, "_ctmax.csv", sep = "", collapse = ""), row.names = F)
     

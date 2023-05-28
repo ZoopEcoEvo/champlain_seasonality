@@ -18,7 +18,9 @@ source(file = "Scripts/01_data_processing.R")
 ### Read in the PROCESSED data ###
 ##################################
 
-full_data = read.csv(file = "Output/Data/full_data.csv")
+full_data = read.csv(file = "Output/Data/full_data.csv") %>% 
+  mutate("sp_name" = str_replace_all(species, pattern = "_", replacement = " "),
+         sp_name = str_to_sentence(sp_name))
 
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
