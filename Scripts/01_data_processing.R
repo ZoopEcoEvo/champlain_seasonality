@@ -11,7 +11,7 @@ temp_record = data.frame()
 ramp_record = data.frame()
 file_list = dir(path = "Raw_data/pheno_obs/") # full set of time data files
 
-all_runs = str_split_fixed(file_list, pattern = "_obs.xlsx", n = 2)[,1] # Pulls out just the date prefix from the file names
+all_runs = str_split_fixed(file_list, pattern = "_obs.csv", n = 2)[,1] # Pulls out just the date prefix from the file names
 if(process_all_data == T){
   prev_runs = NA #Use this line the first time the script is run to process all files
   overwrite = "yes"
@@ -50,11 +50,12 @@ if(length(new_runs) > 0){ # If there are new data files to process...
     name_split = str_split_fixed(file_name, pattern = "_", n = 4)
     date = paste(name_split[1], name_split[2], name_split[3], sep = "-")
     
-    time_data = read_excel(paste("Raw_data/pheno_obs/", file_name, "_obs.xlsx", collapse = "", sep = "")) %>% 
+    time_data = read_csv(paste("Raw_data/pheno_obs/", file_name, "_obs.csv", collapse = "", sep = "")) %>% 
       drop_na(ctmax_minute) %>%
       mutate(time = (ctmax_minute + (ctmax_second / 60)) - 2, # Accounts for the two minute start up delay in the temperature logger
              "rank" = dense_rank(desc(time)),
-             exp_date = lubridate::as_datetime(date),
+             collection_date = lubridate::as_date(collection_date, format = "%m/%d/%y"),
+             exp_date = lubridate::as_date(date),
              days_in_lab = as.numeric(exp_date - collection_date))
 
     min_ramp = temp_data  %>% 
