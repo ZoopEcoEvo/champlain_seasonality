@@ -95,7 +95,14 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
                  "Leptodiaptomus sicilis" = "#D86F29",
                  "Leptodiaptomus sicilis male" = "#E28C00",
                  "Skistodiaptomus oregonensis" = "#C5C35A",
-                 "Skistodiaptomus oregonensis male" = "#e6e6aa")
+                 "Skistodiaptomus oregonensis male" = "#e6e6aa", 
+                 "Epischura lacustris juvenile" = "plum1", 
+                 "Epischura lacustris male" = "plum3", 
+                 "Epischura lacustris" = "plum4", 
+                 "Limnocalanus macrurus" = "skyblue4", 
+                 "Limnocalanus macrurus male" = "skyblue3", 
+                 "Limnocalanus macrurus juvenile" = "skyblue", 
+                 "Senecella calanoides" = "darkseagreen3")
 ```
 
 ## Temperature Variation 
@@ -107,7 +114,7 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
 
 ## Trait Variation 
 
-```{r fig.width=7, fig.height=7}
+```{r fig.width=7, fig.height=21}
 ggplot(full_data, aes(x = size, fill = sp_name)) + 
   facet_wrap(.~sp_name, ncol = 1) + 
   geom_histogram(binwidth = 0.05) + 
@@ -124,7 +131,9 @@ ggplot(full_data, aes(x = ctmax, fill = sp_name)) +
   theme_matt_facets() + 
   theme(legend.position = "none")
 
-ggplot(full_data, aes(x = fecundity, fill = sp_name)) + 
+full_data %>%  
+  drop_na(fecundity) %>%  
+ggplot(aes(x = fecundity, fill = sp_name)) + 
   facet_wrap(.~sp_name, ncol = 1) + 
   geom_histogram(binwidth = 2) + 
   scale_fill_manual(values = species_cols) + 
@@ -164,7 +173,7 @@ ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name)) +
 ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
-       y = "Warming Tolerance (°C)")  + 
+       y = "Fecundity (# Eggs)")  + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")

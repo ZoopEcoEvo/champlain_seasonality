@@ -1,0 +1,12 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
+5/30/23,13.5,1,1,leptodiaptomus_minutus,1,85,12,4,0.645
+5/30/23,13.5,1,1,leptodiaptomus_minutus,2,82,14,8,0.739
+5/30/23,13.5,1,1,limnocalanus_macrurus,3,65,11,NA,1.185
+5/30/23,13.5,1,1,leptodiaptomus_minutus,4,82,57,6,0.773
+5/30/23,13.5,1,1,leptodiaptomus_minutus,5,87,12,2,0.751
+5/30/23,13.5,1,1,leptodiaptomus_minutus,6,77,58,6,0.75
+5/30/23,13.5,1,1,leptodiaptomus_minutus,7,57,1,7,0.769
+5/30/23,13.5,1,1,leptodiaptomus_minutus,8,78,50,7,0.813
+5/30/23,13.5,1,1,leptodiaptomus_minutus,9,83,56,4,0.693
+5/30/23,13.5,1,1,leptodiaptomus_minutus,10,90,10,NA,0.763
+,,,,,,,,,

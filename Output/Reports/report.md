@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-05-28
+2023-05-30
 
 - <a href="#temperature-variation"
   id="toc-temperature-variation">Temperature Variation</a>
@@ -47,7 +47,9 @@ ggplot(full_data, aes(x = ctmax, fill = sp_name)) +
 
 ``` r
 
-ggplot(full_data, aes(x = fecundity, fill = sp_name)) + 
+full_data %>%  
+  drop_na(fecundity) %>%  
+ggplot(aes(x = fecundity, fill = sp_name)) + 
   facet_wrap(.~sp_name, ncol = 1) + 
   geom_histogram(binwidth = 2) + 
   scale_fill_manual(values = species_cols) + 
@@ -103,7 +105,7 @@ ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name)) +
 ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
-       y = "Warming Tolerance (°C)")  + 
+       y = "Fecundity (# Eggs)")  + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
