@@ -2,9 +2,12 @@
 library(rmarkdown)
 library(tidyverse)
 library(readxl)
+library(ggpubr)
+library(cowplot)
+library(patchwork)
 
 #Determine which scripts should be run
-process_all_data = T #Runs data analysis 
+process_all_data = F #Runs data analysis 
 make_report = T #Runs project summary
 knit_manuscript = F #Compiles manuscript draft
 
@@ -19,8 +22,9 @@ source(file = "Scripts/01_data_processing.R")
 ##################################
 
 full_data = read.csv(file = "Output/Data/full_data.csv") %>% 
-  mutate("sp_name" = str_replace_all(species, pattern = "_", replacement = " "),
-         sp_name = str_to_sentence(sp_name))
+  mutate("sp_name_sub" = str_replace_all(species, pattern = "_", replacement = " "),
+         sp_name_sub = str_to_sentence(sp_name_sub), 
+         "sp_name" = word(sp_name_sub, start = 1, end = 2))
 
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
