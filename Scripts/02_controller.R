@@ -3,7 +3,6 @@ library(rmarkdown)
 library(tidyverse)
 library(readxl)
 library(ggpubr)
-library(cowplot)
 library(patchwork)
 
 #Determine which scripts should be run

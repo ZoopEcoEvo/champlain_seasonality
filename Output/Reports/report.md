@@ -10,6 +10,12 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 - <a href="#trait-correlations" id="toc-trait-correlations">Trait
   Correlations</a>
 
+``` r
+### To Do 
+
+# Pull residuals from CTmax ~ temperature model, and examine the relationship with fecundity
+```
+
 ## Temperature Variation
 
 ## Trait Variation
