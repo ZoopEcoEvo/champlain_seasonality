@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-05-31
+2023-06-20
 
 - <a href="#temperature-variation"
   id="toc-temperature-variation">Temperature Variation</a>
