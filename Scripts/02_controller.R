@@ -23,7 +23,11 @@ source(file = "Scripts/01_data_processing.R")
 full_data = read.csv(file = "Output/Data/full_data.csv") %>% 
   mutate("sp_name_sub" = str_replace_all(species, pattern = "_", replacement = " "),
          sp_name_sub = str_to_sentence(sp_name_sub), 
-         "sp_name" = word(sp_name_sub, start = 1, end = 2))
+         "sp_name" = word(sp_name_sub, start = 1, end = 2),
+         "sex" = case_when( # creates a new column called "sex" that is filled with different values when...
+           word(sp_name_sub, start = 3, end = 3) == "male" ~ "male", #... the third word in sp_name_sub is 'male'
+           word(sp_name_sub, start = 3, end = 3) == "juvenile" ~ "juvenile", #... or the third word in sp_name_sub is 'juvenile'
+           TRUE ~ "female")) # In all other cases, 'female' is used
 
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here

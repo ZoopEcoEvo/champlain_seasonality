@@ -186,7 +186,7 @@ full_data %>%
 ### Variation with temperature 
 
 ```{r fig.width=15, fig.height=10}
-ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_name_sub)) + 
+ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "CTmax (°C)",
@@ -195,7 +195,7 @@ ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_n
   theme_matt() + 
   theme(legend.position = "right")
 
-size_temp = ggplot(full_data, aes(x = collection_temp, y = size, colour = sp_name_sub)) + 
+size_temp = ggplot(full_data, aes(x = collection_temp, y = size, colour = sp_name)) + 
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Length (mm)",
@@ -204,7 +204,7 @@ size_temp = ggplot(full_data, aes(x = collection_temp, y = size, colour = sp_nam
   theme_matt() + 
   theme(legend.position = "right")
 
-wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name_sub)) + 
+wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name)) + 
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Warming Tolerance (°C)",
@@ -213,7 +213,7 @@ wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = s
   theme_matt() + 
   theme(legend.position = "right")
 
-eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name_sub)) + 
+eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Fecundity (# Eggs)",
@@ -227,8 +227,8 @@ ggarrange(ctmax_temp, size_temp, wt_temp, eggs_temp,
 ```
 
 ```{r fig.width=15, fig.height=10}
-ggplot(full_data, aes(x = days_in_lab, y = ctmax, colour = sp_name_sub)) + 
-  facet_wrap(sp_name_sub~.) + 
+ggplot(full_data, aes(x = days_in_lab, y = ctmax, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
   geom_point(size = 4) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   scale_x_continuous(breaks = c(0:3)) + 
@@ -239,10 +239,65 @@ ggplot(full_data, aes(x = days_in_lab, y = ctmax, colour = sp_name_sub)) +
   theme(legend.position = "none")
 ```
 
+## Sex and stage variation in thermal limits 
+Previous sections have generally lumped juvenile, female, and male individuals together. There may be important stage- or sex-specific differences in CTmax though. For several species, we have measurements for individuals in different stages or of different sexes. 
+
+```{r}
+sex_sample_sizes = full_data %>%  
+  group_by(sp_name, sex) %>%  
+  summarise(num = n()) %>%  
+  pivot_wider(id_cols = sp_name,
+              names_from = sex, 
+              values_from = num,
+              values_fill = 0) %>% 
+  select("Species" = sp_name, "Juvenile" = juvenile, "Female" = female, "Male" = male)
+
+knitr::kable(sex_sample_sizes, align = "c")
+
+```
+
+The female-male and female-juvenile comparisons show that there are generally no differences in thermal limits between these groups. 
+
+```{r fig.width=7, fig.height=7}
+full_data %>% 
+  filter(sp_name %in% filter(sex_sample_sizes, Male > 0)$Species & 
+           sex != "juvenile") %>% 
+  ggplot(aes(x = sex, y = ctmax, colour = sp_name, group = sp_name)) + 
+  facet_wrap(sp_name~., ncol = 2) + 
+  geom_smooth(method = "lm", se = F, linewidth = 1) + 
+  geom_point(size = 3,
+             alpha = 0.5,
+             position = position_jitter(height = 0, width = 0.05)) +  
+  labs(x = "Sex", 
+       y = "CTmax (°C)") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_bw(base_size = 18) + 
+  theme(legend.position = "none", 
+        panel.grid = element_blank())
+```
+
+```{r fig.width=3, fig.height=6}
+full_data %>% 
+  filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0)$Species & 
+           sex != "male") %>% 
+  ggplot(aes(x = sex, y = ctmax, colour = sp_name, group = sp_name)) + 
+  facet_wrap(sp_name~., ncol = 1) + 
+  geom_smooth(method = "lm", se = F, linewidth = 1) + 
+  geom_point(size = 3,
+             alpha = 0.5,
+             position = position_jitter(height = 0, width = 0.05)) +  
+  labs(x = "Sex", 
+       y = "CTmax (°C)") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_bw(base_size = 18) + 
+  theme(legend.position = "none", 
+        panel.grid = element_blank())
+```
+
 ## Trait Correlations 
 
 ```{r fig.width=10, fig.height=7}
-ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name_sub)) + 
+ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(x = "Length (mm)", 
@@ -253,7 +308,7 @@ ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name_sub)) +
 ```
 
 ```{r fig.width=10, fig.height=7}
-ggplot(full_data, aes(x = size, y = fecundity, colour = sp_name_sub)) + 
+ggplot(full_data, aes(x = size, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(x = "Prosome length (mm)", 
@@ -264,7 +319,7 @@ ggplot(full_data, aes(x = size, y = fecundity, colour = sp_name_sub)) +
 ```
 
 ```{r fig.width=10, fig.height=7}
-ggplot(full_data, aes(x = ctmax, y = fecundity, colour = sp_name_sub)) + 
+ggplot(full_data, aes(x = ctmax, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(x = "CTmax (°C)", 
@@ -273,3 +328,5 @@ ggplot(full_data, aes(x = ctmax, y = fecundity, colour = sp_name_sub)) +
   theme_matt() + 
   theme(legend.position = "right")
 ```
+
+
