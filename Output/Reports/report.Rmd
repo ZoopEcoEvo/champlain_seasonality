@@ -117,8 +117,8 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
 
 ctmax_plot = full_data %>% 
   mutate( #sp_name = str_replace(sp_name, pattern = " ",
-  #                              replacement = "\n"),
-         sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
+    #                              replacement = "\n"),
+    sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
   ggplot(aes(y = sp_name, x = ctmax)) + 
   geom_point(aes(colour= sp_name_sub),
              position = position_dodge(width = 0.3),
@@ -187,6 +187,7 @@ full_data %>%
 
 ```{r fig.width=15, fig.height=10}
 ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "CTmax (°C)",
@@ -195,7 +196,8 @@ ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_n
   theme_matt() + 
   theme(legend.position = "right")
 
-size_temp = ggplot(full_data, aes(x = collection_temp, y = size, colour = sp_name)) + 
+size_temp = ggplot(filter(full_data, sex != "juvenile"), aes(x = collection_temp, y = size, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Length (mm)",
@@ -205,6 +207,7 @@ size_temp = ggplot(full_data, aes(x = collection_temp, y = size, colour = sp_nam
   theme(legend.position = "right")
 
 wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Warming Tolerance (°C)",
@@ -214,6 +217,7 @@ wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = s
   theme(legend.position = "right")
 
 eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Fecundity (# Eggs)",
@@ -298,6 +302,11 @@ full_data %>%
 
 ```{r fig.width=10, fig.height=7}
 ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) + 
+  geom_smooth(data = full_data, 
+              aes(x = size, y = ctmax),
+              method = "lm", 
+              colour ="black", 
+              linewidth = 2.5) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(x = "Length (mm)", 

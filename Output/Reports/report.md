@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-06-22
+2023-06-23
 
 - <a href="#temperature-variation"
   id="toc-temperature-variation">Temperature Variation</a>
@@ -13,6 +13,12 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 - <a href="#trait-correlations" id="toc-trait-correlations">Trait
   Correlations</a>
 
+``` r
+### To Do 
+
+# Pull residuals from CTmax ~ temperature model, and examine the relationship with fecundity
+```
+
 ## Temperature Variation
 
 ## Trait Variation
@@ -21,8 +27,8 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 
 ctmax_plot = full_data %>% 
   mutate( #sp_name = str_replace(sp_name, pattern = " ",
-  #                              replacement = "\n"),
-         sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
+    #                              replacement = "\n"),
+    sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
   ggplot(aes(y = sp_name, x = ctmax)) + 
   geom_point(aes(colour= sp_name_sub),
              position = position_dodge(width = 0.3),
@@ -75,6 +81,7 @@ full_data %>%
 
 ``` r
 ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "CTmax (°C)",
@@ -83,7 +90,8 @@ ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_n
   theme_matt() + 
   theme(legend.position = "right")
 
-size_temp = ggplot(full_data, aes(x = collection_temp, y = size, colour = sp_name)) + 
+size_temp = ggplot(filter(full_data, sex != "juvenile"), aes(x = collection_temp, y = size, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Length (mm)",
@@ -93,6 +101,7 @@ size_temp = ggplot(full_data, aes(x = collection_temp, y = size, colour = sp_nam
   theme(legend.position = "right")
 
 wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Warming Tolerance (°C)",
@@ -102,6 +111,7 @@ wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = s
   theme(legend.position = "right")
 
 eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
+  geom_smooth(method = "lm", linewidth = 3) +
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Fecundity (# Eggs)",
@@ -153,12 +163,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    2     |   2    |  2   |
-|   Leptodiaptomus minutus    |    0     |   36   |  11  |
+|     Epischura lacustris     |    4     |   2    |  2   |
+|   Leptodiaptomus minutus    |    0     |   40   |  11  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    0     |   9    |  1   |
+| Skistodiaptomus oregonensis |    0     |   14   |  1   |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
@@ -207,6 +217,11 @@ full_data %>%
 
 ``` r
 ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) + 
+  geom_smooth(data = full_data, 
+              aes(x = size, y = ctmax),
+              method = "lm", 
+              colour ="black", 
+              linewidth = 2.5) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(x = "Length (mm)", 
