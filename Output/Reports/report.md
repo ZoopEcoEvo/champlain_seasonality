@@ -164,11 +164,11 @@ knitr::kable(sex_sample_sizes, align = "c")
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    4     |   2    |  2   |
-|   Leptodiaptomus minutus    |    0     |   40   |  11  |
+|   Leptodiaptomus minutus    |    0     |   42   |  17  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    0     |   14   |  1   |
+| Skistodiaptomus oregonensis |    0     |   14   |  3   |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
