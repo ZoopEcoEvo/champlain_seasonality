@@ -299,17 +299,17 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-|           Species           |       Predictor        | Correlation |  P-Value  |
-|:---------------------------:|:----------------------:|:-----------:|:---------:|
-|     Epischura lacustris     |   fifty-six_day_var    |  0.8801194  | 0.0017435 |
-|     Epischura lacustris     |  twenty-eight_day_var  |  0.8782671  | 0.0018362 |
-|     Epischura lacustris     | twenty-eight_day_range |  0.8779073  | 0.0018546 |
-|   Leptodiaptomus minutus    |  twenty-eight_day_min  |  0.3824775  | 0.0027936 |
-|   Leptodiaptomus minutus    |  fourteen_day_median   |  0.3812472  | 0.0028904 |
-|   Leptodiaptomus minutus    |   fifty-six_day_var    |  0.3793699  | 0.0030437 |
-| Skistodiaptomus oregonensis |  fifty-six_day_range   |  0.7006952  | 0.0000671 |
-| Skistodiaptomus oregonensis |  twenty-eight_day_var  |  0.7006353  | 0.0000672 |
-| Skistodiaptomus oregonensis | twenty-eight_day_range |  0.7005792  | 0.0000674 |
+|           Species           |        Predictor        | Correlation |  P-Value  |
+|:---------------------------:|:-----------------------:|:-----------:|:---------:|
+|     Epischura lacustris     |  fifty-six_day_median   |  0.8346644  | 0.0026642 |
+|     Epischura lacustris     |   seven_day_mean_max    |  0.8339045  | 0.0027109 |
+|     Epischura lacustris     | fifty-six_day_mean_max  |  0.8337278  | 0.0027219 |
+|   Leptodiaptomus minutus    |     seven_day_range     |  0.4078968  | 0.0012163 |
+|   Leptodiaptomus minutus    |    fifty-six_day_var    |  0.4073493  | 0.0012367 |
+|   Leptodiaptomus minutus    |   fourteen_day_median   |  0.4064832  | 0.0012697 |
+| Skistodiaptomus oregonensis | twenty-eight_day_median |  0.6188447  | 0.0000956 |
+| Skistodiaptomus oregonensis | fifty-six_day_mean_max  |  0.6188389  | 0.0000957 |
+| Skistodiaptomus oregonensis |     seven_day_mean      |  0.6188200  | 0.0000957 |
 
 ## Trait Variation
 
@@ -421,12 +421,12 @@ ctmax_temp.model = lm(data = full_data, ctmax ~ collection_temp * sp_name)
 knitr::kable(car::Anova(ctmax_temp.model))
 ```
 
-|                         |     Sum Sq |  Df |   F value |   Pr(\>F) |
-|:------------------------|-----------:|----:|----------:|----------:|
-| collection_temp         |  59.903993 |   1 | 36.057485 | 0.0000000 |
-| sp_name                 | 684.938771 |   5 | 82.455836 | 0.0000000 |
-| collection_temp:sp_name |   6.666064 |   3 |  1.337482 | 0.2663988 |
-| Residuals               | 169.457391 | 102 |        NA |        NA |
+|                         |     Sum Sq |  Df |    F value |   Pr(\>F) |
+|:------------------------|-----------:|----:|-----------:|----------:|
+| collection_temp         |  60.704917 |   1 | 34.6397263 | 0.0000000 |
+| sp_name                 | 705.115426 |   5 | 80.4712581 | 0.0000000 |
+| collection_temp:sp_name |   3.780296 |   3 |  0.7190434 | 0.5426413 |
+| Residuals               | 196.276110 | 112 |         NA |        NA |
 
 ``` r
 
@@ -470,12 +470,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    4     |   3    |  2   |
-|   Leptodiaptomus minutus    |    0     |   42   |  17  |
+|     Epischura lacustris     |    5     |   3    |  2   |
+|   Leptodiaptomus minutus    |    0     |   43   |  17  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    0     |   23   |  3   |
+| Skistodiaptomus oregonensis |    0     |   29   |  5   |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
