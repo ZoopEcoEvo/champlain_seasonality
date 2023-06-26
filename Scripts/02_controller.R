@@ -4,6 +4,9 @@ library(tidyverse)
 library(readxl)
 library(ggpubr)
 library(patchwork)
+library(dataRetrieval)
+library(lubridate)
+library(slider)
 
 #Determine which scripts should be run
 process_all_data = F #Runs data analysis 

@@ -16,7 +16,8 @@ output:
 ```{r}
 ### To Do 
 
-# Pull residuals from CTmax ~ temperature model, and examine the relationship with fecundity
+# Actual statistics for relationships between temperature and CTmax, size, and fecundity
+# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
 
 ```
 
@@ -106,15 +107,149 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
 ```
 
 ## Temperature Variation 
+Water temperatures in Lake Champlain reached a minimum in February. Sampling for this project began during the Spring warming period. Temperature variability (both daily ranges and daily variance) increase with temperature. 
 
-```{r}
+```{r fig.width=7, fig.height=6, include = T}
+# Lake Champlain near Burlington, VT
+siteNumber = "04294500"
+ChamplainInfo = readNWISsite(siteNumber)
+parameterCd = "00010"
+startDate = "2023-01-01"
+endDate = ""
+#statCd = c("00001", "00002","00003", "00011") # 1 - max, 2 - min, 3 = mean
 
+# Constructs the URL for the data wanted then downloads the data
+url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd, 
+                       startDate = startDate, endDate = endDate, service = "uv")
+
+temp_data = importWaterML1(url, asDateTime = T) %>% 
+  mutate("date" = as.Date(dateTime)) %>% 
+  select(date, "temp" = X_00010_00000)
+
+
+## Daily values
+daily_temp_data = temp_data %>%
+  ungroup() %>% 
+  group_by(date) %>% 
+  summarise(mean_temp = mean(temp),
+            med_temp = median(temp),
+            temp_var = var(temp), 
+            min_temp = min(temp), 
+            max_temp = max(temp)) %>% 
+  mutate("day_range" = max_temp - min_temp)
+
+daily_temp_data %>% 
+  pivot_longer(cols = c(-date),
+               names_to = "parameter", 
+               values_to = "temp") %>% 
+  ggplot(aes(x = date, y = temp, colour = parameter)) + 
+  geom_line(linewidth = 1) + 
+  scale_colour_manual(values = c(
+    "mean_temp" = "olivedrab3",
+    "med_temp" = "seagreen3",
+    "max_temp" = "tomato",  
+    "min_temp" = "dodgerblue",
+    "day_range" = "goldenrod3",
+    "temp_var" = "darkgoldenrod1"
+  )) + 
+  labs(y = "Temperature (°C)",
+       x = "Date") + 
+  theme_bw(base_size = 20) + 
+  theme(panel.grid = element_blank())
 ```
 
+```{r}
+## Defining the function to get predictor values for periods of different lengths
+get_predictors = function(daily_values, raw_temp, n_days){
+  prefix = xfun::numbers_to_words(n_days)
+  
+  mean_values = daily_values %>% 
+    ungroup() %>% 
+    mutate(mean_max = slide_vec(.x = max_temp, .f = mean, .before = n_days, .complete = T),
+           mean_min = slide_vec(.x = min_temp, .f = mean, .before = n_days, .complete = T),
+           mean_range = slide_vec(.x = day_range, .f = mean, .before = n_days, .complete = T)) %>% 
+    select(date, mean_max, mean_min, mean_range) %>% 
+    rename_with( ~ paste(prefix, "day", .x, sep = "_"), .cols = c(-date))
+  
+  period_values = raw_temp %>% 
+    mutate(mean = slide_index_mean(temp, i = date, before = days(n_days), 
+                                   na_rm = T),
+           max = slide_index_max(temp, i = date, before = days(n_days), 
+                                 na_rm = T),
+           min = slide_index_min(temp, i = date, before = days(n_days),
+                                 na_rm = T),
+           median = slide_index_dbl(temp, .i = date, .before = days(n_days), 
+                                    na_rm = T, .f = median),
+           var = slide_index_dbl(temp, .i = date, .before = days(n_days), 
+                                 .f = var),
+           range = max - min) %>%  
+    select(-temp) %>%  
+    distinct() %>% 
+    rename_with( ~ paste(prefix, "day", .x, sep = "_"), .cols = c(-date))%>% 
+    inner_join(mean_values, by = c("date")) %>%  
+    drop_na()
+  
+  return(period_values)
+}
+
+## Getting predictor variables for different periods
+week_temps = get_predictors(daily_values = daily_temp_data, 
+                            raw_temp = temp_data, 
+                            n_days = 7)
+
+two_week_temps = get_predictors(daily_values = daily_temp_data, 
+                                raw_temp = temp_data, 
+                                n_days = 14)
+
+four_week_temps = get_predictors(daily_values = daily_temp_data, 
+                                 raw_temp = temp_data, 
+                                 n_days = 28)
+
+eight_week_temps = get_predictors(daily_values = daily_temp_data, 
+                                  raw_temp = temp_data, 
+                                  n_days = 56)
+
+## Combine data, then pull out values for each collection date
+date_list = as.Date(unique(full_data$collection_date))
+
+temp_predictors = daily_temp_data %>% 
+  full_join(week_temps, by = c("date")) %>% 
+  full_join(two_week_temps, by = c("date")) %>% 
+  full_join(four_week_temps, by = c("date")) %>% 
+  full_join(eight_week_temps, by = c("date")) %>% 
+  filter(date %in% date_list)
+```
+
+A set of predictors variables were assembled from the continuous temperature data set based on conditions during the day of collection, the week before collections, and the preceeding two, four, and eight week periods. This is a preliminary analysis for now. Shown here are the top three factors. Species with no significant predictor or limited collection date distributions were excluded. 
+
+```{r}
+corr_vals = full_data %>%  
+  filter(sp_name != "Senecella calanoides") %>%
+  filter(sp_name != "Limnocalanus macrurus") %>%
+  mutate(collection_date = as.Date(collection_date)) %>% 
+  full_join(temp_predictors, join_by(collection_date == date)) %>% 
+  pivot_longer(cols = c(collection_temp, mean_temp:tail(names(.), 1)),
+               values_to = "value", 
+               names_to = "predictor") %>%  
+  group_by(sp_name, predictor) %>% 
+  summarise(correlation = cor.test(ctmax, value)$estimate,
+            p.value = cor.test(ctmax, value)$p.value,
+            ci_low = cor.test(ctmax, value)$conf.int[1],
+            ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
+  mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig."))
+
+corr_vals %>%  
+  filter(sig == "Sig.") %>% 
+  drop_na(correlation) %>% 
+  group_by(sp_name) %>%
+  arrange(desc(correlation)) %>% 
+  slice_head(n = 3) %>% 
+  select("Species" = sp_name, "Predictor" = predictor, "Correlation" = correlation, "P-Value" = p.value) %>% 
+  knitr::kable(align = "c")
+```
 
 ## Trait Variation 
 ```{r fig.width=20, fig.height=5}
-
 ctmax_plot = full_data %>% 
   mutate( #sp_name = str_replace(sp_name, pattern = " ",
     #                              replacement = "\n"),
@@ -150,7 +285,6 @@ size_plot = full_data %>%
 trait_plot = ctmax_plot + size_plot
 trait_plot
 ```
-
 
 ```{r fig.width=7, fig.height=21, include = F}
 ggplot(full_data, aes(x = size, fill = sp_name_sub)) + 
