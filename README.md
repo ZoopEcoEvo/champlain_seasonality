@@ -16,7 +16,7 @@ The root directory contains the README and Licensing files, along with a .Rproj 
 -   `Raw_Data/` contains the raw data used in this analysis.  
 
 -   `Scripts/` contains two R scripts. 
-    -   `01_Data_analysis.R` is used to process the raw data. The primary components of this analysis are ____. 
+    -   `01_Data_analysis.R` is used to process the raw data. The primary component is the conversion from timepoint measurements of when each individual reached its CTmax to a measurement in °C using the continuous temperature record from the experiment. 
     -   `02_make_report.R` is use to control the project workflow. Through this script, you can choose to run the process the data, make the figures, or knit the manuscript. This script should be used rather than running isolated fragments individually. 
 
 
