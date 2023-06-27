@@ -24,7 +24,7 @@ The root directory contains the README and Licensing files, along with a .Rproj 
 
 The `Raw_Data/` directory contains two sub-directories for the different component data files.
 
-The `pheno_obs` directory contains the observed phenotypic data from each CTmax replicate. Each .csv file represents the observations from one experiment. File names include the date the experiment was performed in YYYY_MM_DD format. Each file contains the following columns:
+The `pheno_obs` directory contains the observed phenotypic data from each CTmax replicate. Each .csv file represents the observations from one experiment. File names include the date the experiment was performed in YYYY_MM_DD format. Each file contains the following columns:   
     -   *collection_date* - The date copepods were collected from Lake Champlain. 	  	
     -   *collection_temp*	- The temperature measured at the time of collection in °C. Temperature was measured in the cod end of the plankton net using a manual thermometer.	
     -   *experiment* - An internal variable. Indicates which of several co-occurring projects the experiment was part of. 		   
@@ -36,7 +36,7 @@ The `pheno_obs` directory contains the observed phenotypic data from each CTmax 
     -   *fecundity* - The number of eggs carried by the individual (if present). 		   
     -   *size* - The prosome length of the individual (in mm). 		   
 
-The `temp_data` directory contains the continuous temperature data recorded during each CTmax assay. Each .csv file represents the recordings from one experiment. File names include the date the experiment was performed in YYYY_MM_DD format. Each file contains the following columns:
+The `temp_data` directory contains the continuous temperature data recorded during each CTmax assay. Each .csv file represents the recordings from one experiment. File names include the date the experiment was performed in YYYY_MM_DD format. Each file contains the following columns:   
     -   *Date* - The date recorded by the temperature logger. Note, these dates may not reflect the actual experimental dates - all information about the date the experiment was performed should be taken from the file name.    	
     -   *Time*	- The time each temperature measurement was recorded. Again, the absolute time may not be correct, but this column is used to follow the progression of the CTmax assay.	
     -   *Temp1/Temp2/Temp3* - The temperatures (in °C) recorded by each of the three temperature sensors, recorded in their own columns. 	
