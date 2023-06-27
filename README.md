@@ -16,7 +16,7 @@ The root directory contains the README and Licensing files, along with a .Rproj 
 -   `Raw_Data/` contains the raw data used in this analysis.  
 
 -   `Scripts/` contains two R scripts. 
-    -   `01_Data_analysis.R` is used to process the raw data. The primary components of this analysis are ____. 
+    -   `01_Data_analysis.R` is used to process the raw data. The primary component is the conversion from timepoint measurements of when each individual reached its CTmax to a measurement in °C using the continuous temperature record from the experiment. 
     -   `02_make_report.R` is use to control the project workflow. Through this script, you can choose to run the process the data, make the figures, or knit the manuscript. This script should be used rather than running isolated fragments individually. 
 
 
@@ -24,7 +24,7 @@ The root directory contains the README and Licensing files, along with a .Rproj 
 
 The `Raw_Data/` directory contains two sub-directories for the different component data files.
 
-The `pheno_obs` directory contains the observed phenotypic data from each CTmax replicate. Each .csv file represents the observations from one experiment. File names include the date the experiment was performed in YYYY_MM_DD format. Each file contains the following columns:   
+The `pheno_obs` directory contains the observed phenotypic data from each CTmax replicate. Each .csv file represents the observations from one experiment. File names include the date the experiment was performed in YYYY_MM_DD format. Each file contains the following columns:    
     -   *collection_date* - The date copepods were collected from Lake Champlain. 	  	
     -   *collection_temp*	- The temperature measured at the time of collection in °C. Temperature was measured in the cod end of the plankton net using a manual thermometer.	
     -   *experiment* - An internal variable. Indicates which of several co-occurring projects the experiment was part of. 		   
