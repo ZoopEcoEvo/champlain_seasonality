@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-06-26
+2023-06-28
 
 - [Temperature Variation](#temperature-variation)
 - [Trait Variation](#trait-variation)
@@ -307,9 +307,9 @@ corr_vals %>%
 |   Leptodiaptomus minutus    |     seven_day_range     |  0.4078968  | 0.0012163 |
 |   Leptodiaptomus minutus    |    fifty-six_day_var    |  0.4073493  | 0.0012367 |
 |   Leptodiaptomus minutus    |   fourteen_day_median   |  0.4064832  | 0.0012697 |
-| Skistodiaptomus oregonensis | twenty-eight_day_median |  0.6188447  | 0.0000956 |
-| Skistodiaptomus oregonensis | fifty-six_day_mean_max  |  0.6188389  | 0.0000957 |
-| Skistodiaptomus oregonensis |     seven_day_mean      |  0.6188200  | 0.0000957 |
+| Skistodiaptomus oregonensis |     seven_day_mean      |  0.6328098  | 0.0000040 |
+| Skistodiaptomus oregonensis | twenty-eight_day_median |  0.6327857  | 0.0000041 |
+| Skistodiaptomus oregonensis | fifty-six_day_mean_max  |  0.6327413  | 0.0000041 |
 
 ## Trait Variation
 
@@ -423,10 +423,10 @@ knitr::kable(car::Anova(ctmax_temp.model))
 
 |                         |     Sum Sq |  Df |    F value |   Pr(\>F) |
 |:------------------------|-----------:|----:|-----------:|----------:|
-| collection_temp         |  60.704917 |   1 | 34.6397263 | 0.0000000 |
-| sp_name                 | 705.115426 |   5 | 80.4712581 | 0.0000000 |
-| collection_temp:sp_name |   3.780296 |   3 |  0.7190434 | 0.5426413 |
-| Residuals               | 196.276110 | 112 |         NA |        NA |
+| collection_temp         |  65.131351 |   1 | 40.2149410 | 0.0000000 |
+| sp_name                 | 723.873479 |   5 | 89.3902208 | 0.0000000 |
+| collection_temp:sp_name |   3.539379 |   3 |  0.7284558 | 0.5369173 |
+| Residuals               | 197.588872 | 122 |         NA |        NA |
 
 ``` r
 
@@ -475,7 +475,7 @@ knitr::kable(sex_sample_sizes, align = "c")
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    0     |   29   |  5   |
+| Skistodiaptomus oregonensis |    0     |   39   |  5   |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
