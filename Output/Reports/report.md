@@ -309,12 +309,12 @@ corr_vals %>%
 |     Epischura lacustris     | fifty-six_day_mean_range |  0.8433962  | 0.0011058 |
 |     Epischura lacustris     |    fifty-six_day_max     |  0.8431410  | 0.0011135 |
 |     Epischura lacustris     |     fourteen_day_max     |  0.8431410  | 0.0011135 |
-|   Leptodiaptomus minutus    |    fifty-six_day_var     |  0.5225154  | 0.0000095 |
-|   Leptodiaptomus minutus    |     fourteen_day_med     |  0.5209867  | 0.0000102 |
-|   Leptodiaptomus minutus    |  fourteen_day_mean_min   |  0.5163355  | 0.0000126 |
-| Skistodiaptomus oregonensis |      seven_day_mean      |  0.6328098  | 0.0000040 |
-| Skistodiaptomus oregonensis |   twenty-eight_day_med   |  0.6327857  | 0.0000041 |
-| Skistodiaptomus oregonensis |  fifty-six_day_mean_max  |  0.6327413  | 0.0000041 |
+|   Leptodiaptomus minutus    |    fifty-six_day_var     |  0.5549757  | 0.0000013 |
+|   Leptodiaptomus minutus    |     fourteen_day_med     |  0.5538826  | 0.0000014 |
+|   Leptodiaptomus minutus    |  fourteen_day_mean_min   |  0.5496359  | 0.0000018 |
+| Skistodiaptomus oregonensis |         max_temp         |  0.6390504  | 0.0000013 |
+| Skistodiaptomus oregonensis |    fifty-six_day_max     |  0.6382472  | 0.0000014 |
+| Skistodiaptomus oregonensis |     fourteen_day_max     |  0.6382472  | 0.0000014 |
 
 ## Trait Variation
 
@@ -428,10 +428,10 @@ knitr::kable(car::Anova(ctmax_temp.model))
 
 |                         |     Sum Sq |  Df |    F value |   Pr(\>F) |
 |:------------------------|-----------:|----:|-----------:|----------:|
-| collection_temp         |  79.452375 |   1 | 51.3696282 | 0.0000000 |
-| sp_name                 | 757.974006 |   6 | 81.6775310 | 0.0000000 |
-| collection_temp:sp_name |   2.373212 |   3 |  0.5114637 | 0.6750716 |
-| Residuals               | 202.615076 | 131 |         NA |        NA |
+| collection_temp         |  87.126901 |   1 | 55.0826022 | 0.0000000 |
+| sp_name                 | 777.451045 |   6 | 81.9188760 | 0.0000000 |
+| collection_temp:sp_name |   2.196534 |   3 |  0.4628911 | 0.7086409 |
+| Residuals               | 223.026736 | 141 |         NA |        NA |
 
 ``` r
 
@@ -476,12 +476,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    5     |   3    |  3   |
-|   Leptodiaptomus minutus    |    0     |   47   |  17  |
+|   Leptodiaptomus minutus    |    0     |   49   |  17  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
-|      Leptodora kindti       |    0     |   0    |  5   |
+|      Leptodora kindti       |    0     |   0    |  10  |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    0     |   39   |  5   |
+| Skistodiaptomus oregonensis |    0     |   42   |  5   |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.

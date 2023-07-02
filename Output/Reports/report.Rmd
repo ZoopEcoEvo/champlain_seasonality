@@ -103,7 +103,10 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
                  "Limnocalanus macrurus" = "skyblue4", 
                  "Limnocalanus macrurus male" = "skyblue3", 
                  "Limnocalanus macrurus juvenile" = "skyblue", 
-                 "Senecella calanoides" = "darkseagreen3")
+                 "Senecella calanoides" = "darkseagreen3",
+                 "Leptodora kindti male" = "lightblue3",
+                 "Leptodora kindti" = "lightblue4",
+                 "Leptodora kindti juvenile" = "lightblue")
 ```
 
 ## Temperature Variation 
