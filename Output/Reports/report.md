@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-06-28
+2023-07-02
 
 - [Temperature Variation](#temperature-variation)
 - [Trait Variation](#trait-variation)
@@ -48,10 +48,10 @@ daily_temp_data = temp_data %>%
   group_by(date) %>% 
   summarise(mean_temp = mean(temp),
             med_temp = median(temp),
-            temp_var = var(temp), 
+            var_temp = var(temp), 
             min_temp = min(temp), 
             max_temp = max(temp)) %>% 
-  mutate("temp_range" = max_temp - min_temp)
+  mutate("range_temp" = max_temp - min_temp)
 
 daily_plot = daily_temp_data %>% 
   pivot_longer(cols = c(-date),
@@ -64,8 +64,8 @@ daily_plot = daily_temp_data %>%
     "med_temp" = "seagreen3",
     "max_temp" = "tomato",  
     "min_temp" = "dodgerblue",
-    "temp_range" = "goldenrod3",
-    "temp_var" = "darkgoldenrod1"
+    "range_temp" = "goldenrod3",
+    "var_temp" = "darkgoldenrod1"
   )) + 
   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
   ggtitle("Daily Values") + 
@@ -79,13 +79,13 @@ daily_plot = daily_temp_data %>%
 ``` r
 ## Defining the function to get predictor values for periods of different lengths
 get_predictors = function(daily_values, raw_temp, n_days){
-  prefix = xfun::numbers_to_words(n_days)
+  prefix = str_replace_all(xfun::numbers_to_words(n_days), pattern = " ", replacement = "-")
   
   mean_values = daily_values %>% 
     ungroup() %>% 
     mutate(mean_max = slide_vec(.x = max_temp, .f = mean, .before = n_days, .complete = T),
            mean_min = slide_vec(.x = min_temp, .f = mean, .before = n_days, .complete = T),
-           mean_range = slide_vec(.x = temp_range, .f = mean, .before = n_days, .complete = T)) %>% 
+           mean_range = slide_vec(.x = range_temp, .f = mean, .before = n_days, .complete = T)) %>% 
     select(date, mean_max, mean_min, mean_range) %>% 
     rename_with( ~ paste(prefix, "day", .x, sep = "_"), .cols = c(-date))
   
@@ -96,7 +96,7 @@ get_predictors = function(daily_values, raw_temp, n_days){
                                  na_rm = T),
            min = slide_index_min(temp, i = date, before = days(n_days),
                                  na_rm = T),
-           median = slide_index_dbl(temp, .i = date, .before = days(n_days), 
+           med = slide_index_dbl(temp, .i = date, .before = days(n_days), 
                                     na_rm = T, .f = median),
            var = slide_index_dbl(temp, .i = date, .before = days(n_days), 
                                  .f = var),
@@ -109,7 +109,9 @@ get_predictors = function(daily_values, raw_temp, n_days){
   
   return(period_values)
 }
+```
 
+``` r
 ## Getting predictor variables for different periods
 
 ### ONE WEEK
@@ -122,20 +124,21 @@ week_plot = week_temps %>%
                names_to = "parameter", 
                values_to = "temp") %>% 
   filter(parameter %in% c("seven_day_mean",
-                          "seven_day_median",
+                          "seven_day_med",
                           "seven_day_max", 
                           "seven_day_min", 
                           "seven_day_var",
                           "seven_day_range")) %>% 
+  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
   ggplot(aes(x = date, y = temp, colour = parameter)) + 
   geom_line(linewidth = 1) + 
   scale_colour_manual(values = c(
-    "seven_day_mean" = "olivedrab3",
-    "seven_day_median" = "seagreen3",
-    "seven_day_max" = "tomato",  
-    "seven_day_min" = "dodgerblue",
-    "seven_day_range" = "goldenrod3",
-    "seven_day_var" = "darkgoldenrod1"
+    "mean_temp" = "olivedrab3",
+    "med_temp" = "seagreen3",
+    "max_temp" = "tomato",  
+    "min_temp" = "dodgerblue",
+    "range_temp" = "goldenrod3",
+    "var_temp" = "darkgoldenrod1"
   )) + 
   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
   ggtitle("One Week") + 
@@ -156,20 +159,21 @@ two_week_plot = two_week_temps %>%
                names_to = "parameter", 
                values_to = "temp") %>% 
   filter(parameter %in% c("fourteen_day_mean",
-                          "fourteen_day_median",
+                          "fourteen_day_med",
                           "fourteen_day_max", 
                           "fourteen_day_min", 
                           "fourteen_day_var",
                           "fourteen_day_range")) %>% 
+  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
   ggplot(aes(x = date, y = temp, colour = parameter)) + 
   geom_line(linewidth = 1) + 
   scale_colour_manual(values = c(
-    "fourteen_day_mean" = "olivedrab3",
-    "fourteen_day_median" = "seagreen3",
-    "fourteen_day_max" = "tomato",  
-    "fourteen_day_min" = "dodgerblue",
-    "fourteen_day_range" = "goldenrod3",
-    "fourteen_day_var" = "darkgoldenrod1"
+    "mean_temp" = "olivedrab3",
+    "med_temp" = "seagreen3",
+    "max_temp" = "tomato",  
+    "min_temp" = "dodgerblue",
+    "range_temp" = "goldenrod3",
+    "var_temp" = "darkgoldenrod1"
   )) + 
   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
   ggtitle("Two Weeks") + 
@@ -190,20 +194,21 @@ four_week_plot = four_week_temps %>%
                names_to = "parameter", 
                values_to = "temp") %>% 
   filter(parameter %in% c("twenty-eight_day_mean",
-                          "twenty-eight_day_median",
+                          "twenty-eight_day_med",
                           "twenty-eight_day_max", 
                           "twenty-eight_day_min", 
                           "twenty-eight_day_var",
                           "twenty-eight_day_range")) %>% 
+  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
   ggplot(aes(x = date, y = temp, colour = parameter)) + 
   geom_line(linewidth = 1) + 
   scale_colour_manual(values = c(
-    "twenty-eight_day_mean" = "olivedrab3",
-    "twenty-eight_day_median" = "seagreen3",
-    "twenty-eight_day_max" = "tomato",  
-    "twenty-eight_day_min" = "dodgerblue",
-    "twenty-eight_day_range" = "goldenrod3",
-    "twenty-eight_day_var" = "darkgoldenrod1"
+    "mean_temp" = "olivedrab3",
+    "med_temp" = "seagreen3",
+    "max_temp" = "tomato",  
+    "min_temp" = "dodgerblue",
+    "range_temp" = "goldenrod3",
+    "var_temp" = "darkgoldenrod1"
   )) + 
   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
   ggtitle("Four Weeks") + 
@@ -224,20 +229,21 @@ eight_week_plot = eight_week_temps %>%
                names_to = "parameter", 
                values_to = "temp") %>% 
   filter(parameter %in% c("fifty-six_day_mean",
-                          "fifty-six_day_median",
+                          "fifty-six_day_med",
                           "fifty-six_day_max", 
                           "fifty-six_day_min", 
                           "fifty-six_day_var",
                           "fifty-six_day_range")) %>% 
+  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
   ggplot(aes(x = date, y = temp, colour = parameter)) + 
   geom_line(linewidth = 1) + 
   scale_colour_manual(values = c(
-    "fifty-six_day_mean" = "olivedrab3",
-    "fifty-six_day_median" = "seagreen3",
-    "fifty-six_day_max" = "tomato",  
-    "fifty-six_day_min" = "dodgerblue",
-    "fifty-six_day_range" = "goldenrod3",
-    "fifty-six_day_var" = "darkgoldenrod1"
+    "mean_temp" = "olivedrab3",
+    "med_temp" = "seagreen3",
+    "max_temp" = "tomato",  
+    "min_temp" = "dodgerblue",
+    "range_temp" = "goldenrod3",
+    "var_temp" = "darkgoldenrod1"
   )) + 
   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
   ggtitle("Eight Weeks") + 
@@ -254,7 +260,6 @@ ggarrange(daily_plot, week_plot, two_week_plot, four_week_plot, eight_week_plot,
 <img src="../Figures/markdown/predictors-and-plots-1.png" style="display: block; margin: auto;" />
 
 ``` r
-
 ## Combine data, then pull out values for each collection date
 date_list = as.Date(unique(full_data$collection_date))
 
@@ -268,9 +273,9 @@ temp_predictors = daily_temp_data %>%
 
 A set of predictors variables were assembled from the continuous
 temperature data set based on conditions during the day of collection,
-the week before collections, and the preceeding two, four, and eight
-week periods. This is a preliminary analysis for now. Shown here are the
-top three factors. Species with no significant predictor or limited
+the week before collections, and the preceding two, four, and eight week
+periods. This is a preliminary analysis for now. Shown here are the top
+three factors. Species with no significant predictor or limited
 collection date distributions were excluded.
 
 ``` r
@@ -299,17 +304,17 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-|           Species           |        Predictor        | Correlation |  P-Value  |
-|:---------------------------:|:-----------------------:|:-----------:|:---------:|
-|     Epischura lacustris     |  fifty-six_day_median   |  0.8346644  | 0.0026642 |
-|     Epischura lacustris     |   seven_day_mean_max    |  0.8339045  | 0.0027109 |
-|     Epischura lacustris     | fifty-six_day_mean_max  |  0.8337278  | 0.0027219 |
-|   Leptodiaptomus minutus    |     seven_day_range     |  0.4078968  | 0.0012163 |
-|   Leptodiaptomus minutus    |    fifty-six_day_var    |  0.4073493  | 0.0012367 |
-|   Leptodiaptomus minutus    |   fourteen_day_median   |  0.4064832  | 0.0012697 |
-| Skistodiaptomus oregonensis |     seven_day_mean      |  0.6328098  | 0.0000040 |
-| Skistodiaptomus oregonensis | twenty-eight_day_median |  0.6327857  | 0.0000041 |
-| Skistodiaptomus oregonensis | fifty-six_day_mean_max  |  0.6327413  | 0.0000041 |
+|           Species           |        Predictor         | Correlation |  P-Value  |
+|:---------------------------:|:------------------------:|:-----------:|:---------:|
+|     Epischura lacustris     | fifty-six_day_mean_range |  0.8433962  | 0.0011058 |
+|     Epischura lacustris     |    fifty-six_day_max     |  0.8431410  | 0.0011135 |
+|     Epischura lacustris     |     fourteen_day_max     |  0.8431410  | 0.0011135 |
+|   Leptodiaptomus minutus    |    fifty-six_day_var     |  0.5225154  | 0.0000095 |
+|   Leptodiaptomus minutus    |     fourteen_day_med     |  0.5209867  | 0.0000102 |
+|   Leptodiaptomus minutus    |  fourteen_day_mean_min   |  0.5163355  | 0.0000126 |
+| Skistodiaptomus oregonensis |      seven_day_mean      |  0.6328098  | 0.0000040 |
+| Skistodiaptomus oregonensis |   twenty-eight_day_med   |  0.6327857  | 0.0000041 |
+| Skistodiaptomus oregonensis |  fifty-six_day_mean_max  |  0.6327413  | 0.0000041 |
 
 ## Trait Variation
 
@@ -423,10 +428,10 @@ knitr::kable(car::Anova(ctmax_temp.model))
 
 |                         |     Sum Sq |  Df |    F value |   Pr(\>F) |
 |:------------------------|-----------:|----:|-----------:|----------:|
-| collection_temp         |  65.131351 |   1 | 40.2149410 | 0.0000000 |
-| sp_name                 | 723.873479 |   5 | 89.3902208 | 0.0000000 |
-| collection_temp:sp_name |   3.539379 |   3 |  0.7284558 | 0.5369173 |
-| Residuals               | 197.588872 | 122 |         NA |        NA |
+| collection_temp         |  79.452375 |   1 | 51.3696282 | 0.0000000 |
+| sp_name                 | 757.974006 |   6 | 81.6775310 | 0.0000000 |
+| collection_temp:sp_name |   2.373212 |   3 |  0.5114637 | 0.6750716 |
+| Residuals               | 202.615076 | 131 |         NA |        NA |
 
 ``` r
 
@@ -470,9 +475,10 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    5     |   3    |  2   |
-|   Leptodiaptomus minutus    |    0     |   43   |  17  |
+|     Epischura lacustris     |    5     |   3    |  3   |
+|   Leptodiaptomus minutus    |    0     |   47   |  17  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
+|      Leptodora kindti       |    0     |   0    |  5   |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
 | Skistodiaptomus oregonensis |    0     |   39   |  5   |
