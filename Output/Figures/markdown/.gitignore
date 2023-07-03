@@ -1,16 +1,2 @@
 *.pdf
-ctmax-and-size-histograms-1.pdf
-ctmax-and-size-histograms-2.pdf
-ctmax-and-size-sum-plot-1.pdf
-fecundity-histogram-1.pdf
-predictors-and-plots-1.pdf
-trait-coll-temp-plots-1.pdf
-unnamed-chunk-1-1.pdf
-unnamed-chunk-3-1.pdf
-unnamed-chunk-3-1.png
-unnamed-chunk-4-1.pdf
-unnamed-chunk-4-1.png
-unnamed-chunk-5-1.pdf
-unnamed-chunk-6-1.pdf
-unnamed-chunk-7-1.pdf
-unnamed-chunk-8-1.pdf
+*.png

@@ -92,6 +92,7 @@ theme_matt_facets = function(base_size = 18,
 }
 
 species_cols = c("Leptodiaptomus minutus" = "#ffd029",
+                 "Leptodiaptomus minutus juvenile" = "#e3d8af",
                  "Leptodiaptomus minutus male" = "#ffe896",
                  "Leptodiaptomus sicilis" = "#D86F29",
                  "Leptodiaptomus sicilis male" = "#E28C00",
