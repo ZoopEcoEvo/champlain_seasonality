@@ -1,8 +1,6 @@
 ### TO DO ###
-# Pull in temperature data
-# Generate temperature profiles for each collection 
 
-
+###
 # This script cycles through the time, temperature, and length data files collected for each individual replicate
 # and combines them to estimate thermal limits (as CTmax)
 
