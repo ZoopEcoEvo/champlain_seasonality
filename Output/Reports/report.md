@@ -1,7 +1,8 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-07-20
+2023-07-23
 
+- [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
 - [Trait Variation](#trait-variation)
   - [Variation with temperature](#variation-with-temperature)
@@ -9,12 +10,13 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   limits](#sex-and-stage-variation-in-thermal-limits)
 - [Trait Correlations](#trait-correlations)
 
-``` r
-### To Do 
+## Copepod Collection
 
-# Actual statistics for relationships between temperature and CTmax, size, and fecundity
-# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
-```
+Copepods were collected at approximately weekly intervals from Lake
+Champlain (Burlington Fishing Pier). Plankton was collected from the top
+3 meters using a 250 um mesh net. Copepods from 10 collections were used
+to make a total of 205 thermal limit measurements. Over this time
+period, collection temperatures ranged from 10.5 to 26.5°C.
 
 ## Temperature Variation
 
@@ -97,7 +99,7 @@ get_predictors = function(daily_values, raw_temp, n_days){
            min = slide_index_min(temp, i = date, before = days(n_days),
                                  na_rm = T),
            med = slide_index_dbl(temp, .i = date, .before = days(n_days), 
-                                    na_rm = T, .f = median),
+                                 na_rm = T, .f = median),
            var = slide_index_dbl(temp, .i = date, .before = days(n_days), 
                                  .f = var),
            range = max - min) %>%  
@@ -260,6 +262,98 @@ ggarrange(daily_plot, week_plot, two_week_plot, four_week_plot, eight_week_plot,
 <img src="../Figures/markdown/predictors-and-plots-1.png" style="display: block; margin: auto;" />
 
 ``` r
+## Daily values for the period examined by dataset
+collection_conditions = temp_data %>%
+  ungroup() %>% 
+  group_by(date) %>% 
+  summarise(mean_temp = mean(temp),
+            med_temp = median(temp),
+            var_temp = var(temp), 
+            min_temp = min(temp), 
+            max_temp = max(temp)) %>% 
+  mutate("range_temp" = max_temp - min_temp,
+         date = as.Date(date)) %>% 
+  ungroup() %>%  
+  filter(date >= (min(as.Date(full_data$collection_date)) - 7))
+
+## Mean female thermal limits for each species, grouped by collection
+species_summaries = full_data %>%  
+  #filter(sex == "female") %>% 
+  group_by(sp_name, collection_date) %>%  
+  summarise("mean_ctmax" = mean(ctmax),
+            "sample_size" = n(),
+            "ctmax_st_err" = (sd(ctmax) / sqrt(sample_size)),
+            "mean_size" = mean(size),
+            "size_st_err" = (sd(size) / sqrt(sample_size))) %>%  
+  ungroup() %>% 
+  complete(sp_name, collection_date)
+
+ctmax_timeseries = ggplot() + 
+  geom_vline(data = unique(select(full_data, collection_date)), 
+             aes(xintercept = as.Date(collection_date)),
+             colour = "grey90",
+             linewidth = 1) + 
+  geom_line(data = collection_conditions, 
+            aes(x = as.Date(date), y = mean_temp),
+            colour = "black", 
+            linewidth = 2) + 
+  # geom_errorbar(data = species_summaries,
+  #               aes(x = as.Date(collection_date), 
+  #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
+  #                   colour = sp_name),
+  #               position = position_dodge(width = 1),
+  #               width = 5, linewidth = 1) + 
+  geom_point(data = species_summaries, 
+             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Date", 
+       y = "Temperature", 
+       colour = "Species",
+       size = "Sample Size") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+
+size_timeseries = ggplot() + 
+  geom_vline(data = unique(select(full_data, collection_date)), 
+             aes(xintercept = as.Date(collection_date)),
+             colour = "grey90",
+             linewidth = 1) + 
+  geom_line(data = collection_conditions, 
+            aes(x = as.Date(date), y = mean_temp),
+            colour = "black", 
+            linewidth = 2) + 
+  # geom_errorbar(data = species_summaries,
+  #               aes(x = as.Date(collection_date), 
+  #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
+  #                   colour = sp_name),
+  #               position = position_dodge(width = 1),
+  #               width = 5, linewidth = 1) + 
+  geom_point(data = species_summaries, 
+             aes(x = as.Date(collection_date), y = mean_size * 40, colour = sp_name),
+             position = position_dodge(width = 1),
+             size = 4) + 
+  scale_colour_manual(values = species_cols) + 
+  scale_y_continuous(
+    name = "Temperature", # Features of the first axis
+    sec.axis = sec_axis(~./40, name="Prosome Length (mm)"), # Add a second axis and specify its features
+    breaks = c(0,5,10,15,20,25,30)
+  ) + 
+  labs(x = "Date", 
+       y = "Temperature", 
+       colour = "Species") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+
+ctmax_timeseries
+```
+
+<img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
+
+``` r
+#ggarrange(ctmax_timeseries, size_timeseries, common.legend = T, legend = "bottom")
+```
+
+``` r
 ## Combine data, then pull out values for each collection date
 date_list = as.Date(unique(full_data$collection_date))
 
@@ -304,17 +398,17 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-|           Species           |        Predictor         | Correlation |  P-Value  |
-|:---------------------------:|:------------------------:|:-----------:|:---------:|
-|     Epischura lacustris     | fifty-six_day_mean_range |  0.8433962  | 0.0011058 |
-|     Epischura lacustris     |    fifty-six_day_max     |  0.8431410  | 0.0011135 |
-|     Epischura lacustris     |     fourteen_day_max     |  0.8431410  | 0.0011135 |
-|   Leptodiaptomus minutus    |    fifty-six_day_var     |  0.6881855  | 0.0000000 |
-|   Leptodiaptomus minutus    |     fourteen_day_med     |  0.6880290  | 0.0000000 |
-|   Leptodiaptomus minutus    |    seven_day_mean_min    |  0.6843642  | 0.0000000 |
-| Skistodiaptomus oregonensis |         max_temp         |  0.6503606  | 0.0000001 |
-| Skistodiaptomus oregonensis | fifty-six_day_mean_range |  0.6494350  | 0.0000001 |
-| Skistodiaptomus oregonensis |    fifty-six_day_max     |  0.6491209  | 0.0000001 |
+|           Species           |      Predictor       | Correlation |  P-Value  |
+|:---------------------------:|:--------------------:|:-----------:|:---------:|
+|     Epischura lacustris     |  fifty-six_day_max   |  0.8903508  | 0.0001036 |
+|     Epischura lacustris     |   fourteen_day_max   |  0.8903508  | 0.0001036 |
+|     Epischura lacustris     | twenty-eight_day_max |  0.8903508  | 0.0001036 |
+|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7222163  | 0.0000000 |
+|   Leptodiaptomus minutus    |      mean_temp       |  0.7152640  | 0.0000000 |
+|   Leptodiaptomus minutus    |       med_temp       |  0.7151052  | 0.0000000 |
+| Skistodiaptomus oregonensis |       max_temp       |  0.6667928  | 0.0000000 |
+| Skistodiaptomus oregonensis |    seven_day_max     |  0.6644856  | 0.0000000 |
+| Skistodiaptomus oregonensis |   collection_temp    |  0.6620832  | 0.0000000 |
 
 ## Trait Variation
 
@@ -428,10 +522,10 @@ knitr::kable(car::Anova(ctmax_temp.model))
 
 |                         |     Sum Sq |  Df |     F value |   Pr(\>F) |
 |:------------------------|-----------:|----:|------------:|----------:|
-| collection_temp         | 134.493092 |   1 |  93.4821267 | 0.0000000 |
-| sp_name                 | 892.343642 |   6 | 103.3735639 | 0.0000000 |
-| collection_temp:sp_name |   1.449658 |   3 |   0.3358714 | 0.7994164 |
-| Residuals               | 244.579648 | 170 |          NA |        NA |
+| collection_temp         | 177.660108 |   1 | 132.6929781 | 0.0000000 |
+| sp_name                 | 997.435179 |   6 | 124.1627868 | 0.0000000 |
+| collection_temp:sp_name |   1.600039 |   3 |   0.3983523 | 0.7543349 |
+| Residuals               | 259.742914 | 194 |          NA |        NA |
 
 ``` r
 
@@ -475,20 +569,20 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    5     |   3    |  3   |
-|   Leptodiaptomus minutus    |    5     |   61   |  19  |
+|     Epischura lacustris     |    5     |   3    |  4   |
+|   Leptodiaptomus minutus    |    5     |   71   |  24  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |      Leptodora kindti       |    1     |   0    |  11  |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    0     |   50   |  5   |
+| Skistodiaptomus oregonensis |    0     |   58   |  5   |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
 
 ``` r
 ctmax_resids %>% 
-  filter(sp_name %in% filter(sex_sample_sizes, Male > 0)$Species & 
+  filter(sp_name %in% filter(sex_sample_sizes, Male > 0, Female > 0)$Species & 
            sex != "juvenile") %>% 
   ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
   facet_wrap(sp_name~., ncol = 2) + 
@@ -508,7 +602,7 @@ ctmax_resids %>%
 
 ``` r
 ctmax_resids %>% 
-  filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0)$Species & 
+  filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0 & Female > 0)$Species & 
            sex != "male") %>% 
   ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
   facet_wrap(sp_name~., ncol = 1) + 

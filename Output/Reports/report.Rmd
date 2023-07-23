@@ -110,6 +110,10 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
                  "Leptodora kindti juvenile" = "lightblue")
 ```
 
+## Copepod Collection
+
+Copepods were collected at approximately weekly intervals from Lake Champlain (Burlington Fishing Pier). Plankton was collected from the top 3 meters using a 250 um mesh net. Copepods from `r length(unique(full_data$collection_date))` collections were used to make a total of `r dim(full_data)[1]` thermal limit measurements. Over this time period, collection temperatures ranged from `r paste(min(full_data$collection_temp), " to ", max(full_data$collection_temp), sep = "")`°C. 
+
 ## Temperature Variation 
 Water temperatures in Lake Champlain reached a minimum in February. Sampling for this project began during the Spring warming period. Temperature variability (both ranges and variance) increase with temperature, but are strongly affected by the length of time period examined.    
 
@@ -186,7 +190,7 @@ get_predictors = function(daily_values, raw_temp, n_days){
            min = slide_index_min(temp, i = date, before = days(n_days),
                                  na_rm = T),
            med = slide_index_dbl(temp, .i = date, .before = days(n_days), 
-                                    na_rm = T, .f = median),
+                                 na_rm = T, .f = median),
            var = slide_index_dbl(temp, .i = date, .before = days(n_days), 
                                  .f = var),
            range = max - min) %>%  
@@ -345,6 +349,93 @@ eight_week_plot = eight_week_temps %>%
 
 ggarrange(daily_plot, week_plot, two_week_plot, four_week_plot, eight_week_plot, 
           common.legend = T, nrow = 1, legend = "bottom")
+```
+
+```{r ctmax-timeseries, fig.width=10, fig.height=5}
+## Daily values for the period examined by dataset
+collection_conditions = temp_data %>%
+  ungroup() %>% 
+  group_by(date) %>% 
+  summarise(mean_temp = mean(temp),
+            med_temp = median(temp),
+            var_temp = var(temp), 
+            min_temp = min(temp), 
+            max_temp = max(temp)) %>% 
+  mutate("range_temp" = max_temp - min_temp,
+         date = as.Date(date)) %>% 
+  ungroup() %>%  
+  filter(date >= (min(as.Date(full_data$collection_date)) - 7))
+
+## Mean female thermal limits for each species, grouped by collection
+species_summaries = full_data %>%  
+  #filter(sex == "female") %>% 
+  group_by(sp_name, collection_date) %>%  
+  summarise("mean_ctmax" = mean(ctmax),
+            "sample_size" = n(),
+            "ctmax_st_err" = (sd(ctmax) / sqrt(sample_size)),
+            "mean_size" = mean(size),
+            "size_st_err" = (sd(size) / sqrt(sample_size))) %>%  
+  ungroup() %>% 
+  complete(sp_name, collection_date)
+
+ctmax_timeseries = ggplot() + 
+  geom_vline(data = unique(select(full_data, collection_date)), 
+             aes(xintercept = as.Date(collection_date)),
+             colour = "grey90",
+             linewidth = 1) + 
+  geom_line(data = collection_conditions, 
+            aes(x = as.Date(date), y = mean_temp),
+            colour = "black", 
+            linewidth = 2) + 
+  # geom_errorbar(data = species_summaries,
+  #               aes(x = as.Date(collection_date), 
+  #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
+  #                   colour = sp_name),
+  #               position = position_dodge(width = 1),
+  #               width = 5, linewidth = 1) + 
+  geom_point(data = species_summaries, 
+             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Date", 
+       y = "Temperature", 
+       colour = "Species",
+       size = "Sample Size") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+
+size_timeseries = ggplot() + 
+  geom_vline(data = unique(select(full_data, collection_date)), 
+             aes(xintercept = as.Date(collection_date)),
+             colour = "grey90",
+             linewidth = 1) + 
+  geom_line(data = collection_conditions, 
+            aes(x = as.Date(date), y = mean_temp),
+            colour = "black", 
+            linewidth = 2) + 
+  # geom_errorbar(data = species_summaries,
+  #               aes(x = as.Date(collection_date), 
+  #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
+  #                   colour = sp_name),
+  #               position = position_dodge(width = 1),
+  #               width = 5, linewidth = 1) + 
+  geom_point(data = species_summaries, 
+             aes(x = as.Date(collection_date), y = mean_size * 40, colour = sp_name),
+             position = position_dodge(width = 1),
+             size = 4) + 
+  scale_colour_manual(values = species_cols) + 
+  scale_y_continuous(
+    name = "Temperature", # Features of the first axis
+    sec.axis = sec_axis(~./40, name="Prosome Length (mm)"), # Add a second axis and specify its features
+    breaks = c(0,5,10,15,20,25,30)
+  ) + 
+  labs(x = "Date", 
+       y = "Temperature", 
+       colour = "Species") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+
+ctmax_timeseries
+#ggarrange(ctmax_timeseries, size_timeseries, common.legend = T, legend = "bottom")
 ```
 
 
@@ -538,14 +629,13 @@ sex_sample_sizes = ctmax_resids %>%
   select("Species" = sp_name, "Juvenile" = juvenile, "Female" = female, "Male" = male)
 
 knitr::kable(sex_sample_sizes, align = "c")
-
 ```
 
 The female-male and female-juvenile comparisons show that there are generally no differences in thermal limits between these groups. 
 
 ```{r fig.width=7, fig.height=7}
 ctmax_resids %>% 
-  filter(sp_name %in% filter(sex_sample_sizes, Male > 0)$Species & 
+  filter(sp_name %in% filter(sex_sample_sizes, Male > 0, Female > 0)$Species & 
            sex != "juvenile") %>% 
   ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
   facet_wrap(sp_name~., ncol = 2) + 
@@ -563,7 +653,7 @@ ctmax_resids %>%
 
 ```{r fig.width=3, fig.height=6}
 ctmax_resids %>% 
-  filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0)$Species & 
+  filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0 & Female > 0)$Species & 
            sex != "male") %>% 
   ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
   facet_wrap(sp_name~., ncol = 1) + 
