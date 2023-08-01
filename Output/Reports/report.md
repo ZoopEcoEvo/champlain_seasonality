@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-07-26
+2023-07-31
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -9,13 +9,6 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 - [Sex and stage variation in thermal
   limits](#sex-and-stage-variation-in-thermal-limits)
 - [Trait Correlations](#trait-correlations)
-
-``` r
-### To Do 
-
-# Actual statistics for relationships between temperature and CTmax, size, and fecundity
-# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
-```
 
 ## Copepod Collection
 
@@ -286,12 +279,14 @@ collection_conditions = temp_data %>%
 ## Mean female thermal limits for each species, grouped by collection
 species_summaries = full_data %>%  
   #filter(sex == "female") %>% 
-  group_by(sp_name, collection_date) %>%  
+  group_by(sp_name, collection_date, collection_temp) %>%  
   summarise("mean_ctmax" = mean(ctmax),
             "sample_size" = n(),
             "ctmax_st_err" = (sd(ctmax) / sqrt(sample_size)),
+            "ctmax_var" = var(ctmax), 
             "mean_size" = mean(size),
-            "size_st_err" = (sd(size) / sqrt(sample_size))) %>%  
+            "size_st_err" = (sd(size) / sqrt(sample_size)),
+            "size_var" = var(size)) %>%  
   ungroup() %>% 
   complete(sp_name, collection_date)
 
@@ -314,7 +309,7 @@ ctmax_timeseries = ggplot() +
              aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Date", 
-       y = "Temperature", 
+       y = "Temperature (°C)", 
        colour = "Species",
        size = "Sample Size") + 
   theme_matt() + 
@@ -346,7 +341,7 @@ size_timeseries = ggplot() +
     breaks = c(0,5,10,15,20,25,30)
   ) + 
   labs(x = "Date", 
-       y = "Temperature", 
+       y = "Temperature (°C)", 
        colour = "Species") + 
   theme_matt() + 
   theme(legend.position = "right")
@@ -480,7 +475,7 @@ ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_n
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "CTmax (°C)",
-       colour = "Group") + 
+       colour = "Species") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
@@ -490,7 +485,7 @@ size_temp = ggplot(filter(full_data, sex != "juvenile"), aes(x = collection_temp
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Length (mm)",
-       colour = "Group")  + 
+       colour = "Species")  + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
@@ -500,7 +495,7 @@ wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = s
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Warming Tolerance (°C)",
-       colour = "Group")  + 
+       colour = "Species")  + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
@@ -510,7 +505,7 @@ eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = s
   geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Fecundity (# Eggs)",
-       colour = "Group")  + 
+       colour = "Species")  + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
@@ -553,6 +548,44 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) +
 ```
 
 <img src="../Figures/markdown/unnamed-chunk-1-1.png" style="display: block; margin: auto;" />
+
+Given the long generation times of these copepods, decreases in trait
+variance may indicate selection over the seasonal cycle. Shown below are
+the variance in observed CTmax and size, plotted against collection
+date. Variance decreases in *Skistodiaptomus*, but this pattern is
+driven by a single collection with high variance early in the year. Size
+variance increases slightly in *Skistodiaptomus*. Variance in both CTmax
+and size is fairly constant in *Leptodiaptomus minutus*, the only other
+species collected across the entire set of samples thus far.
+
+``` r
+ggplot(drop_na(species_summaries, ctmax_var), aes(x = as.Date(collection_date), y = ctmax_var, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm", se = F) + 
+  labs(x = "Collection Temp. (°C)", 
+       y = "CTmax Variance") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt_facets() + 
+  theme(legend.position = "none")
+```
+
+<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+ggplot(drop_na(species_summaries, size_var), aes(x = as.Date(collection_date), y = size_var, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm", se = F) + 
+  labs(x = "Collection Temp. (°C)", 
+       y = "Size Variance") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt_facets() + 
+  theme(legend.position = "none")
+```
+
+<img src="../Figures/markdown/unnamed-chunk-2-2.png" style="display: block; margin: auto;" />
 
 ## Sex and stage variation in thermal limits
 
@@ -605,7 +638,7 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ctmax_resids %>% 
@@ -625,7 +658,7 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
 
 ## Trait Correlations
 
@@ -639,36 +672,38 @@ ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) +
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(x = "Length (mm)", 
-       y = "CTmax (°C)") + 
+       y = "CTmax (°C)",
+       colour = "Species") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(x = "Prosome length (mm)", 
-       y = "Fecundity (# Eggs)") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt() + 
-  theme(legend.position = "right")
-```
-
-<img src="../Figures/markdown/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
-
-``` r
-ggplot(ctmax_resids, aes(x = resids, y = fecundity, colour = sp_name)) + 
-  geom_smooth(method = "lm", se = F, linewidth = 2) + 
-  geom_point(size = 4) + 
-  labs(x = "CTmax Residuals", 
-       y = "Fecundity (# Eggs)") + 
+       y = "Fecundity (# Eggs)",
+       colour = "Species") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
 ```
 
 <img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+
+``` r
+ggplot(ctmax_resids, aes(x = ctmax, y = fecundity, colour = sp_name)) + 
+  geom_smooth(method = "lm", se = F, linewidth = 2) + 
+  geom_point(size = 4) + 
+  labs(x = "CTmax (°C)", 
+       y = "Fecundity (# Eggs)") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt() + 
+  theme(legend.position = "right")
+```
+
+<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
