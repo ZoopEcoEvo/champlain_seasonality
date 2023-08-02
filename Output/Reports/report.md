@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-08-01
+2023-08-02
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -10,12 +10,19 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   limits](#sex-and-stage-variation-in-thermal-limits)
 - [Trait Correlations](#trait-correlations)
 
+``` r
+### To Do 
+
+# Actual statistics for relationships between temperature and CTmax, size, and fecundity
+# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
+```
+
 ## Copepod Collection
 
 Copepods were collected at approximately weekly intervals from Lake
 Champlain (Burlington Fishing Pier). Plankton was collected from the top
 3 meters using a 250 um mesh net. Copepods from 11 collections were used
-to make a total of 225 thermal limit measurements. Over this time
+to make a total of 235 thermal limit measurements. Over this time
 period, collection temperatures ranged from 10.5 to 26.5°C.
 
 ## Temperature Variation
@@ -402,15 +409,15 @@ corr_vals %>%
 
 |           Species           |      Predictor       | Correlation | P-Value  |
 |:---------------------------:|:--------------------:|:-----------:|:--------:|
-|     Epischura lacustris     |   fourteen_day_max   |  0.8927516  | 4.01e-05 |
-|     Epischura lacustris     |    seven_day_max     |  0.8868689  | 5.32e-05 |
-|     Epischura lacustris     |  fifty-six_day_max   |  0.8827629  | 6.42e-05 |
-|   Leptodiaptomus minutus    |      mean_temp       |  0.7210650  | 0.00e+00 |
-|   Leptodiaptomus minutus    |       med_temp       |  0.7208808  | 0.00e+00 |
-|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7205007  | 0.00e+00 |
-| Skistodiaptomus oregonensis |    seven_day_max     |  0.6949137  | 0.00e+00 |
-| Skistodiaptomus oregonensis |  fifty-six_day_max   |  0.6937754  | 0.00e+00 |
-| Skistodiaptomus oregonensis | twenty-eight_day_max |  0.6937754  | 0.00e+00 |
+|     Epischura lacustris     |   fourteen_day_max   |  0.8740119  | 4.38e-05 |
+|     Epischura lacustris     |    seven_day_max     |  0.8659850  | 6.23e-05 |
+|     Epischura lacustris     |  seven_day_mean_max  |  0.8544345  | 9.96e-05 |
+|   Leptodiaptomus minutus    |      mean_temp       |  0.7250251  | 0.00e+00 |
+|   Leptodiaptomus minutus    |       med_temp       |  0.7244956  | 0.00e+00 |
+|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7238891  | 0.00e+00 |
+| Skistodiaptomus oregonensis |    seven_day_max     |  0.6989991  | 0.00e+00 |
+| Skistodiaptomus oregonensis |  fifty-six_day_max   |  0.6977365  | 0.00e+00 |
+| Skistodiaptomus oregonensis | twenty-eight_day_max |  0.6977365  | 0.00e+00 |
 
 ## Trait Variation
 
@@ -522,12 +529,12 @@ ctmax_temp.model = lm(data = full_data, ctmax ~ collection_temp * sp_name)
 knitr::kable(car::Anova(ctmax_temp.model))
 ```
 
-|                         |      Sum Sq |  Df |     F value |   Pr(\>F) |
-|:------------------------|------------:|----:|------------:|----------:|
-| collection_temp         |  200.737481 |   1 | 156.2893034 | 0.0000000 |
-| sp_name                 | 1077.227611 |   6 | 139.7838545 | 0.0000000 |
-| collection_temp:sp_name |    2.753582 |   3 |   0.7146239 | 0.5442285 |
-| Residuals               |  274.860915 | 214 |          NA |        NA |
+|                         |     Sum Sq |  Df |     F value |  Pr(\>F) |
+|:------------------------|-----------:|----:|------------:|---------:|
+| collection_temp         |  209.04692 |   1 | 166.0923777 | 0.000000 |
+| sp_name                 | 1109.40860 |   6 | 146.9082606 | 0.000000 |
+| collection_temp:sp_name |    2.55511 |   3 |   0.6766971 | 0.567142 |
+| Residuals               |  281.93051 | 224 |          NA |       NA |
 
 ``` r
 
@@ -609,13 +616,13 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    5     |   4    |  4   |
-|   Leptodiaptomus minutus    |    5     |   78   |  25  |
+|     Epischura lacustris     |    6     |   4    |  4   |
+|   Leptodiaptomus minutus    |    5     |   85   |  25  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |      Leptodora kindti       |    1     |   0    |  11  |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    0     |   62   |  12  |
+| Skistodiaptomus oregonensis |    1     |   62   |  13  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
