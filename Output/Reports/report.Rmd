@@ -380,7 +380,7 @@ species_summaries = full_data %>%
   ungroup() %>% 
   complete(sp_name, collection_date)
 
-ctmax_timeseries = ggplot() + 
+ggplot() + 
   geom_vline(data = unique(select(full_data, collection_date)), 
              aes(xintercept = as.Date(collection_date)),
              colour = "grey90",
@@ -436,7 +436,6 @@ size_timeseries = ggplot() +
   theme_matt() + 
   theme(legend.position = "right")
 
-ctmax_timeseries
 #ggarrange(ctmax_timeseries, size_timeseries, common.legend = T, legend = "bottom")
 ```
 
@@ -604,7 +603,7 @@ knitr::kable(car::Anova(ctmax_temp.model))
 ctmax_resids = cbind(full_data, "resids" = ctmax_temp.model$residuals)
 ```
 
-```{r fig.width=15, fig.height=10}
+```{r ctmax-time-in-lab, fig.width=15, fig.height=10}
 ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
   geom_point(size = 4) + 
@@ -619,7 +618,7 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) +
 
 Given the long generation times of these copepods, decreases in trait variance may indicate selection over the seasonal cycle. Shown below are the variance in observed CTmax and size, plotted against collection date. Variance decreases in *Skistodiaptomus*, but this pattern is driven by a single collection with high variance early in the year. Size variance increases slightly in *Skistodiaptomus*. Variance in both CTmax and size is fairly constant in *Leptodiaptomus minutus*, the only other species collected across the entire set of samples thus far. 
 
-```{r}
+```{r trait-variance-coll-temp}
 ggplot(drop_na(species_summaries, ctmax_var), aes(x = as.Date(collection_date), y = ctmax_var, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
   geom_point(size = 2) + 
@@ -645,7 +644,7 @@ ggplot(drop_na(species_summaries, size_var), aes(x = as.Date(collection_date), y
 ## Sex and stage variation in thermal limits 
 Previous sections have generally lumped juvenile, female, and male individuals together. There may be important stage- or sex-specific differences in CTmax though. For several species, we have measurements for individuals in different stages or of different sexes. 
 
-```{r}
+```{r sex-stage-table}
 sex_sample_sizes = ctmax_resids %>%  
   group_by(sp_name, sex) %>%  
   summarise(num = n()) %>%  
@@ -660,7 +659,7 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 The female-male and female-juvenile comparisons show that there are generally no differences in thermal limits between these groups. 
 
-```{r fig.width=7, fig.height=7}
+```{r ctmax-sex, fig.width=7, fig.height=7}
 ctmax_resids %>% 
   filter(sp_name %in% filter(sex_sample_sizes, Male > 0, Female > 0)$Species & 
            sex != "juvenile") %>% 
@@ -678,7 +677,7 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-```{r fig.width=3, fig.height=6}
+```{r ctmax-stage, fig.width=3, fig.height=6}
 ctmax_resids %>% 
   filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0 & Female > 0)$Species & 
            sex != "male") %>% 
@@ -698,7 +697,7 @@ ctmax_resids %>%
 
 ## Trait Correlations 
 
-```{r fig.width=10, fig.height=7}
+```{r ctmax-size, fig.width=10, fig.height=7}
 ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) + 
   geom_smooth(data = full_data, 
               aes(x = size, y = ctmax),
@@ -715,7 +714,7 @@ ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) +
   theme(legend.position = "right")
 ```
 
-```{r fig.width=10, fig.height=7, include = F}
+```{r ctmaxresids-size, fig.width=10, fig.height=7, include = F}
 ggplot(ctmax_resids, aes(x = size, y = resids, colour = sp_name)) + 
   geom_smooth(data = ctmax_resids, 
               aes(x = size, y = resids),
@@ -732,7 +731,7 @@ ggplot(ctmax_resids, aes(x = size, y = resids, colour = sp_name)) +
 ```
 
 
-```{r fig.width=10, fig.height=7}
+```{r fecundity-size, fig.width=10, fig.height=7}
 ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
@@ -744,7 +743,7 @@ ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) +
   theme(legend.position = "right")
 ```
 
-```{r fig.width=10, fig.height=7}
+```{r, ctmax-fecundity, fig.width=10, fig.height=7}
 ggplot(ctmax_resids, aes(x = ctmax, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 

@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-08-02
+2023-08-03
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -297,7 +297,7 @@ species_summaries = full_data %>%
   ungroup() %>% 
   complete(sp_name, collection_date)
 
-ctmax_timeseries = ggplot() + 
+ggplot() + 
   geom_vline(data = unique(select(full_data, collection_date)), 
              aes(xintercept = as.Date(collection_date)),
              colour = "grey90",
@@ -321,6 +321,11 @@ ctmax_timeseries = ggplot() +
        size = "Sample Size") + 
   theme_matt() + 
   theme(legend.position = "right")
+```
+
+<img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
+
+``` r
 
 size_timeseries = ggplot() + 
   geom_vline(data = unique(select(full_data, collection_date)), 
@@ -353,12 +358,6 @@ size_timeseries = ggplot() +
   theme_matt() + 
   theme(legend.position = "right")
 
-ctmax_timeseries
-```
-
-<img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
-
-``` r
 #ggarrange(ctmax_timeseries, size_timeseries, common.legend = T, legend = "bottom")
 ```
 
@@ -554,7 +553,7 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) +
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-1-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/ctmax-time-in-lab-1.png" style="display: block; margin: auto;" />
 
 Given the long generation times of these copepods, decreases in trait
 variance may indicate selection over the seasonal cycle. Shown below are
@@ -577,7 +576,7 @@ ggplot(drop_na(species_summaries, ctmax_var), aes(x = as.Date(collection_date), 
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/trait-variance-coll-temp-1.png" style="display: block; margin: auto;" />
 
 ``` r
 
@@ -592,7 +591,7 @@ ggplot(drop_na(species_summaries, size_var), aes(x = as.Date(collection_date), y
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-2-2.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/trait-variance-coll-temp-2.png" style="display: block; margin: auto;" />
 
 ## Sex and stage variation in thermal limits
 
@@ -645,7 +644,7 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/ctmax-sex-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ctmax_resids %>% 
@@ -665,7 +664,7 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/ctmax-stage-1.png" style="display: block; margin: auto;" />
 
 ## Trait Correlations
 
@@ -686,7 +685,7 @@ ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) +
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/ctmax-size-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) + 
@@ -700,7 +699,7 @@ ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) +
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/fecundity-size-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ggplot(ctmax_resids, aes(x = ctmax, y = fecundity, colour = sp_name)) + 
@@ -713,4 +712,4 @@ ggplot(ctmax_resids, aes(x = ctmax, y = fecundity, colour = sp_name)) +
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/ctmax-fecundity-1.png" style="display: block; margin: auto;" />
