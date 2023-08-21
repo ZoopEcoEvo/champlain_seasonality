@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-08-20
+2023-08-21
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -9,13 +9,6 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 - [Sex and stage variation in thermal
   limits](#sex-and-stage-variation-in-thermal-limits)
 - [Trait Correlations](#trait-correlations)
-
-``` r
-### To Do 
-
-# Actual statistics for relationships between temperature and CTmax, size, and fecundity
-# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
-```
 
 ## Copepod Collection
 
@@ -295,7 +288,8 @@ species_summaries = full_data %>%
             "size_st_err" = (sd(size) / sqrt(sample_size)),
             "size_var" = var(size)) %>%  
   ungroup() %>% 
-  complete(sp_name, collection_date)
+  complete(sp_name, collection_date) %>% 
+  arrange(desc(sample_size))
 
 ggplot() + 
   geom_vline(data = unique(select(full_data, collection_date)), 
@@ -313,8 +307,7 @@ ggplot() +
   #               position = position_dodge(width = 1),
   #               width = 5, linewidth = 1) +
   geom_point(data = species_summaries, 
-             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size),
-             position = position_dodge(width = 1)) + 
+             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Date", 
        y = "Temperature (°C)", 

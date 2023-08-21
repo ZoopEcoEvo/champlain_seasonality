@@ -378,7 +378,8 @@ species_summaries = full_data %>%
             "size_st_err" = (sd(size) / sqrt(sample_size)),
             "size_var" = var(size)) %>%  
   ungroup() %>% 
-  complete(sp_name, collection_date)
+  complete(sp_name, collection_date) %>% 
+  arrange(desc(sample_size))
 
 ggplot() + 
   geom_vline(data = unique(select(full_data, collection_date)), 
@@ -396,8 +397,7 @@ ggplot() +
   #               position = position_dodge(width = 1),
   #               width = 5, linewidth = 1) +
   geom_point(data = species_summaries, 
-             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size),
-             position = position_dodge(width = 1)) + 
+             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Date", 
        y = "Temperature (°C)", 
