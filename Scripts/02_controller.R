@@ -9,7 +9,7 @@ library(lubridate)
 library(slider)
 
 #Determine which scripts should be run
-process_all_data = T #Runs data analysis 
+process_all_data = F #Runs data analysis 
 make_report = T #Runs project summary
 knit_manuscript = F #Compiles manuscript draft
 
