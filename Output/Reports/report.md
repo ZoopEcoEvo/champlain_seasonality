@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-08-22
+2023-08-30
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -10,19 +10,12 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   limits](#sex-and-stage-variation-in-thermal-limits)
 - [Trait Correlations](#trait-correlations)
 
-``` r
-### To Do 
-
-# Actual statistics for relationships between temperature and CTmax, size, and fecundity
-# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
-```
-
 ## Copepod Collection
 
 Copepods were collected at approximately weekly intervals from Lake
 Champlain (Burlington Fishing Pier). Plankton was collected from the top
-3 meters using a 250 um mesh net. Copepods from 12 collections were used
-to make a total of 263 thermal limit measurements. Over this time
+3 meters using a 250 um mesh net. Copepods from 13 collections were used
+to make a total of 273 thermal limit measurements. Over this time
 period, collection temperatures ranged from 10.5 to 26.5°C.
 
 ## Temperature Variation
@@ -269,6 +262,42 @@ ggarrange(daily_plot, week_plot, two_week_plot, four_week_plot, eight_week_plot,
 <img src="../Figures/markdown/predictors-and-plots-1.png" style="display: block; margin: auto;" />
 
 ``` r
+one_week_doy_data = week_temps %>% 
+  mutate(doy = yday(date))
+
+one_week_temp_circle = ggplot(one_week_doy_data, aes(x = seven_day_mean_max, y = seven_day_mean_min, colour = doy)) + 
+  geom_point() + 
+  labs(x = "Max. Temp. (°C)",
+       y = "Min. Temp. (°C)") + 
+  ggtitle("One Week") + 
+  theme_matt()
+```
+
+The different time periods examined by this climate data highlights that
+the relationship between minimum and maximum temperatures changes based
+on the window examined. For example, minimum and maximum temperatures
+experienced over weekly intervals are closely linked, whereas there is a
+distinct seasonal cycle in the relationship between minimum and maximum
+temperatures experienced over periods of four weeks.
+
+``` r
+four_week_doy_data = four_week_temps %>% 
+  mutate(doy = yday(date))
+
+four_week_temp_circle = ggplot(four_week_doy_data, aes(x = `twenty-eight_day_max`, y = `twenty-eight_day_min`, colour = doy)) + 
+  geom_point() + 
+  labs(x = "Max. Temp. (°C)",
+       y = "Min. Temp. (°C)") + 
+  ggtitle("Four Week") + 
+  theme_matt()
+
+ggarrange(one_week_temp_circle, four_week_temp_circle,
+          common.legend = T, legend = "bottom")
+```
+
+<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+
+``` r
 ## Daily values for the period examined by dataset
 collection_conditions = temp_data %>%
   ungroup() %>% 
@@ -407,17 +436,17 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-|           Species           |      Predictor       | Correlation | P-Value |
-|:---------------------------:|:--------------------:|:-----------:|:-------:|
-|     Epischura lacustris     |  fifty-six_day_max   |  0.7776250  | 7.8e-06 |
-|     Epischura lacustris     | twenty-eight_day_max |  0.7775023  | 7.8e-06 |
-|     Epischura lacustris     |  seven_day_mean_max  |  0.7765511  | 8.1e-06 |
-|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7089108  | 0.0e+00 |
-|   Leptodiaptomus minutus    |       min_temp       |  0.7082184  | 0.0e+00 |
-|   Leptodiaptomus minutus    |      mean_temp       |  0.7079993  | 0.0e+00 |
-| Skistodiaptomus oregonensis |    seven_day_max     |  0.6992135  | 0.0e+00 |
-| Skistodiaptomus oregonensis |   fourteen_day_max   |  0.6973601  | 0.0e+00 |
-| Skistodiaptomus oregonensis | twenty-eight_day_max |  0.6951473  | 0.0e+00 |
+|           Species           |      Predictor       | Correlation |  P-Value  |
+|:---------------------------:|:--------------------:|:-----------:|:---------:|
+|     Epischura lacustris     | twenty-eight_day_max |  0.6492748  | 0.0004452 |
+|     Epischura lacustris     |    seven_day_max     |  0.6415380  | 0.0005476 |
+|     Epischura lacustris     |  seven_day_mean_max  |  0.6256773  | 0.0008228 |
+|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7099485  | 0.0000000 |
+|   Leptodiaptomus minutus    |       min_temp       |  0.7081803  | 0.0000000 |
+|   Leptodiaptomus minutus    |  seven_day_mean_min  |  0.7081169  | 0.0000000 |
+| Skistodiaptomus oregonensis |    seven_day_max     |  0.6991276  | 0.0000000 |
+| Skistodiaptomus oregonensis |   fourteen_day_max   |  0.6969446  | 0.0000000 |
+| Skistodiaptomus oregonensis | twenty-eight_day_max |  0.6948773  | 0.0000000 |
 
 ## Trait Variation
 
@@ -531,10 +560,10 @@ knitr::kable(car::Anova(ctmax_temp.model))
 
 |                         |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:------------------------|------------:|----:|------------:|----------:|
-| collection_temp         |  224.539478 |   1 | 178.7447772 | 0.0000000 |
-| sp_name                 | 1174.077704 |   6 | 155.7708693 | 0.0000000 |
-| collection_temp:sp_name |    2.204612 |   3 |   0.5849942 | 0.6253559 |
-| Residuals               |  316.562807 | 252 |          NA |        NA |
+| collection_temp         |  228.960890 |   1 | 180.1116642 | 0.0000000 |
+| sp_name                 | 1193.196099 |   6 | 156.4375873 | 0.0000000 |
+| collection_temp:sp_name |    1.895329 |   3 |   0.4969856 | 0.6846815 |
+| Residuals               |  333.058680 | 262 |          NA |        NA |
 
 ``` r
 
@@ -616,13 +645,13 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    9     |   8    |  7   |
-|   Leptodiaptomus minutus    |    5     |   94   |  27  |
+|     Epischura lacustris     |    10    |   8    |  7   |
+|   Leptodiaptomus minutus    |    5     |  102   |  27  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |      Leptodora kindti       |    1     |   0    |  11  |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    2     |   65   |  16  |
+| Skistodiaptomus oregonensis |    2     |   66   |  16  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.

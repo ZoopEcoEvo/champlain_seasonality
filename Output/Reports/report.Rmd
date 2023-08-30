@@ -351,6 +351,36 @@ ggarrange(daily_plot, week_plot, two_week_plot, four_week_plot, eight_week_plot,
           common.legend = T, nrow = 1, legend = "bottom")
 ```
 
+```{r}
+one_week_doy_data = week_temps %>% 
+  mutate(doy = yday(date))
+
+one_week_temp_circle = ggplot(one_week_doy_data, aes(x = seven_day_mean_max, y = seven_day_mean_min, colour = doy)) + 
+  geom_point() + 
+  labs(x = "Max. Temp. (°C)",
+       y = "Min. Temp. (°C)") + 
+  ggtitle("One Week") + 
+  theme_matt()
+```
+
+The different time periods examined by this climate data highlights that the relationship between minimum and maximum temperatures changes based on the window examined. For example, minimum and maximum temperatures experienced over weekly intervals are closely linked, whereas there is a distinct seasonal cycle in the relationship between minimum and maximum temperatures experienced over periods of four weeks. 
+
+```{r}
+four_week_doy_data = four_week_temps %>% 
+  mutate(doy = yday(date))
+
+four_week_temp_circle = ggplot(four_week_doy_data, aes(x = `twenty-eight_day_max`, y = `twenty-eight_day_min`, colour = doy)) + 
+  geom_point() + 
+  labs(x = "Max. Temp. (°C)",
+       y = "Min. Temp. (°C)") + 
+  ggtitle("Four Week") + 
+  theme_matt()
+
+ggarrange(one_week_temp_circle, four_week_temp_circle,
+          common.legend = T, legend = "bottom")
+```
+
+
 ```{r ctmax-timeseries, fig.width=10, fig.height=5}
 ## Daily values for the period examined by dataset
 collection_conditions = temp_data %>%
