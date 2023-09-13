@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-08-30
+2023-09-12
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -10,12 +10,19 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   limits](#sex-and-stage-variation-in-thermal-limits)
 - [Trait Correlations](#trait-correlations)
 
+``` r
+### To Do 
+
+# Actual statistics for relationships between temperature and CTmax, size, and fecundity
+# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
+```
+
 ## Copepod Collection
 
 Copepods were collected at approximately weekly intervals from Lake
 Champlain (Burlington Fishing Pier). Plankton was collected from the top
-3 meters using a 250 um mesh net. Copepods from 13 collections were used
-to make a total of 273 thermal limit measurements. Over this time
+3 meters using a 250 um mesh net. Copepods from 14 collections were used
+to make a total of 283 thermal limit measurements. Over this time
 period, collection temperatures ranged from 10.5 to 26.5°C.
 
 ## Temperature Variation
@@ -441,12 +448,12 @@ corr_vals %>%
 |     Epischura lacustris     | twenty-eight_day_max |  0.6492748  | 0.0004452 |
 |     Epischura lacustris     |    seven_day_max     |  0.6415380  | 0.0005476 |
 |     Epischura lacustris     |  seven_day_mean_max  |  0.6256773  | 0.0008228 |
-|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7099485  | 0.0000000 |
-|   Leptodiaptomus minutus    |       min_temp       |  0.7081803  | 0.0000000 |
-|   Leptodiaptomus minutus    |  seven_day_mean_min  |  0.7081169  | 0.0000000 |
-| Skistodiaptomus oregonensis |    seven_day_max     |  0.6991276  | 0.0000000 |
-| Skistodiaptomus oregonensis |   fourteen_day_max   |  0.6969446  | 0.0000000 |
-| Skistodiaptomus oregonensis | twenty-eight_day_max |  0.6948773  | 0.0000000 |
+|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7061519  | 0.0000000 |
+|   Leptodiaptomus minutus    |  seven_day_mean_min  |  0.7050832  | 0.0000000 |
+|   Leptodiaptomus minutus    |    seven_day_mean    |  0.7030745  | 0.0000000 |
+| Skistodiaptomus oregonensis |       max_temp       |  0.6852416  | 0.0000000 |
+| Skistodiaptomus oregonensis |       med_temp       |  0.6848968  | 0.0000000 |
+| Skistodiaptomus oregonensis |      mean_temp       |  0.6843249  | 0.0000000 |
 
 ## Trait Variation
 
@@ -560,10 +567,10 @@ knitr::kable(car::Anova(ctmax_temp.model))
 
 |                         |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:------------------------|------------:|----:|------------:|----------:|
-| collection_temp         |  228.960890 |   1 | 180.1116642 | 0.0000000 |
-| sp_name                 | 1193.196099 |   6 | 156.4375873 | 0.0000000 |
-| collection_temp:sp_name |    1.895329 |   3 |   0.4969856 | 0.6846815 |
-| Residuals               |  333.058680 | 262 |          NA |        NA |
+| collection_temp         |  233.080807 |   1 | 183.8847418 | 0.0000000 |
+| sp_name                 | 1228.963969 |   6 | 161.5946879 | 0.0000000 |
+| collection_temp:sp_name |    1.693666 |   3 |   0.4453953 | 0.7207541 |
+| Residuals               |  344.770202 | 272 |          NA |        NA |
 
 ``` r
 
@@ -646,12 +653,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    10    |   8    |  7   |
-|   Leptodiaptomus minutus    |    5     |  102   |  27  |
+|   Leptodiaptomus minutus    |    5     |  105   |  27  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |      Leptodora kindti       |    1     |   0    |  11  |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    2     |   66   |  16  |
+| Skistodiaptomus oregonensis |    2     |   73   |  16  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.

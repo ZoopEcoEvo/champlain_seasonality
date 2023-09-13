@@ -775,11 +775,11 @@ ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) +
 ```
 
 ```{r, ctmax-fecundity, fig.width=10, fig.height=7}
-ggplot(ctmax_resids, aes(x = ctmax, y = fecundity, colour = sp_name)) + 
+ggplot(ctmax_resids, aes(y = ctmax, x = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
-  labs(x = "CTmax (°C)", 
-       y = "Fecundity (# Eggs)") + 
+  labs(y = "CTmax (°C)", 
+       x = "Fecundity (# Eggs)") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
