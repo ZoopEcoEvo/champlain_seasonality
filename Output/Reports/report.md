@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-09-12
+2023-09-13
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -22,7 +22,7 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 Copepods were collected at approximately weekly intervals from Lake
 Champlain (Burlington Fishing Pier). Plankton was collected from the top
 3 meters using a 250 um mesh net. Copepods from 14 collections were used
-to make a total of 283 thermal limit measurements. Over this time
+to make a total of 293 thermal limit measurements. Over this time
 period, collection temperatures ranged from 10.5 to 26.5°C.
 
 ## Temperature Variation
@@ -448,12 +448,12 @@ corr_vals %>%
 |     Epischura lacustris     | twenty-eight_day_max |  0.6492748  | 0.0004452 |
 |     Epischura lacustris     |    seven_day_max     |  0.6415380  | 0.0005476 |
 |     Epischura lacustris     |  seven_day_mean_max  |  0.6256773  | 0.0008228 |
-|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7061519  | 0.0000000 |
-|   Leptodiaptomus minutus    |  seven_day_mean_min  |  0.7050832  | 0.0000000 |
-|   Leptodiaptomus minutus    |    seven_day_mean    |  0.7030745  | 0.0000000 |
-| Skistodiaptomus oregonensis |       max_temp       |  0.6852416  | 0.0000000 |
-| Skistodiaptomus oregonensis |       med_temp       |  0.6848968  | 0.0000000 |
-| Skistodiaptomus oregonensis |      mean_temp       |  0.6843249  | 0.0000000 |
+|   Leptodiaptomus minutus    |   fourteen_day_med   |  0.7075103  | 0.0000000 |
+|   Leptodiaptomus minutus    |  seven_day_mean_min  |  0.7066067  | 0.0000000 |
+|   Leptodiaptomus minutus    |    seven_day_mean    |  0.7046417  | 0.0000000 |
+| Skistodiaptomus oregonensis |       max_temp       |  0.6831590  | 0.0000000 |
+| Skistodiaptomus oregonensis |      mean_temp       |  0.6821413  | 0.0000000 |
+| Skistodiaptomus oregonensis |       med_temp       |  0.6816512  | 0.0000000 |
 
 ## Trait Variation
 
@@ -567,10 +567,10 @@ knitr::kable(car::Anova(ctmax_temp.model))
 
 |                         |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:------------------------|------------:|----:|------------:|----------:|
-| collection_temp         |  233.080807 |   1 | 183.8847418 | 0.0000000 |
-| sp_name                 | 1228.963969 |   6 | 161.5946879 | 0.0000000 |
-| collection_temp:sp_name |    1.693666 |   3 |   0.4453953 | 0.7207541 |
-| Residuals               |  344.770202 | 272 |          NA |        NA |
+| collection_temp         |  234.079201 |   1 | 190.1604587 | 0.0000000 |
+| sp_name                 | 1285.569706 |   6 | 174.0611184 | 0.0000000 |
+| collection_temp:sp_name |    1.629976 |   3 |   0.4413849 | 0.7235857 |
+| Residuals               |  347.129656 | 282 |          NA |        NA |
 
 ``` r
 
@@ -653,12 +653,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    10    |   8    |  7   |
-|   Leptodiaptomus minutus    |    5     |  105   |  27  |
+|   Leptodiaptomus minutus    |    5     |  106   |  27  |
 |   Leptodiaptomus sicilis    |    0     |   10   |  0   |
 |      Leptodora kindti       |    1     |   0    |  11  |
 |    Limnocalanus macrurus    |    2     |   4    |  1   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    2     |   73   |  16  |
+| Skistodiaptomus oregonensis |    2     |   82   |  16  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
@@ -739,11 +739,11 @@ ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) +
 <img src="../Figures/markdown/fecundity-size-1.png" style="display: block; margin: auto;" />
 
 ``` r
-ggplot(ctmax_resids, aes(x = ctmax, y = fecundity, colour = sp_name)) + 
+ggplot(ctmax_resids, aes(y = ctmax, x = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
-  labs(x = "CTmax (°C)", 
-       y = "Fecundity (# Eggs)") + 
+  labs(y = "CTmax (°C)", 
+       x = "Fecundity (# Eggs)") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
