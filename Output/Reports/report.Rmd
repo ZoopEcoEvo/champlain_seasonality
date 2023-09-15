@@ -489,6 +489,8 @@ A set of predictors variables were assembled from the continuous temperature dat
 corr_vals = full_data %>%  
   filter(sp_name != "Senecella calanoides") %>%
   filter(sp_name != "Limnocalanus macrurus") %>%
+  filter(sp_name != "Leptodora kindti") %>% 
+  filter(sp_name != "Leptodiaptomus sicilis") %>% 
   mutate(collection_date = as.Date(collection_date)) %>% 
   full_join(temp_predictors, join_by(collection_date == date)) %>% 
   pivot_longer(cols = c(collection_temp, mean_temp:tail(names(.), 1)),
