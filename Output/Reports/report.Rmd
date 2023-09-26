@@ -411,6 +411,20 @@ species_summaries = full_data %>%
   complete(sp_name, collection_date) %>% 
   arrange(desc(sample_size))
 
+adult_summaries = full_data %>%  
+  filter(sex == "female") %>% 
+  group_by(sp_name, collection_date, collection_temp) %>%  
+  summarise("mean_ctmax" = mean(ctmax),
+            "sample_size" = n(),
+            "ctmax_st_err" = (sd(ctmax) / sqrt(sample_size)),
+            "ctmax_var" = var(ctmax), 
+            "mean_size" = mean(size),
+            "size_st_err" = (sd(size) / sqrt(sample_size)),
+            "size_var" = var(size)) %>%  
+  ungroup() %>% 
+  complete(sp_name, collection_date) %>% 
+  arrange(desc(sample_size))
+
 ggplot() + 
   geom_vline(data = unique(select(full_data, collection_date)), 
              aes(xintercept = as.Date(collection_date)),
@@ -491,6 +505,7 @@ corr_vals = full_data %>%
   filter(sp_name != "Limnocalanus macrurus") %>%
   filter(sp_name != "Leptodora kindti") %>% 
   filter(sp_name != "Leptodiaptomus sicilis") %>% 
+  filter(sex == "female") %>% 
   mutate(collection_date = as.Date(collection_date)) %>% 
   full_join(temp_predictors, join_by(collection_date == date)) %>% 
   pivot_longer(cols = c(collection_temp, mean_temp:tail(names(.), 1)),
@@ -629,6 +644,9 @@ ggarrange(ctmax_temp, size_temp, wt_temp, eggs_temp,
 ```
 
 ```{r ctmax-coll-temp-model}
+# adult_data = full_data %>% 
+#   filter(sex == "female")
+
 ctmax_temp.model = lm(data = full_data, ctmax ~ collection_temp * sp_name)
 
 knitr::kable(car::Anova(ctmax_temp.model))
@@ -652,8 +670,8 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) +
 Given the long generation times of these copepods, decreases in trait variance may indicate selection over the seasonal cycle. Shown below are the variance in observed CTmax and size, plotted against collection date. Variance decreases in *Skistodiaptomus*, but this pattern is driven by a single collection with high variance early in the year. Size variance increases slightly in *Skistodiaptomus*. Variance in both CTmax and size is fairly constant in *Leptodiaptomus minutus*, the only other species collected across the entire set of samples thus far. 
 
 ```{r trait-variance-coll-temp}
-ggplot(drop_na(species_summaries, ctmax_var), aes(x = as.Date(collection_date), y = ctmax_var, colour = sp_name)) + 
-  facet_wrap(sp_name~.) + 
+ggplot(drop_na(adult_summaries, ctmax_var), aes(x = as.Date(collection_date), y = ctmax_var, colour = sp_name)) + 
+  facet_wrap(sp_name~., scales = "free_y") + 
   geom_point(size = 2) + 
   geom_smooth(method = "lm", se = F) + 
   labs(x = "Collection Temp. (°C)", 
@@ -662,7 +680,7 @@ ggplot(drop_na(species_summaries, ctmax_var), aes(x = as.Date(collection_date), 
   theme_matt_facets() + 
   theme(legend.position = "none")
 
-ggplot(drop_na(species_summaries, size_var), aes(x = as.Date(collection_date), y = size_var, colour = sp_name)) + 
+ggplot(drop_na(adult_summaries, size_var), aes(x = as.Date(collection_date), y = size_var, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
   geom_point(size = 2) + 
   geom_smooth(method = "lm", se = F) + 
@@ -731,7 +749,10 @@ ctmax_resids %>%
 ## Trait Correlations 
 
 ```{r ctmax-size, fig.width=10, fig.height=7}
-ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) + 
+
+full_data %>% 
+  #filter(sex == "female") %>%  
+ggplot( aes(x = size, y = ctmax, colour = sp_name)) + 
   geom_smooth(data = full_data, 
               aes(x = size, y = ctmax),
               method = "lm", 
@@ -748,7 +769,9 @@ ggplot(full_data, aes(x = size, y = ctmax, colour = sp_name)) +
 ```
 
 ```{r ctmaxresids-size, fig.width=10, fig.height=7, include = F}
-ggplot(ctmax_resids, aes(x = size, y = resids, colour = sp_name)) + 
+ctmax_resids %>% 
+  filter(sex == "female") %>% 
+ggplot(aes(x = size, y = resids, colour = sp_name)) + 
   geom_smooth(data = ctmax_resids, 
               aes(x = size, y = resids),
               method = "lm", 
@@ -777,7 +800,7 @@ ggplot(ctmax_resids, aes(x = size, y = fecundity, colour = sp_name)) +
 ```
 
 ```{r, ctmax-fecundity, fig.width=10, fig.height=7}
-ggplot(ctmax_resids, aes(y = ctmax, x = fecundity, colour = sp_name)) + 
+ggplot(ctmax_resids, aes(y = resids, x = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 4) + 
   labs(y = "CTmax (°C)", 
