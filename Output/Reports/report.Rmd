@@ -657,7 +657,7 @@ ctmax_resids = cbind(full_data, "resids" = ctmax_temp.model$residuals)
 ```{r ctmax-time-in-lab, fig.width=15, fig.height=10}
 ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
-  geom_point(size = 4) + 
+  geom_point(size = 4, alpha = 0.5) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   scale_x_continuous(breaks = c(0:3)) + 
   labs(x = "Days in lab", 
