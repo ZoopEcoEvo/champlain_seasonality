@@ -107,7 +107,8 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
                  "Senecella calanoides" = "darkseagreen3",
                  "Leptodora kindti male" = "lightblue3",
                  "Leptodora kindti" = "lightblue4",
-                 "Leptodora kindti juvenile" = "lightblue")
+                 "Leptodora kindti juvenile" = "lightblue",
+                 "Pseudodiaptomus sp" = "lightcoral")
 ```
 
 ## Copepod Collection
@@ -505,6 +506,7 @@ corr_vals = full_data %>%
   filter(sp_name != "Limnocalanus macrurus") %>%
   filter(sp_name != "Leptodora kindti") %>% 
   filter(sp_name != "Leptodiaptomus sicilis") %>% 
+  filter(sp_name != "Pseudodiaptomus sp") %>% 
   filter(sex == "female") %>% 
   mutate(collection_date = as.Date(collection_date)) %>% 
   full_join(temp_predictors, join_by(collection_date == date)) %>% 
