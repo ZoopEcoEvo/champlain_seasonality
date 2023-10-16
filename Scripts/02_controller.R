@@ -7,10 +7,12 @@ library(patchwork)
 library(dataRetrieval)
 library(lubridate)
 library(slider)
+library(english)
 
 #Determine which scripts should be run
 process_all_data = F #Runs data analysis 
 make_report = T #Runs project summary
+predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 
 knit_manuscript = F #Compiles manuscript draft
 
 ############################
@@ -31,6 +33,9 @@ full_data = read.csv(file = "Output/Data/full_data.csv") %>%
            word(sp_name_sub, start = 3, end = 3) == "male" ~ "male", #... the third word in sp_name_sub is 'male'
            word(sp_name_sub, start = 3, end = 3) == "juvenile" ~ "juvenile", #... or the third word in sp_name_sub is 'juvenile'
            TRUE ~ "female")) # In all other cases, 'female' is used
+
+hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
+  mutate(date = as_date(date))
 
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
