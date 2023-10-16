@@ -235,7 +235,8 @@ num_colls = full_data %>%
 
 corr_vals = data.frame()
 
-for(i in 2:100){
+dur_vals = c(2, 3, 4, 5, 10, 15, 20, 25, 30)
+for(i in dur_vals){
   
   duration_temps = get_predictors(daily_values = daily_temp_data, 
                              raw_temp = temp_data, 
@@ -267,10 +268,12 @@ corr_vals = corr_vals %>%
   mutate(duration = as.numeric(duration))
 ```
 
-```{r}
+```{r fig.width=10, fig.height=6}
 ggplot(corr_vals, aes(x = duration, y = correlation, colour = sp_name)) + 
   facet_wrap(.~parameter) + 
-  geom_line()
+  geom_hline(yintercept = 0) + 
+  geom_line(linewidth = 1) + 
+  theme_matt_facets()
 ```
 
 
@@ -283,9 +286,9 @@ ggplot(corr_vals, aes(x = duration, y = correlation, colour = sp_name)) +
 #                                  n_days = 3)
 # 
 # ### ONE WEEK
-# week_temps = get_predictors(daily_values = daily_temp_data, 
-#                             raw_temp = temp_data, 
-#                             n_days = 7)
+week_temps = get_predictors(daily_values = daily_temp_data,
+                            raw_temp = temp_data,
+                            n_days = 7)
 # 
 # week_plot = week_temps %>% 
 #   pivot_longer(cols = c(-date),
@@ -353,9 +356,9 @@ ggplot(corr_vals, aes(x = duration, y = correlation, colour = sp_name)) +
 # 
 # 
 # ### FOUR WEEKS
-# four_week_temps = get_predictors(daily_values = daily_temp_data, 
-#                                  raw_temp = temp_data, 
-#                                  n_days = 28)
+four_week_temps = get_predictors(daily_values = daily_temp_data,
+                                 raw_temp = temp_data,
+                                 n_days = 28)
 # 
 # four_week_plot = four_week_temps %>% 
 #   pivot_longer(cols = c(-date),

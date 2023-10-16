@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-10-15
+2023-10-16
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variation](#temperature-variation)
@@ -9,10 +9,6 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 - [Sex and stage variation in thermal
   limits](#sex-and-stage-variation-in-thermal-limits)
 - [Trait Correlations](#trait-correlations)
-- [Predicting Vulnerability](#predicting-vulnerability)
-  - [Scenario 1](#scenario-1)
-  - [Scenario 2](#scenario-2)
-  - [Scenario 3](#scenario-3)
 
 ## Copepod Collection
 
@@ -129,157 +125,224 @@ get_predictors = function(daily_values, raw_temp, n_days){
 ```
 
 ``` r
-## Getting predictor variables for different periods
+### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
 
-### Short (three days)
-three_day_temps = get_predictors(daily_values = daily_temp_data, 
-                                 raw_temp = temp_data, 
-                                 n_days = 3)
+words_to_numbers <- function(s) {
+  s <- stringr::str_to_lower(s)
+  for (i in 0:56)
+    s <- stringr::str_replace_all(s, words(i), as.character(i))
+  s
+}
 
-### ONE WEEK
-week_temps = get_predictors(daily_values = daily_temp_data, 
-                            raw_temp = temp_data, 
-                            n_days = 7)
+num_colls = full_data %>% 
+  filter(sex == "female") %>% 
+  select(collection_date, sp_name) %>%  
+  distinct() %>%  
+  count(sp_name) %>% 
+  filter(n >= 5)
 
-week_plot = week_temps %>% 
-  pivot_longer(cols = c(-date),
-               names_to = "parameter", 
-               values_to = "temp") %>% 
-  filter(parameter %in% c("seven_day_mean",
-                          "seven_day_med",
-                          "seven_day_max", 
-                          "seven_day_min", 
-                          "seven_day_var",
-                          "seven_day_range")) %>% 
-  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
-  ggplot(aes(x = date, y = temp, colour = parameter)) + 
-  geom_line(linewidth = 1) + 
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",  
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) + 
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-  ggtitle("One Week") + 
-  labs(y = "Temperature (°C)",
-       x = "") + 
-  theme_bw(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+corr_vals = data.frame()
 
+dur_vals = c(2, 3, 4, 5, 10, 15, 20, 25, 30)
+for(i in dur_vals){
+  
+  duration_temps = get_predictors(daily_values = daily_temp_data, 
+                             raw_temp = temp_data, 
+                             n_days = i) %>% 
+    filter(date %in% as_date(unique(full_data$collection_date)))
+  
+  corr_data = full_data %>%
+    filter(sp_name %in% num_colls$sp_name) %>% 
+    filter(sex == "female") %>% 
+    mutate(collection_date = as.Date(collection_date)) %>% 
+    inner_join(duration_temps, join_by(collection_date == date)) %>% 
+    pivot_longer(cols = c(collection_temp, contains("day_")),
+                 values_to = "value", 
+                 names_to = "predictor") %>%  
+    group_by(sp_name, predictor) %>% 
+    summarise(correlation = cor.test(ctmax, value)$estimate,
+              p.value = cor.test(ctmax, value)$p.value,
+              ci_low = cor.test(ctmax, value)$conf.int[1],
+              ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
+    filter(predictor != "collection_temp") %>% 
+    mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
+    separate(predictor, "_day_", into = c(NA, "parameter")) %>% 
+    mutate(duration = i)
+  
+  corr_vals = bind_rows(corr_vals, corr_data)
+}
 
-### TWO WEEKS
-two_week_temps = get_predictors(daily_values = daily_temp_data, 
-                                raw_temp = temp_data, 
-                                n_days = 14)
-
-two_week_plot = two_week_temps %>% 
-  pivot_longer(cols = c(-date),
-               names_to = "parameter", 
-               values_to = "temp") %>% 
-  filter(parameter %in% c("fourteen_day_mean",
-                          "fourteen_day_med",
-                          "fourteen_day_max", 
-                          "fourteen_day_min", 
-                          "fourteen_day_var",
-                          "fourteen_day_range")) %>% 
-  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
-  ggplot(aes(x = date, y = temp, colour = parameter)) + 
-  geom_line(linewidth = 1) + 
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",  
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) + 
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-  ggtitle("Two Weeks") + 
-  labs(y = "Temperature (°C)",
-       x = "") + 
-  theme_bw(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-
-
-### FOUR WEEKS
-four_week_temps = get_predictors(daily_values = daily_temp_data, 
-                                 raw_temp = temp_data, 
-                                 n_days = 28)
-
-four_week_plot = four_week_temps %>% 
-  pivot_longer(cols = c(-date),
-               names_to = "parameter", 
-               values_to = "temp") %>% 
-  filter(parameter %in% c("twenty-eight_day_mean",
-                          "twenty-eight_day_med",
-                          "twenty-eight_day_max", 
-                          "twenty-eight_day_min", 
-                          "twenty-eight_day_var",
-                          "twenty-eight_day_range")) %>% 
-  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
-  ggplot(aes(x = date, y = temp, colour = parameter)) + 
-  geom_line(linewidth = 1) + 
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",  
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) + 
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-  ggtitle("Four Weeks") + 
-  labs(y = "Temperature (°C)",
-       x = "") + 
-  theme_bw(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-
-
-### EIGHT WEEKS
-eight_week_temps = get_predictors(daily_values = daily_temp_data, 
-                                  raw_temp = temp_data, 
-                                  n_days = 56)
-
-eight_week_plot = eight_week_temps %>% 
-  pivot_longer(cols = c(-date),
-               names_to = "parameter", 
-               values_to = "temp") %>% 
-  filter(parameter %in% c("fifty-six_day_mean",
-                          "fifty-six_day_med",
-                          "fifty-six_day_max", 
-                          "fifty-six_day_min", 
-                          "fifty-six_day_var",
-                          "fifty-six_day_range")) %>% 
-  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
-  ggplot(aes(x = date, y = temp, colour = parameter)) + 
-  geom_line(linewidth = 1) + 
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",  
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) + 
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-  ggtitle("Eight Weeks") + 
-  labs(y = "Temperature (°C)",
-       x = "") + 
-  theme_bw(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-
-ggarrange(daily_plot, week_plot, two_week_plot, four_week_plot, eight_week_plot, 
-          common.legend = T, nrow = 1, legend = "bottom")
+corr_vals = corr_vals %>%  
+  mutate(duration = as.numeric(duration))
 ```
 
-<img src="../Figures/markdown/predictors-and-plots-1.png" style="display: block; margin: auto;" />
+``` r
+ggplot(corr_vals, aes(x = duration, y = correlation, colour = sp_name)) + 
+  facet_wrap(.~parameter) + 
+  geom_hline(yintercept = 0) + 
+  geom_line(linewidth = 1) + 
+  theme_matt_facets()
+```
+
+<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+
+``` r
+# ## Getting predictor variables for different periods
+# 
+# ### Short (three days)
+# three_day_temps = get_predictors(daily_values = daily_temp_data, 
+#                                  raw_temp = temp_data, 
+#                                  n_days = 3)
+# 
+# ### ONE WEEK
+week_temps = get_predictors(daily_values = daily_temp_data,
+                            raw_temp = temp_data,
+                            n_days = 7)
+# 
+# week_plot = week_temps %>% 
+#   pivot_longer(cols = c(-date),
+#                names_to = "parameter", 
+#                values_to = "temp") %>% 
+#   filter(parameter %in% c("seven_day_mean",
+#                           "seven_day_med",
+#                           "seven_day_max", 
+#                           "seven_day_min", 
+#                           "seven_day_var",
+#                           "seven_day_range")) %>% 
+#   mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
+#   ggplot(aes(x = date, y = temp, colour = parameter)) + 
+#   geom_line(linewidth = 1) + 
+#   scale_colour_manual(values = c(
+#     "mean_temp" = "olivedrab3",
+#     "med_temp" = "seagreen3",
+#     "max_temp" = "tomato",  
+#     "min_temp" = "dodgerblue",
+#     "range_temp" = "goldenrod3",
+#     "var_temp" = "darkgoldenrod1"
+#   )) + 
+#   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
+#   ggtitle("One Week") + 
+#   labs(y = "Temperature (°C)",
+#        x = "") + 
+#   theme_bw(base_size = 20) + 
+#   theme(panel.grid = element_blank(),
+#         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+# 
+# 
+# ### TWO WEEKS
+# two_week_temps = get_predictors(daily_values = daily_temp_data, 
+#                                 raw_temp = temp_data, 
+#                                 n_days = 14)
+# 
+# two_week_plot = two_week_temps %>% 
+#   pivot_longer(cols = c(-date),
+#                names_to = "parameter", 
+#                values_to = "temp") %>% 
+#   filter(parameter %in% c("fourteen_day_mean",
+#                           "fourteen_day_med",
+#                           "fourteen_day_max", 
+#                           "fourteen_day_min", 
+#                           "fourteen_day_var",
+#                           "fourteen_day_range")) %>% 
+#   mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
+#   ggplot(aes(x = date, y = temp, colour = parameter)) + 
+#   geom_line(linewidth = 1) + 
+#   scale_colour_manual(values = c(
+#     "mean_temp" = "olivedrab3",
+#     "med_temp" = "seagreen3",
+#     "max_temp" = "tomato",  
+#     "min_temp" = "dodgerblue",
+#     "range_temp" = "goldenrod3",
+#     "var_temp" = "darkgoldenrod1"
+#   )) + 
+#   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
+#   ggtitle("Two Weeks") + 
+#   labs(y = "Temperature (°C)",
+#        x = "") + 
+#   theme_bw(base_size = 20) + 
+#   theme(panel.grid = element_blank(),
+#         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+# 
+# 
+# ### FOUR WEEKS
+four_week_temps = get_predictors(daily_values = daily_temp_data,
+                                 raw_temp = temp_data,
+                                 n_days = 28)
+# 
+# four_week_plot = four_week_temps %>% 
+#   pivot_longer(cols = c(-date),
+#                names_to = "parameter", 
+#                values_to = "temp") %>% 
+#   filter(parameter %in% c("twenty-eight_day_mean",
+#                           "twenty-eight_day_med",
+#                           "twenty-eight_day_max", 
+#                           "twenty-eight_day_min", 
+#                           "twenty-eight_day_var",
+#                           "twenty-eight_day_range")) %>% 
+#   mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
+#   ggplot(aes(x = date, y = temp, colour = parameter)) + 
+#   geom_line(linewidth = 1) + 
+#   scale_colour_manual(values = c(
+#     "mean_temp" = "olivedrab3",
+#     "med_temp" = "seagreen3",
+#     "max_temp" = "tomato",  
+#     "min_temp" = "dodgerblue",
+#     "range_temp" = "goldenrod3",
+#     "var_temp" = "darkgoldenrod1"
+#   )) + 
+#   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
+#   ggtitle("Four Weeks") + 
+#   labs(y = "Temperature (°C)",
+#        x = "") + 
+#   theme_bw(base_size = 20) + 
+#   theme(panel.grid = element_blank(),
+#         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+# 
+# 
+# ### EIGHT WEEKS
+# eight_week_temps = get_predictors(daily_values = daily_temp_data, 
+#                                   raw_temp = temp_data, 
+#                                   n_days = 56)
+# 
+# eight_week_plot = eight_week_temps %>% 
+#   pivot_longer(cols = c(-date),
+#                names_to = "parameter", 
+#                values_to = "temp") %>% 
+#   filter(parameter %in% c("fifty-six_day_mean",
+#                           "fifty-six_day_med",
+#                           "fifty-six_day_max", 
+#                           "fifty-six_day_min", 
+#                           "fifty-six_day_var",
+#                           "fifty-six_day_range")) %>% 
+#   mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
+#   ggplot(aes(x = date, y = temp, colour = parameter)) + 
+#   geom_line(linewidth = 1) + 
+#   scale_colour_manual(values = c(
+#     "mean_temp" = "olivedrab3",
+#     "med_temp" = "seagreen3",
+#     "max_temp" = "tomato",  
+#     "min_temp" = "dodgerblue",
+#     "range_temp" = "goldenrod3",
+#     "var_temp" = "darkgoldenrod1"
+#   )) + 
+#   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
+#   ggtitle("Eight Weeks") + 
+#   labs(y = "Temperature (°C)",
+#        x = "") + 
+#   theme_bw(base_size = 20) + 
+#   theme(panel.grid = element_blank(),
+#         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+# 
+# ggarrange(daily_plot, week_plot, two_week_plot, four_week_plot, eight_week_plot, 
+#           common.legend = T, nrow = 1, legend = "bottom")
+```
+
+The different time periods examined by this climate data highlights that
+the relationship between minimum and maximum temperatures changes based
+on the window examined. For example, minimum and maximum temperatures
+experienced over weekly intervals are closely linked, whereas there is a
+distinct seasonal cycle in the relationship between minimum and maximum
+temperatures experienced over periods of four weeks.
 
 ``` r
 one_week_doy_data = week_temps %>% 
@@ -296,16 +359,7 @@ one_week_temp_circle = ggplot(one_week_doy_data, aes(x = seven_day_mean_max, y =
        y = "Min. Temp. (°C)") + 
   ggtitle("One Week") + 
   theme_matt()
-```
 
-The different time periods examined by this climate data highlights that
-the relationship between minimum and maximum temperatures changes based
-on the window examined. For example, minimum and maximum temperatures
-experienced over weekly intervals are closely linked, whereas there is a
-distinct seasonal cycle in the relationship between minimum and maximum
-temperatures experienced over periods of four weeks.
-
-``` r
 four_week_doy_data = four_week_temps %>% 
   mutate(doy = yday(date))
 
@@ -323,7 +377,7 @@ ggarrange(one_week_temp_circle, four_week_temp_circle,
           common.legend = T, legend = "bottom")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ## Daily values for the period examined by dataset
@@ -434,17 +488,17 @@ size_timeseries = ggplot() +
 ```
 
 ``` r
-## Combine data, then pull out values for each collection date
-date_list = as.Date(unique(full_data$collection_date))
-
-temp_predictors = daily_temp_data %>% 
-  full_join(day_prior_temp_data, by = c("date")) %>% 
-  full_join(three_day_temps, by = c("date")) %>% 
-  full_join(week_temps, by = c("date")) %>% 
-  full_join(two_week_temps, by = c("date")) %>% 
-  full_join(four_week_temps, by = c("date")) %>% 
-  full_join(eight_week_temps, by = c("date")) %>% 
-  filter(date %in% date_list)
+# ## Combine data, then pull out values for each collection date
+# date_list = as.Date(unique(full_data$collection_date))
+# 
+# temp_predictors = daily_temp_data %>% 
+#   full_join(day_prior_temp_data, by = c("date")) %>% 
+#   full_join(three_day_temps, by = c("date")) %>% 
+#   full_join(week_temps, by = c("date")) %>% 
+#   full_join(two_week_temps, by = c("date")) %>% 
+#   full_join(four_week_temps, by = c("date")) %>% 
+#   full_join(eight_week_temps, by = c("date")) %>% 
+#   filter(date %in% date_list)
 ```
 
 A set of predictors variables were assembled from the continuous
@@ -455,27 +509,21 @@ three factors. Species with no significant predictor or limited
 collection date distributions were excluded.
 
 ``` r
-num_colls = full_data %>% 
-  filter(sex == "female") %>% 
-  select(collection_date, sp_name) %>%  
-  distinct() %>%  
-  count(sp_name) %>% 
-  filter(n >= 5)
-
-corr_vals = full_data %>%
-  filter(sp_name %in% num_colls$sp_name) %>% 
-  filter(sex == "female") %>% 
-  mutate(collection_date = as.Date(collection_date)) %>% 
-  full_join(temp_predictors, join_by(collection_date == date)) %>% 
-  pivot_longer(cols = c(collection_temp, mean_temp:tail(names(.), 1)),
-               values_to = "value", 
-               names_to = "predictor") %>%  
-  group_by(sp_name, predictor) %>% 
-  summarise(correlation = cor.test(ctmax, value)$estimate,
-            p.value = cor.test(ctmax, value)$p.value,
-            ci_low = cor.test(ctmax, value)$conf.int[1],
-            ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
-  mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig."))
+# 
+# corr_vals = full_data %>%
+#   filter(sp_name %in% num_colls$sp_name) %>% 
+#   filter(sex == "female") %>% 
+#   mutate(collection_date = as.Date(collection_date)) %>% 
+#   full_join(temp_predictors, join_by(collection_date == date)) %>% 
+#   pivot_longer(cols = c(collection_temp, mean_temp:tail(names(.), 1)),
+#                values_to = "value", 
+#                names_to = "predictor") %>%  
+#   group_by(sp_name, predictor) %>% 
+#   summarise(correlation = cor.test(ctmax, value)$estimate,
+#             p.value = cor.test(ctmax, value)$p.value,
+#             ci_low = cor.test(ctmax, value)$conf.int[1],
+#             ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
+#   mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig."))
 
 corr_vals %>%  
   filter(sig == "Sig.") %>% 
@@ -483,21 +531,21 @@ corr_vals %>%
   group_by(sp_name) %>%
   arrange(desc(correlation)) %>% 
   slice_head(n = 3) %>% 
-  select("Species" = sp_name, "Predictor" = predictor, "Correlation" = correlation, "P-Value" = p.value) %>% 
+  select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, "P-Value" = p.value) %>% 
   knitr::kable(align = "c")
 ```
 
-|           Species           |     Predictor      | Correlation |  P-Value  |
-|:---------------------------:|:------------------:|:-----------:|:---------:|
-|     Epischura lacustris     | three_day_mean_min |  0.7776747  | 0.0136206 |
-|     Epischura lacustris     | prior_day_min_temp |  0.7697148  | 0.0152761 |
-|     Epischura lacustris     |   three_day_med    |  0.7693684  | 0.0153510 |
-|   Leptodiaptomus minutus    | three_day_mean_max |  0.6074635  | 0.0000000 |
-|   Leptodiaptomus minutus    |   three_day_max    |  0.6047785  | 0.0000000 |
-|   Leptodiaptomus minutus    | prior_day_max_temp |  0.6039838  | 0.0000000 |
-| Skistodiaptomus oregonensis | prior_day_max_temp |  0.5111761  | 0.0000000 |
-| Skistodiaptomus oregonensis | three_day_mean_max |  0.5034440  | 0.0000000 |
-| Skistodiaptomus oregonensis |   three_day_max    |  0.4951207  | 0.0000000 |
+|           Species           | Predictor | Duration | Correlation |  P-Value  |
+|:---------------------------:|:---------:|:--------:|:-----------:|:---------:|
+|     Epischura lacustris     | mean_min  |    2     |  0.7794828  | 0.0132621 |
+|     Epischura lacustris     | mean_min  |    3     |  0.7776747  | 0.0136206 |
+|     Epischura lacustris     |    min    |    2     |  0.7750777  | 0.0141468 |
+|   Leptodiaptomus minutus    | mean_max  |    4     |  0.6093347  | 0.0000000 |
+|   Leptodiaptomus minutus    | mean_max  |    3     |  0.6074635  | 0.0000000 |
+|   Leptodiaptomus minutus    | mean_max  |    5     |  0.6074283  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.5109811  | 0.0000000 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.5079838  | 0.0000000 |
+| Skistodiaptomus oregonensis | mean_max  |    3     |  0.5034440  | 0.0000000 |
 
 ## Trait Variation
 
@@ -810,344 +858,3 @@ if(predict_vuln == F){
   knitr::knit_exit()
 }
 ```
-
-## Predicting Vulnerability
-
-Using the observed thermal limit data, we can produce a hindcast of
-thermal stress for Lake Champlain copepods. For these initial assays, we
-will define thermal stress as any time when maximum daily water
-temperature is within 2°C of copepod CTmax or higher. We will use three
-different scenarios: 1) the average CTmax for each species, 2) CTmax
-predicted using collection temperatures, and 3) for species that have
-sufficient data, CTmax predicted using whichever environmental factor is
-the strongest candidate for driving acclimation. In all cases, data is
-filtered to just thermal limits of adult females.
-
-### Scenario 1
-
-``` r
-mean_ctmax = full_data %>% 
-  filter(sex == "female") %>%  
-  group_by(sp_name) %>% 
-  summarize("mean_ctmax" = mean(ctmax)) %>% 
-  arrange(mean_ctmax)
-
-knitr::kable(mean_ctmax)
-```
-
-| sp_name                     | mean_ctmax |
-|:----------------------------|-----------:|
-| Senecella calanoides        |   23.90509 |
-| Limnocalanus macrurus       |   25.30001 |
-| Leptodiaptomus sicilis      |   30.96424 |
-| Leptodiaptomus minutus      |   32.83846 |
-| Epischura lacustris         |   34.15190 |
-| Pseudodiaptomus sp          |   36.31250 |
-| Skistodiaptomus oregonensis |   37.02116 |
-
-``` r
-# # Constructs the URL for the full temperature data set; RUN THIS ONCE
-# hind_url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd, service = "uv")
-# 
-# hind_temp_data = importWaterML1(hind_url, asDateTime = T) %>%
-#   mutate("date" = as.Date(dateTime)) %>%
-#   select(date, "temp" = X_00010_00000)
-# 
-# write.table(x = hind_temp_data, file = "hindcast_temps.csv", row.names = F, sep = ",")
-```
-
-``` r
-# ggplot(hind_temp_data, aes(x = date, y = temp)) + 
-#   geom_line(linewidth = 0.1) + 
-#   labs(x = "Date", 
-#        y = "Water Temperature (°C)") +
-#   theme_matt()
-```
-
-In the simplest scenario, species thermal limits are static through
-time, represented by the average CTmax of adult female copepods. In this
-scenario, only three of the seven observed species are exposed to
-thermal stress (temperatures within 5°C of CTmax). Temperatures
-approached the thermal limit of *Leptodiaptomus sicilis* on a handful of
-days. By contrast, *Senecella calanoides* and *Limnocalanus macrurus*
-were both exposed to substantial thermal stress throughout a large
-portion of the year, likely explaining why these species are absent from
-the community for the summer and fall periods.
-
-``` r
-hind1_data = hind_temp_data %>% 
-  group_by(date) %>% 
-  summarize("daily_max" = max(temp),
-            "daily_mean" = mean(temp),) %>% 
-  bind_cols(pivot_wider(mean_ctmax, names_from = sp_name, values_from = mean_ctmax)) %>%  
-  pivot_longer(cols = c(-date, -daily_max, -daily_mean),
-               names_to = "species", 
-               values_to = "mean_ctmax") %>%  
-  mutate(lim_diff = mean_ctmax - daily_max) %>%  
-  mutate(doy = yday(date),
-         "method" = "No_acclimation")
-
-hind_daily_temp_data = hind_temp_data %>%
-  ungroup() %>% 
-  group_by(date) %>% 
-  summarise(mean_temp = mean(temp),
-            med_temp = median(temp),
-            var_temp = var(temp), 
-            min_temp = min(temp), 
-            max_temp = max(temp)) %>% 
-  mutate("range_temp" = max_temp - min_temp)
-
-#table(hind1_data$species)
-
-hind1_data %>% 
-filter(lim_diff <= 5) %>%  
-ggplot(aes(x = doy, y = lim_diff, colour = species)) +
-  geom_hline(yintercept = 0) + 
-    geom_hline(yintercept = 5, 
-               colour = "grey") + 
-  geom_point(alpha = 0.5) +
-  geom_smooth() + 
-  labs(x = "Day of Year", 
-       y = "Predicted Warming Tolerance \n(°C Above Daily Max)") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-```
-
-<img src="../Figures/markdown/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
-
-### Scenario 2
-
-In the second scenario, thermal limits vary within and between species.
-A simple model is used to predict species thermal limits based on mean
-daily temperature (CTmax as a function of species and collection
-temperature, but without the interaction between these two factors).
-These predicted thermal limits are then compared against the maximum
-daily temperature to estimate thermal stress, as in Scenario 1.
-Including this simple form of acclimation in the model reduced the
-degree of thermal stress for each species, eliminating it entirely for
-*Leptodiaptomus sicilis*. Note that the magnitude of the predicted
-stress is low enough that removing the 5°C buffer around the predicted
-thermal limits would actually limit predicted thermal stress to just a
-few days for *Senecella calanoides*.
-
-``` r
-hindcast_model1 = lm(data = filter(full_data, sex == "female"),
-                     ctmax ~ collection_temp + sp_name)
-
-hind2_data = hind_temp_data %>% 
-  group_by(date) %>% 
-  summarize("collection_temp" = mean(temp),
-            "daily_max" = max(temp)) %>% 
-  bind_cols(
-    pivot_wider(mean_ctmax, 
-                names_from = sp_name, 
-                values_from = mean_ctmax)) %>% 
-  pivot_longer(cols = c(-date, -daily_max, -collection_temp),
-               names_to = "sp_name", 
-               values_to = "mean_ctmax") %>% 
-  select(-mean_ctmax) %>% 
-  mutate("pred_ctmax" = predict.lm (hindcast_model1, newdata = .)) %>% 
-  select(date, "daily_mean" = collection_temp, daily_max, "species" = sp_name, pred_ctmax) %>% 
-  mutate(lim_diff = pred_ctmax - daily_max) %>% 
-  #filter(lim_diff <= 0) %>%  
-  mutate(doy = yday(date),
-         "method" = "Constant_acclimation")
-
-# ggplot(hind2_data, aes(x = daily_mean, y = pred_ctmax, colour = species)) +
-#   geom_smooth(method = "lm") 
-
-# table(hind2_data$species)
-hind2_data %>%  
-  filter(lim_diff <= 5) %>%  
-  ggplot(aes(x = doy, y = lim_diff, colour = species)) +
-  geom_hline(yintercept = 0) + 
-    geom_hline(yintercept = 5, 
-               colour = "grey") + 
-  geom_point(alpha = 0.5) +
-  geom_smooth() + 
-  labs(x = "Day of Year", 
-       y = "Predicted Warming Tolerance \n(°C Above Daily Max)") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-```
-
-<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
-
-### Scenario 3
-
-The final scenario allows the environmental variable used to predict
-CTmax to vary between species. For species observed in fewer than 5
-collections, we use the same approach as in Scenario 2. For species
-observed in more than 5 collections, however, the factor with the
-strongest correlation with CTmax is used to predict thermal limits.
-These factors are included below.
-
-``` r
-hind_preds = corr_vals %>%  
-  filter(sig == "Sig.") %>% 
-  drop_na(correlation) %>% 
-  group_by(sp_name) %>%
-  arrange(desc(correlation)) %>% 
-  slice_head(n = 1) %>% 
-  select("Species" = sp_name, "Predictor" = predictor, "Correlation" = correlation, "P-Value" = p.value)
-
-knitr::kable(hind_preds, align = "c")
-```
-
-|           Species           |     Predictor      | Correlation |  P-Value  |
-|:---------------------------:|:------------------:|:-----------:|:---------:|
-|     Epischura lacustris     | three_day_mean_min |  0.7776747  | 0.0136206 |
-|   Leptodiaptomus minutus    | three_day_mean_max |  0.6074635  | 0.0000000 |
-| Skistodiaptomus oregonensis | prior_day_max_temp |  0.5111761  | 0.0000000 |
-
-``` r
-hind3_data = hind2_data %>% # Contains data for species that won't change from scenario 2
-  filter(!(species %in% corr_vals$sp_name))
-
-words_to_numbers <- function(s) {
-  s <- stringr::str_to_lower(s)
-  for (i in 0:56)
-    s <- stringr::str_replace_all(s, words(i), as.character(i))
-  s
-}
-
-preds_to_pull = hind_preds %>%  
-  select(Species, Predictor) %>% 
-  mutate(n_days = str_split_fixed(Predictor, pattern = "_", n = 2)[,1],
-         parameter = str_split_fixed(Predictor, pattern = "_day_", n = 2)[,2])
-
-for(i in 1:length(preds_to_pull$Species)){
-  
-  if(preds_to_pull$n_days[i] == "prior"){ #The prior day temperature metrics should be used
-    duration = NA
-    
-    predictors = hind_daily_temp_data %>% 
-      mutate(date = date + 1) 
-    
-    parameter = str_split_fixed(preds_to_pull$parameter[i], pattern = "_temp", n = 2)[1]
-    
-    model_data = full_data %>%
-      filter(sp_name %in% preds_to_pull$Species[i]) %>% 
-      filter(sex == "female") %>% 
-      mutate(collection_date = as_date(collection_date)) %>% 
-      inner_join(predictors, join_by(collection_date == date)) %>%  
-      select(ctmax, contains(parameter))
-    
-    if(dim(model_data)[2] == 2){
-      hind.model = lm(data = model_data, 
-                      ctmax ~ .)
-      
-      sp_data = predictors %>% 
-        select(date, contains(parameter)) %>% 
-        mutate(pred_ctmax = predict(hind.model, newdata = .)) %>%  
-        select(date, pred_ctmax) %>% 
-        inner_join(hind_daily_temp_data, by = c("date")) %>% 
-        mutate("species" = preds_to_pull$Species[i],
-               "doy" = yday(date),
-               lim_diff = pred_ctmax - max_temp) %>% 
-        select(date, daily_mean = mean_temp, daily_max = max_temp, species, pred_ctmax, lim_diff, doy)
-    
-        hind3_data = bind_rows(hind3_data, sp_data)
-    }else{
-      print("Too many columns selected")
-    }
-    
-    
-  }else{
-    duration = as.numeric(words_to_numbers(preds_to_pull$n_days[i]))
-  }
-  
-  if(preds_to_pull$n_days[i] != "prior" & is.na(duration)){ #Daily temperatures should be used, as in Scenario 2
-    sp_data = hind2_data %>% 
-      filter(species == preds_to_pull$Species[i])
-    
-    hind3_data = bind_rows(hind3_data, sp_data)
-  }
-  
-  if(is.numeric(duration)){
-    #Neither the prior day nor day of metrics should be used; use duration as n_days
-    
-    predictors = get_predictors(daily_values = hind_daily_temp_data, 
-                                raw_temp = hind_temp_data, 
-                                n_days = duration)
-    
-    parameter = str_split_fixed(preds_to_pull$parameter[i], pattern = "_temp", n = 2)[1]
-    
-    model_data = full_data %>%
-      filter(sp_name %in% preds_to_pull$Species[i]) %>% 
-      filter(sex == "female") %>% 
-      mutate(collection_date = as_date(collection_date)) %>% 
-      inner_join(predictors, join_by(collection_date == date)) %>%  
-      select(ctmax, contains(parameter))
-    
-    if(dim(model_data)[2] == 2){
-      hind.model = lm(data = model_data, 
-                      ctmax ~ .)
-      
-      sp_data = predictors %>% 
-        select(date, contains(parameter)) %>% 
-        mutate(pred_ctmax = predict(hind.model, newdata = .)) %>%  
-        select(date, pred_ctmax) %>% 
-        inner_join(hind_daily_temp_data, by = c("date")) %>% 
-        mutate("species" = preds_to_pull$Species[i],
-               "doy" = yday(date),
-               lim_diff = pred_ctmax - max_temp) %>% 
-        select(date, daily_mean = mean_temp, daily_max = max_temp, species, pred_ctmax, lim_diff, doy)
-    
-        hind3_data = bind_rows(hind3_data, sp_data)
-
-    }else{
-      print("Too many columns selected")
-    }
-    
-  }
-}
-
-hind3_data = hind3_data %>% 
-  mutate("method" = "Variable_acclimation")
-```
-
-This third approach did not affect the predicted patterns in
-*Limnocalanus* or *Senecella* (neither species has been observed in
-enough collections to estimate the effects of different environmental
-factors). Changing the acclimation approach did affect patterns in
-thermal limits in the other species though. The figure below shows how
-predicted warming tolerance varies over the year in the seven species,
-based on the three different prediction methods. In general, constant
-thermal limits (the ‘no acclimation’ method) resulted in larger warming
-tolerance during the winter and lower warming tolerance during the
-summer, although this effect was small in most species.
-
-``` r
-synthesis = bind_rows(
-  select(hind1_data, date, doy, daily_mean, daily_max, species, "pred_ctmax" = mean_ctmax, lim_diff, method),
-  select(hind2_data, date, doy, daily_mean, daily_max,  species, pred_ctmax, lim_diff, method),
-  select(hind3_data, date, doy, daily_mean, daily_max,  species, pred_ctmax, lim_diff, method)) %>% 
-  mutate(method = fct_relevel(method, "No_acclimation", "Constant_acclimation", "Variable_acclimation"))
-
-climatology = synthesis %>% 
-  group_by(species, doy, method) %>%  
-  summarise("mean_diff" = mean(lim_diff),
-            "min_diff" = min(lim_diff),
-            "max_diff" = max(lim_diff)) %>% 
-  mutate(method = fct_relevel(method, "No_acclimation", "Constant_acclimation", "Variable_acclimation"))
-
-acc_effects = synthesis %>% 
-  pivot_wider(id_cols = c(date, species, doy), 
-              names_from = method, 
-              values_from = lim_diff) %>%  
-  mutate("const_acc_effect" = Constant_acclimation - No_acclimation,
-         "var_acc_effect" = Variable_acclimation - No_acclimation)
-
-ggplot(synthesis, aes(x = doy, y = lim_diff, colour = method)) + 
-  facet_wrap(species~.) + 
-  geom_hline(yintercept = 0) + 
-  geom_hline(yintercept = 5, colour = "grey") + 
-  geom_point(alpha = 0.1) + 
-  labs(x = "Day of Year", 
-       y = "Predicted Warming Tolerance (°C Above Daily Max)") + 
-  theme_matt_facets(base_size = 18) + 
-  theme(strip.text.x.top = element_text(size = 10))
-```
-
-<img src="../Figures/markdown/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
