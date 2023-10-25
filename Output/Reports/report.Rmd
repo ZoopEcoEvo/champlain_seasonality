@@ -108,7 +108,7 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
                  "Leptodora kindti male" = "lightblue3",
                  "Leptodora kindti" = "lightblue4",
                  "Leptodora kindti juvenile" = "lightblue",
-                 "Pseudodiaptomus sp" = "lightcoral")
+                 "Osphranticum labronectum" = "lightcoral")
 ```
 
 ## Copepod Collection
