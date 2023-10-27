@@ -10,7 +10,7 @@ library(slider)
 library(english)
 
 #Determine which scripts should be run
-process_all_data = T #Runs data analysis 
+process_all_data = F #Runs data analysis 
 make_report = T #Runs project summary
 predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 
 knit_manuscript = F #Compiles manuscript draft
