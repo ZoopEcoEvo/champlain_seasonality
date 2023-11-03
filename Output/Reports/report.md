@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-11-02
+2023-11-03
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -10,6 +10,13 @@ Seasonality in Lake Champlain Copepod Thermal Limits
     limits](#sex-and-stage-variation-in-thermal-limits)
   - [Trait Correlations and
     Trade-offs](#trait-correlations-and-trade-offs)
+
+``` r
+### To Do 
+
+# Actual statistics for relationships between temperature and CTmax, size, and fecundity
+# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
+```
 
 ## Copepod Collection
 
@@ -37,7 +44,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 21 collections were used to make a total of 514 thermal
+Copepods from 21 collections were used to make a total of 534 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 10.5 to 26.5°C.
 
@@ -602,15 +609,15 @@ corr_vals %>%
 
 |           Species           | Predictor | Duration | Correlation | P-Value |
 |:---------------------------:|:---------:|:--------:|:-----------:|:-------:|
-|     Epischura lacustris     |    max    |    20    |  0.7836996  |  0e+00  |
-|     Epischura lacustris     |    max    |    15    |  0.7392239  |  6e-07  |
-|     Epischura lacustris     |    med    |    5     |  0.7302038  |  1e-06  |
-|   Leptodiaptomus minutus    | mean_max  |    4     |  0.6034431  |  0e+00  |
-|   Leptodiaptomus minutus    | mean_max  |    5     |  0.6027548  |  0e+00  |
-|   Leptodiaptomus minutus    |    max    |    10    |  0.6027183  |  0e+00  |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.5487905  |  0e+00  |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.5454238  |  0e+00  |
-| Skistodiaptomus oregonensis | mean_max  |    3     |  0.5432979  |  0e+00  |
+|     Epischura lacustris     |    max    |    20    |  0.8018430  |  0e+00  |
+|     Epischura lacustris     |    max    |    15    |  0.7551468  |  2e-07  |
+|     Epischura lacustris     |    med    |    5     |  0.7298558  |  7e-07  |
+|   Leptodiaptomus minutus    |    max    |    10    |  0.6202459  |  0e+00  |
+|   Leptodiaptomus minutus    | mean_max  |    3     |  0.6183001  |  0e+00  |
+|   Leptodiaptomus minutus    | mean_max  |    4     |  0.6178094  |  0e+00  |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.5478622  |  0e+00  |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.5444970  |  0e+00  |
+| Skistodiaptomus oregonensis | mean_max  |    3     |  0.5426651  |  0e+00  |
 
 ## Trait Variation
 
@@ -799,13 +806,13 @@ ARR_vals %>%
 | Species                     | Group    |   N |       ARR |     Error |
 |:----------------------------|:---------|----:|----------:|----------:|
 | Epischura lacustris         | juvenile |  18 | 0.0573593 | 0.0974497 |
-| Leptodiaptomus minutus      | juvenile |   6 | 0.1768668 | 0.0897683 |
-| Skistodiaptomus oregonensis | female   | 166 | 0.1790109 | 0.0224684 |
-| Leptodiaptomus minutus      | female   | 160 | 0.1796000 | 0.0199181 |
+| Skistodiaptomus oregonensis | female   | 167 | 0.1771861 | 0.0221978 |
+| Leptodiaptomus minutus      | female   | 174 | 0.2038819 | 0.0204867 |
 | Epischura lacustris         | male     |  12 | 0.2039977 | 0.0410498 |
 | Leptodiaptomus minutus      | male     |  31 | 0.2068073 | 0.0251894 |
-| Epischura lacustris         | female   |  34 | 0.2332897 | 0.0404429 |
-| Leptodiaptomus sicilis      | female   |  22 | 0.2422417 | 0.1887478 |
+| Leptodiaptomus minutus      | juvenile |   8 | 0.2305062 | 0.0677669 |
+| Leptodiaptomus sicilis      | female   |  23 | 0.2374205 | 0.1856108 |
+| Epischura lacustris         | female   |  35 | 0.2449800 | 0.0416285 |
 | Skistodiaptomus oregonensis | male     |  27 | 0.3397684 | 0.0475937 |
 | Skistodiaptomus oregonensis | juvenile |  14 | 0.3900367 | 0.0935739 |
 
@@ -872,13 +879,13 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    18    |   34   |  12  |
-|   Leptodiaptomus minutus    |    6     |  160   |  31  |
-|   Leptodiaptomus sicilis    |    0     |   22   |  0   |
+|     Epischura lacustris     |    18    |   35   |  12  |
+|   Leptodiaptomus minutus    |    7     |  174   |  31  |
+|   Leptodiaptomus sicilis    |    0     |   23   |  1   |
 |    Limnocalanus macrurus    |    2     |   5    |  1   |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    14    |  165   |  27  |
+| Skistodiaptomus oregonensis |    14    |  166   |  27  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
