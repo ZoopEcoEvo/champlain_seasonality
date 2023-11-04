@@ -1,0 +1,11 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
+10/31/23,13,1,1,skistodiaptomus_oregonensis,1,79,23,NA,0.8
+10/31/23,13,1,1,leptodiaptomus_minutus,2,59,35,9,0.687
+10/31/23,13,1,1,epischura_lacustris,3,54,20,NA,1.126
+10/31/23,13,1,1,skistodiaptomus_oregonensis,4,76,21,NA,0.912
+10/31/23,13,1,1,epischura_lacustris,5,53,30,NA,1.048
+10/31/23,13,1,1,leptodiaptomus_minutus_juvenile,6,57,13,NA,0.538
+10/31/23,13,1,1,leptodiaptomus_sicilis,7,56,10,NA,0.964
+10/31/23,13,1,1,skistodiaptomus_oregonensis,8,79,51,NA,0.887
+10/31/23,13,1,1,epischura_lacustris,9,58,21,NA,1.075
+10/31/23,13,1,1,skistodiaptomus_oregonensis_male,10,75,45,NA,0.802

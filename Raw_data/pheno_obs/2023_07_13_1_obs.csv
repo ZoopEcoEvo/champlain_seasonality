@@ -1,0 +1,5 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
+7/13/23,24.5,1,1,leptodiaptomus_minutus,1,38,53,10,0.675
+7/13/23,24.5,1,1,leptodiaptomus_minutus,2,36,2,11,0.71
+7/13/23,24.5,1,1,leptodiaptomus_minutus_male,3,35,0,NA,0.612
+7/13/23,24.5,1,1,leptodiaptomus_minutus_male,4,40,53,NA,0.623
