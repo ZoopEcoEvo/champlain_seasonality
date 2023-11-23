@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-11-14
+2023-11-22
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -44,9 +44,9 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 23 collections were used to make a total of 584 thermal
+Copepods from 24 collections were used to make a total of 594 thermal
 limit measurements. Over this time period, collection temperatures
-ranged from 9 to 26.5°C.
+ranged from 8.5 to 26.5°C.
 
 There is substantial variation in thermal limits across the species
 collected. There is also some degree of variation within the species,
@@ -609,15 +609,15 @@ corr_vals %>%
 
 |           Species           | Predictor | Duration | Correlation |  P-Value  |
 |:---------------------------:|:---------:|:--------:|:-----------:|:---------:|
-|     Epischura lacustris     |    max    |    20    |  0.8018430  | 0.0000000 |
-|     Epischura lacustris     |    max    |    15    |  0.7551468  | 0.0000002 |
-|     Epischura lacustris     |    med    |    5     |  0.7298558  | 0.0000007 |
-|   Leptodiaptomus minutus    |    max    |    10    |  0.6560820  | 0.0000000 |
-|   Leptodiaptomus minutus    | mean_max  |    3     |  0.6558182  | 0.0000000 |
-|   Leptodiaptomus minutus    | mean_max  |    4     |  0.6555234  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.4741726  | 0.0005040 |
-|   Leptodiaptomus sicilis    |    max    |    5     |  0.4718334  | 0.0005420 |
-|   Leptodiaptomus sicilis    |    max    |    3     |  0.4714309  | 0.0005488 |
+|     Epischura lacustris     |    max    |    20    |  0.8576955  | 0.0000000 |
+|     Epischura lacustris     |    max    |    15    |  0.8107320  | 0.0000000 |
+|     Epischura lacustris     |    med    |    5     |  0.7910533  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    10    |  0.6631747  | 0.0000000 |
+|   Leptodiaptomus minutus    | mean_max  |    3     |  0.6627077  | 0.0000000 |
+|   Leptodiaptomus minutus    | mean_max  |    4     |  0.6622210  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    max    |    4     |  0.4326244  | 0.0009712 |
+|   Leptodiaptomus sicilis    |    max    |    3     |  0.4253443  | 0.0012070 |
+|   Leptodiaptomus sicilis    |    max    |    5     |  0.4177861  | 0.0015049 |
 | Skistodiaptomus oregonensis |    max    |    2     |  0.6173083  | 0.0000000 |
 | Skistodiaptomus oregonensis | mean_max  |    2     |  0.6086284  | 0.0000000 |
 | Skistodiaptomus oregonensis | mean_max  |    3     |  0.6050970  | 0.0000000 |
@@ -828,14 +828,14 @@ ARR_vals %>%
 | Epischura lacustris         | juvenile |  18 | 0.0573593 | 0.0974497 |
 | Epischura lacustris         | male     |  12 | 0.2039977 | 0.0410498 |
 | Leptodiaptomus minutus      | male     |  31 | 0.2068073 | 0.0251894 |
-| Leptodiaptomus minutus      | female   | 187 | 0.2077335 | 0.0181568 |
+| Leptodiaptomus minutus      | female   | 188 | 0.2096575 | 0.0179666 |
 | Skistodiaptomus oregonensis | female   | 169 | 0.2262419 | 0.0246169 |
-| Epischura lacustris         | female   |  35 | 0.2449800 | 0.0416285 |
 | Leptodiaptomus minutus      | juvenile |   9 | 0.3260456 | 0.0784852 |
+| Leptodiaptomus sicilis      | female   |  55 | 0.3348345 | 0.1103589 |
 | Skistodiaptomus oregonensis | male     |  27 | 0.3397684 | 0.0475937 |
+| Epischura lacustris         | female   |  38 | 0.3475729 | 0.0513004 |
 | Skistodiaptomus oregonensis | juvenile |  14 | 0.3900367 | 0.0935739 |
-| Leptodiaptomus sicilis      | female   |  50 | 0.3979586 | 0.1238509 |
-| Leptodiaptomus sicilis      | male     |   8 | 0.4214858 | 0.4138194 |
+| Leptodiaptomus sicilis      | male     |   9 | 0.9690004 | 0.4458793 |
 
 ``` r
 coef_plot = ARR_vals %>% 
@@ -900,9 +900,9 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    18    |   35   |  12  |
-|   Leptodiaptomus minutus    |    8     |  187   |  31  |
-|   Leptodiaptomus sicilis    |    0     |   50   |  8   |
+|     Epischura lacustris     |    18    |   38   |  12  |
+|   Leptodiaptomus minutus    |    8     |  188   |  31  |
+|   Leptodiaptomus sicilis    |    0     |   55   |  9   |
 |    Limnocalanus macrurus    |    2     |   5    |  1   |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    0     |   1    |  0   |
