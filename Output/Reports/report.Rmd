@@ -247,8 +247,8 @@ For the three species with the most data (*Skistodiaptomus*, *L. minutus*, *Epis
 ```{r trait-doy-feature, fig.width = 14, fig.height = 7}
 ctmax_feature = full_data %>%  
   mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Epischura lacustris")) %>% 
-  ggplot(aes(x = doy, y = ctmax, colour = sp_name)) + 
+  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus","Epischura lacustris")) %>% 
+  ggplot(aes(x = as.Date(collection_date), y = ctmax, colour = sp_name)) + 
   facet_grid(sp_name~sex) + 
   geom_point() + 
   scale_colour_manual(values = species_cols) + 
@@ -261,7 +261,7 @@ ctmax_feature = full_data %>%
 size_feature = full_data %>%  
   mutate(doy = yday(collection_date)) %>% 
   filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Epischura lacustris")) %>% 
-  ggplot(aes(x = doy, y = size, colour = sp_name)) + 
+  ggplot(aes(x = as.Date(collection_date), y = size, colour = sp_name)) + 
   facet_grid(sp_name~sex) + 
   geom_point() + 
   scale_colour_manual(values = species_cols) + 
@@ -572,7 +572,7 @@ num_colls = full_data %>%
 
 corr_vals = data.frame()
 
-dur_vals = c(2, 3, 4, 5, 10, 15, 20, 25, 30)
+dur_vals = c(1:50)
 for(i in dur_vals){
   
   duration_temps = get_predictors(daily_values = daily_temp_data, 
@@ -601,8 +601,21 @@ for(i in dur_vals){
   corr_vals = bind_rows(corr_vals, corr_data)
 }
 
+coll_corr = full_data %>%
+    filter(sp_name %in% num_colls$sp_name) %>% 
+    filter(sex == "female") %>% 
+    group_by(sp_name) %>% 
+    summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
+              p.value = cor.test(ctmax, collection_temp)$p.value,
+              ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
+              ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
+    mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
+    mutate(duration = 0,
+           parameter = "coll_temp")
+
 corr_vals = corr_vals %>%  
-  mutate(duration = as.numeric(duration))
+  mutate(duration = as.numeric(duration)) %>% 
+  bind_rows(coll_corr)
 ```
 
 ```{r fig.width=10, fig.height=6}
@@ -688,21 +701,6 @@ corr_vals %>%
 # trait_plot
 ```
 
-Shown below are the distributions of thermal limits for each species. This includes all data (all collections, stages, sexes, etc.). It's clear that there is substantial variation in thermal limits for several species. 
-
-```{r ctmax-and-size-histograms, fig.width=7, fig.height=21, include = F}
-full_data %>% 
-mutate(sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
-ggplot(aes(x = ctmax, fill = sp_name)) + 
-  facet_wrap(.~sp_name, ncol = 1) + 
-  geom_histogram(binwidth = 1) + 
-  scale_fill_manual(values = species_cols) + 
-  labs(x = "CTmax (°C)") + 
-  theme_matt_facets() + 
-  theme(legend.position = "none",
-        panel.grid.major.x = element_line(colour = "grey95"))
-```
-
 Shown below are the clutch size distributions for the three diaptomiid species, which produce egg sacs that allow for easy quantification of fecundity. 
 
 ```{r fecundity-histogram, fig.width=7, fig.height=10}
@@ -785,6 +783,21 @@ full_data %>%
   theme(legend.position = "none")
 ```
 
+```{r ctmax-range-plot, include = F}
+full_data %>%  
+  group_by(sp_name, collection_date, collection_temp) %>%  
+  summarise("ctmax_range" = max(ctmax) - min(ctmax)) %>% 
+  ungroup() %>% 
+  group_by(sp_name) %>% 
+  filter(n() > 5) %>% 
+  ggplot(aes(x = collection_temp, y = ctmax_range, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
+  geom_smooth(method = "lm") + 
+  geom_point() + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt_facets()
+```
+
 
 ```{r ctmax-coll-temp-model, include = F}
 # adult_data = full_data %>% 
@@ -792,8 +805,8 @@ full_data %>%
 model_data = full_data %>%  
   drop_na(size, ctmax)
 
-ctmax_temp.model = lm(data = model_data, ctmax ~ collection_temp * sp_name + sex)
-size_temp.model = lm(data = model_data, size ~ collection_temp * sp_name + sex)
+ctmax_temp.model = lm(data = model_data, ctmax ~ collection_temp * sp_name)
+size_temp.model = lm(data = model_data, size ~ collection_temp * sp_name )
 
 knitr::kable(car::Anova(ctmax_temp.model))
 
@@ -801,13 +814,13 @@ ctmax_resids = cbind(model_data, "resids" = ctmax_temp.model$residuals, "size_re
 
 ```
 
-Copepods spent several days in lab during experiments. Shown below are the CTmax residuals (taken from a model of CTmax against collection temperature) plotted against the time spent in lab before measurements were made. We can see clearly that thermal limits are fairly stable over time. 
+Copepods spent several days in lab during experiments. Shown below are the CTmax residuals (taken from a model of CTmax against collection temperature) plotted against the time spent in lab before measurements were made. Individual regressions are shown for the residuals against days in lab for each collection. We can see clearly that thermal limits are fairly stable over time. 
 
 ```{r ctmax-time-in-lab, fig.width=15, fig.height=10}
-ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) + 
+ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = collection_date)) + 
   facet_wrap(sp_name~.) + 
   geom_point(size = 4, alpha = 0.5) + 
-  geom_smooth(method = "lm", se = F, linewidth = 2) + 
+  geom_smooth(method = "lm", se = F, linewidth = 1) + 
   scale_x_continuous(breaks = c(0:5)) + 
   labs(x = "Days in lab", 
        y = "CTmax Residuals") + 
@@ -816,9 +829,9 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name)) +
   theme(legend.position = "none")
 ```
 
-The term "acclimation response ratio" is often used to describe the effect of temperature on thermal limits. The ARR is calculated as the change in thermal limits per degree change in acclimation temperature. For our data, we will estimate ARR as the slope of CTmax against collection temperature. 
+The term "acclimation response ratio" is often used to describe the effect of temperature on thermal limits. The ARR is calculated as the change in thermal limits per degree change in acclimation temperature. For our data, we will estimate ARR as the slope of CTmax against collection temperature. These slopes were taken from a regression of CTmax against collection temperature and body size. Two different model types were used, a simple linear regression and a mixed effects model. The estimated ARR values were generally highly similar between the model types used.
 
-```{r}
+```{r arr-comp-plot, fig.width=8, fig.height=10}
 coef_model_data = full_data %>% 
   group_by(sp_name, sex) %>% 
   filter(n() > 5 & !str_detect(sp_name, pattern = "kindti")) 
@@ -830,8 +843,8 @@ coef_n = full_data %>%
             mean_ctmax = mean(ctmax))
 
 ARR_vals = coef_model_data %>% 
-  do(broom::tidy(lm(ctmax ~ collection_temp, data = .))) %>% 
-  filter(term != "(Intercept)") %>% 
+  do(broom::tidy(lm(ctmax ~ collection_temp + size, data = .))) %>% 
+  filter(term == "collection_temp") %>% 
   select(sp_name, sex, "ARR" = estimate, std.error) %>% 
   arrange(ARR) %>% 
   inner_join(coef_n, by = c("sp_name", "sex"))
@@ -843,10 +856,38 @@ ARR_vals %>%
          ARR, 
          "Error" = std.error) %>% 
   knitr::kable()
+
+mle.model = lmer(data = model_data,
+     ctmax ~ collection_temp + size + sex + (size + collection_temp|sex:sp_name))
+
+mle_coefs = coefficients(mle.model)$`sex:sp_name` %>% 
+  mutate("group" = rownames(.)) %>% 
+  select(group, "intercept" = "(Intercept)", "ARR" = collection_temp, size) %>% 
+  separate(group, into = c("sex", "species"), sep = ":", remove = TRUE) %>% 
+  remove_rownames()
+
+mle_ARR = mle_coefs %>%  
+  select(sp_name = species, sex, ARR) %>% 
+  mutate("model" = "mixed effects")  %>% 
+  inner_join(coef_n, by = c("sp_name", "sex"))
+
+ARR_comp = bind_rows(mle_ARR, 
+                     mutate(ARR_vals, "model" = "linear"))
+
+ARR_comp %>% 
+  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
+ggplot(aes(x = model, y = ARR, group = sp_name)) + 
+  facet_grid(sp_name~sex) +
+  geom_point(size = 3) + 
+  geom_line(linewidth = 1.5) + 
+  scale_y_continuous(breaks = c(0, 0.5, 1)) + 
+  theme_matt_facets() + 
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+
 ```
 
 ```{r coef-summary, fig.width=10, fig.height=5}
-coef_plot = ARR_vals %>% 
+coef_plot = mle_ARR %>% 
   mutate("abbr" = case_when(
     sp_name == "Epischura lacustris" ~ "E. lac",
     sp_name == "Leptodiaptomus minutus" ~ "L. min", 
@@ -854,8 +895,8 @@ coef_plot = ARR_vals %>%
     sp_name == "Leptodiaptomus sicilis" ~ "L. sic"
   )) %>% 
   ggplot(aes(x = abbr, y = ARR, colour = sp_name, shape = sex)) + 
-  geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),
-                width = 0.35, linewidth = 1, position = position_dodge(width = 0.5)) + 
+  # geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),
+  #               width = 0.35, linewidth = 1, position = position_dodge(width = 0.5)) + 
   geom_point(size = 5,
     position = position_dodge(width = 0.5)) + 
   scale_colour_manual(values = species_cols) + 
@@ -866,10 +907,10 @@ coef_plot = ARR_vals %>%
   theme_matt() + 
   theme(legend.position = "right")
 
-coef_lim_plot = ggplot(ARR_vals, aes(x = mean_ctmax, y = ARR)) + 
+coef_lim_plot = ggplot(mle_ARR, aes(x = mean_ctmax, y = ARR)) + 
   geom_smooth(method = "lm", colour = "grey70", se = F, linewidth = 2) + 
-  geom_errorbar(aes(colour = sp_name, ymin = ARR - std.error, ymax = ARR + std.error),
-                width = 0.5, linewidth = 1, position = position_dodge(width = 0.5)) + 
+  # geom_errorbar(aes(colour = sp_name, ymin = ARR - std.error, ymax = ARR + std.error),
+  #               width = 0.5, linewidth = 1, position = position_dodge(width = 0.5)) + 
   geom_point(aes(colour = sp_name, shape = sex ),
              size = 5,
     position = position_dodge(width = 0.5)) +
@@ -883,6 +924,8 @@ coef_lim_plot = ggplot(ARR_vals, aes(x = mean_ctmax, y = ARR)) +
 
 ggarrange(coef_plot, coef_lim_plot, common.legend = T, legend = "right")
 ```
+
+
 
 ### Sex and stage variation in thermal limits 
 Previous sections have generally lumped juvenile, female, and male individuals together. There may be important stage- or sex-specific differences in CTmax though. For several species, we have measurements for individuals in different stages or of different sexes. 

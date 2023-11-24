@@ -8,6 +8,7 @@ library(dataRetrieval)
 library(lubridate)
 library(slider)
 library(english)
+library(lme4)
 
 #Determine which scripts should be run
 process_all_data = F #Runs data analysis 
