@@ -925,8 +925,6 @@ coef_lim_plot = ggplot(mle_ARR, aes(x = mean_ctmax, y = ARR)) +
 ggarrange(coef_plot, coef_lim_plot, common.legend = T, legend = "right")
 ```
 
-
-
 ### Sex and stage variation in thermal limits 
 Previous sections have generally lumped juvenile, female, and male individuals together. There may be important stage- or sex-specific differences in CTmax though. For several species, we have measurements for individuals in different stages or of different sexes. 
 
