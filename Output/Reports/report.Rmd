@@ -834,7 +834,7 @@ The term "acclimation response ratio" is often used to describe the effect of te
 ```{r arr-comp-plot, fig.width=8, fig.height=10}
 coef_model_data = full_data %>% 
   group_by(sp_name, sex) %>% 
-  filter(n() > 5 & !str_detect(sp_name, pattern = "kindti")) 
+  filter(n() > 3 & !str_detect(sp_name, pattern = "kindti")) 
 
 coef_n = full_data %>% 
   group_by(sp_name, sex) %>% 
@@ -875,7 +875,6 @@ ARR_comp = bind_rows(mle_ARR,
                      mutate(ARR_vals, "model" = "linear"))
 
 ARR_comp %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
 ggplot(aes(x = model, y = ARR, group = sp_name)) + 
   facet_grid(sp_name~sex) +
   geom_point(size = 3) + 
@@ -892,7 +891,8 @@ coef_plot = mle_ARR %>%
     sp_name == "Epischura lacustris" ~ "E. lac",
     sp_name == "Leptodiaptomus minutus" ~ "L. min", 
     sp_name == "Skistodiaptomus oregonensis" ~ "S. ore",
-    sp_name == "Leptodiaptomus sicilis" ~ "L. sic"
+    sp_name == "Leptodiaptomus sicilis" ~ "L. sic",
+    sp_name == "Limnocalanus macrurus" ~ "L. mac"
   )) %>% 
   ggplot(aes(x = abbr, y = ARR, colour = sp_name, shape = sex)) + 
   # geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),

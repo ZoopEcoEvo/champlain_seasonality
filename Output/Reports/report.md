@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-11-26
+2023-11-27
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -10,13 +10,6 @@ Seasonality in Lake Champlain Copepod Thermal Limits
     limits](#sex-and-stage-variation-in-thermal-limits)
   - [Trait Correlations and
     Trade-offs](#trait-correlations-and-trade-offs)
-
-``` r
-### To Do 
-
-# Actual statistics for relationships between temperature and CTmax, size, and fecundity
-# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
-```
 
 ## Copepod Collection
 
@@ -44,9 +37,9 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 24 collections were used to make a total of 624 thermal
+Copepods from 25 collections were used to make a total of 634 thermal
 limit measurements. Over this time period, collection temperatures
-ranged from 8.5 to 26.5°C.
+ranged from 8 to 26.5°C.
 
 There is substantial variation in thermal limits across the species
 collected. There is also some degree of variation within the species,
@@ -620,20 +613,20 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-|           Species           | Predictor | Duration | Correlation |  P-Value  |
-|:---------------------------:|:---------:|:--------:|:-----------:|:---------:|
-|     Epischura lacustris     |    max    |    20    |  0.8808650  | 0.0000000 |
-|     Epischura lacustris     |    max    |    21    |  0.8793394  | 0.0000000 |
-|     Epischura lacustris     |    max    |    19    |  0.8776958  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.6929898  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    10    |  0.6919056  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    9     |  0.6919003  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.4213943  | 0.0003834 |
-|   Leptodiaptomus sicilis    |    max    |    3     |  0.4137401  | 0.0005010 |
-|   Leptodiaptomus sicilis    |    max    |    5     |  0.4049398  | 0.0006762 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.6551011  | 0.0000000 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.6460239  | 0.0000000 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.6460066  | 0.0000000 |
+|           Species           | Predictor | Duration | Correlation | P-Value  |
+|:---------------------------:|:---------:|:--------:|:-----------:|:--------:|
+|     Epischura lacustris     |    max    |    20    |  0.8804979  | 0.00e+00 |
+|     Epischura lacustris     |    max    |    19    |  0.8768600  | 0.00e+00 |
+|     Epischura lacustris     |    max    |    21    |  0.8765401  | 0.00e+00 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.6963883  | 0.00e+00 |
+|   Leptodiaptomus minutus    |    max    |    10    |  0.6953332  | 0.00e+00 |
+|   Leptodiaptomus minutus    |    max    |    9     |  0.6953303  | 0.00e+00 |
+|   Leptodiaptomus sicilis    |    max    |    4     |  0.4860801  | 1.99e-05 |
+|   Leptodiaptomus sicilis    |    max    |    5     |  0.4756663  | 3.16e-05 |
+|   Leptodiaptomus sicilis    |    max    |    3     |  0.4746569  | 3.30e-05 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.6551011  | 0.00e+00 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.6460239  | 0.00e+00 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.6460066  | 0.00e+00 |
 
 ## Trait Variation
 
@@ -812,7 +805,7 @@ types used.
 ``` r
 coef_model_data = full_data %>% 
   group_by(sp_name, sex) %>% 
-  filter(n() > 5 & !str_detect(sp_name, pattern = "kindti")) 
+  filter(n() > 3 & !str_detect(sp_name, pattern = "kindti")) 
 
 coef_n = full_data %>% 
   group_by(sp_name, sex) %>% 
@@ -839,16 +832,17 @@ ARR_vals %>%
 | Species                     | Group    |   N |        ARR |     Error |
 |:----------------------------|:---------|----:|-----------:|----------:|
 | Epischura lacustris         | juvenile |  18 | -0.0001189 | 0.1057432 |
-| Epischura lacustris         | male     |  12 |  0.1828277 | 0.0511841 |
-| Leptodiaptomus minutus      | female   | 196 |  0.2102371 | 0.0169417 |
+| Leptodiaptomus minutus      | female   | 197 |  0.2105266 | 0.0167743 |
 | Leptodiaptomus minutus      | male     |  32 |  0.2184299 | 0.0292233 |
 | Skistodiaptomus oregonensis | female   | 171 |  0.2414597 | 0.0239109 |
 | Skistodiaptomus oregonensis | male     |  27 |  0.2611101 | 0.0480816 |
-| Leptodiaptomus sicilis      | female   |  67 |  0.3431587 | 0.0863374 |
+| Epischura lacustris         | male     |  13 |  0.2641731 | 0.0470361 |
 | Skistodiaptomus oregonensis | juvenile |  14 |  0.3813308 | 0.0971708 |
-| Epischura lacustris         | female   |  39 |  0.3966359 | 0.0548040 |
+| Leptodiaptomus sicilis      | female   |  70 |  0.3921189 | 0.0837194 |
+| Epischura lacustris         | female   |  40 |  0.3962902 | 0.0515171 |
+| Limnocalanus macrurus       | female   |   6 |  0.4361052 | 0.6034479 |
 | Leptodiaptomus minutus      | juvenile |   9 |  0.5489301 | 0.0968203 |
-| Leptodiaptomus sicilis      | male     |  15 |  1.2828429 | 0.3075849 |
+| Leptodiaptomus sicilis      | male     |  16 |  1.0621486 | 0.3219560 |
 
 ``` r
 
@@ -870,7 +864,6 @@ ARR_comp = bind_rows(mle_ARR,
                      mutate(ARR_vals, "model" = "linear"))
 
 ARR_comp %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
 ggplot(aes(x = model, y = ARR, group = sp_name)) + 
   facet_grid(sp_name~sex) +
   geom_point(size = 3) + 
@@ -888,7 +881,8 @@ coef_plot = mle_ARR %>%
     sp_name == "Epischura lacustris" ~ "E. lac",
     sp_name == "Leptodiaptomus minutus" ~ "L. min", 
     sp_name == "Skistodiaptomus oregonensis" ~ "S. ore",
-    sp_name == "Leptodiaptomus sicilis" ~ "L. sic"
+    sp_name == "Leptodiaptomus sicilis" ~ "L. sic",
+    sp_name == "Limnocalanus macrurus" ~ "L. mac"
   )) %>% 
   ggplot(aes(x = abbr, y = ARR, colour = sp_name, shape = sex)) + 
   # geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),
@@ -945,10 +939,10 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    18    |   39   |  12  |
-|   Leptodiaptomus minutus    |    8     |  196   |  32  |
-|   Leptodiaptomus sicilis    |    0     |   67   |  15  |
-|    Limnocalanus macrurus    |    2     |   5    |  1   |
+|     Epischura lacustris     |    18    |   40   |  13  |
+|   Leptodiaptomus minutus    |    8     |  197   |  32  |
+|   Leptodiaptomus sicilis    |    0     |   70   |  16  |
+|    Limnocalanus macrurus    |    2     |   6    |  3   |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    0     |   1    |  0   |
 | Skistodiaptomus oregonensis |    14    |  170   |  27  |
