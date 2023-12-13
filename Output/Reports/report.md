@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-12-08
+2023-12-12
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -44,7 +44,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 26 collections were used to make a total of 694 thermal
+Copepods from 27 collections were used to make a total of 704 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 7 to 26.5°C.
 
@@ -622,15 +622,15 @@ corr_vals %>%
 
 |           Species           | Predictor | Duration | Correlation | P-Value |
 |:---------------------------:|:---------:|:--------:|:-----------:|:-------:|
-|     Epischura lacustris     |    max    |    20    |  0.8912992  |    0    |
-|     Epischura lacustris     |    max    |    21    |  0.8889595  |    0    |
-|     Epischura lacustris     |    max    |    19    |  0.8863271  |    0    |
+|     Epischura lacustris     |    max    |    20    |  0.8977004  |    0    |
+|     Epischura lacustris     |    max    |    21    |  0.8942393  |    0    |
+|     Epischura lacustris     |    max    |    19    |  0.8940956  |    0    |
 |   Leptodiaptomus minutus    |    max    |    8     |  0.7427159  |    0    |
 |   Leptodiaptomus minutus    |    max    |    6     |  0.7423021  |    0    |
 |   Leptodiaptomus minutus    |    max    |    7     |  0.7422769  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.5884791  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    5     |  0.5829666  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    3     |  0.5771292  |    0    |
+|   Leptodiaptomus sicilis    |    max    |    4     |  0.5566070  |    0    |
+|   Leptodiaptomus sicilis    |    max    |    5     |  0.5497993  |    0    |
+|   Leptodiaptomus sicilis    |    max    |    3     |  0.5496143  |    0    |
 | Skistodiaptomus oregonensis |    max    |    2     |  0.7553293  |    0    |
 | Skistodiaptomus oregonensis |    max    |    1     |  0.7473277  |    0    |
 | Skistodiaptomus oregonensis | mean_max  |    2     |  0.7468815  |    0    |
@@ -845,11 +845,12 @@ ARR_vals %>%
 | Epischura lacustris         | male     |  19 |  0.3199615 | 0.0254948 |
 | Skistodiaptomus oregonensis | female   | 184 |  0.3361886 | 0.0245889 |
 | Skistodiaptomus oregonensis | juvenile |  14 |  0.3813308 | 0.0971708 |
-| Epischura lacustris         | female   |  43 |  0.4340523 | 0.0496385 |
-| Limnocalanus macrurus       | female   |   6 |  0.4361052 | 0.6034479 |
-| Leptodiaptomus sicilis      | female   |  87 |  0.4496727 | 0.0654250 |
+| Leptodiaptomus sicilis      | female   |  91 |  0.4185861 | 0.0633726 |
+| Epischura lacustris         | female   |  44 |  0.4410593 | 0.0470148 |
+| Limnocalanus macrurus       | female   |   8 |  0.4515024 | 0.3146093 |
 | Leptodiaptomus minutus      | juvenile |  10 |  0.5756003 | 0.0575750 |
-| Leptodiaptomus sicilis      | male     |  24 |  0.7259754 | 0.2469851 |
+| Leptodiaptomus sicilis      | male     |  25 |  0.6888694 | 0.2419312 |
+| Limnocalanus macrurus       | male     |   6 |  2.6398698 | 0.5355882 |
 
 ``` r
 
@@ -946,10 +947,10 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    18    |   43   |  19  |
+|     Epischura lacustris     |    18    |   44   |  19  |
 |   Leptodiaptomus minutus    |    9     |  204   |  33  |
-|   Leptodiaptomus sicilis    |    3     |   87   |  24  |
-|    Limnocalanus macrurus    |    2     |   6    |  4   |
+|   Leptodiaptomus sicilis    |    3     |   91   |  25  |
+|    Limnocalanus macrurus    |    2     |   8    |  6   |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    0     |   1    |  0   |
 | Skistodiaptomus oregonensis |    14    |  183   |  27  |
@@ -1054,15 +1055,19 @@ full_data %>%
 
 <img src="../Figures/markdown/ind-sp-ctmax-size-1.png" style="display: block; margin: auto;" />
 
+Shown below is the relationship between mean size and mean thermal
+limits for females of each species. We see that larger species within
+the community tend to have a lower thermal limit than smaller species.
+
 ``` r
 full_data %>% 
   group_by(sp_name, sex) %>% 
   summarize(mean_ctmax = mean(ctmax, na.rm = T),
             mean_size = mean(size, na.rm = T)) %>% 
-  #filter(sex == "female") %>% 
+  filter(sex == "female") %>% 
   ggplot(aes(x = mean_size, y = mean_ctmax)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2, colour = "black") + 
-  geom_point(aes(colour = sp_name, shape = sex),
+  geom_point(aes(colour = sp_name),
              size = 5) + 
   labs(x = "Length (mm)", 
        y = "CTmax (°C)",

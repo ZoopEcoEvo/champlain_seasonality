@@ -803,7 +803,9 @@ full_data %>%
 # adult_data = full_data %>% 
 #   filter(sex == "female")
 model_data = full_data %>%  
-  drop_na(size, ctmax)
+  drop_na(size, ctmax) %>%  
+  mutate(temp_cent = scale(collection_temp, center = T, scale = F),
+         size_cent = scale(size, center = T, scale = F))
 
 ctmax_temp.model = lm(data = model_data, ctmax ~ collection_temp * sp_name)
 size_temp.model = lm(data = model_data, size ~ collection_temp * sp_name )
@@ -828,6 +830,37 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
   theme_matt_facets() + 
   theme(legend.position = "none")
 ```
+
+```{r include = F}
+full.model = lme4::lmer(data = model_data,
+           ctmax ~ temp_cent + size_cent + days_in_lab + 
+             (1 + temp_cent + size_cent|sp_name:sex))
+
+car::Anova(full.model)
+
+model_coefs = coefficients(full.model)$`sp_name:sex` %>%  
+  rownames_to_column(var = "species") %>% 
+  separate(species, into = c("species", "sex"), sep = ":") %>% 
+  select(species, sex, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
+
+ggplot(model_coefs, aes(x = sex, y = intercept, colour = species)) + 
+  facet_wrap(species~.) + 
+  geom_point(size = 3) + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt_facets() + 
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+
+ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
+  geom_smooth(method = "lm", colour = "black") +
+  geom_point(aes(colour = species, shape = sex),
+             size = 6) + 
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Species Intercept", 
+       y = "ARR") +
+  theme_matt() + 
+  theme(legend.position = "right")
+```
+
 
 The term "acclimation response ratio" is often used to describe the effect of temperature on thermal limits. The ARR is calculated as the change in thermal limits per degree change in acclimation temperature. For our data, we will estimate ARR as the slope of CTmax against collection temperature. These slopes were taken from a regression of CTmax against collection temperature and body size. Two different model types were used, a simple linear regression and a mixed effects model. The estimated ARR values were generally highly similar between the model types used.
 
@@ -1048,15 +1081,17 @@ full_data %>%
   theme(legend.position = "none")
 ```
 
+Shown below is the relationship between mean size and mean thermal limits for females of each species. We see that larger species within the community tend to have a lower thermal limit than smaller species. 
+
 ```{r mean-ctmax-mean-size-plot, fig.width=9, fig.height=5}
 full_data %>% 
   group_by(sp_name, sex) %>% 
   summarize(mean_ctmax = mean(ctmax, na.rm = T),
             mean_size = mean(size, na.rm = T)) %>% 
-  #filter(sex == "female") %>% 
+  filter(sex == "female") %>% 
   ggplot(aes(x = mean_size, y = mean_ctmax)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2, colour = "black") + 
-  geom_point(aes(colour = sp_name, shape = sex),
+  geom_point(aes(colour = sp_name),
              size = 5) + 
   labs(x = "Length (mm)", 
        y = "CTmax (°C)",
