@@ -16,9 +16,6 @@ output:
 ```{r to-do}
 ### To Do 
 
-# Actual statistics for relationships between temperature and CTmax, size, and fecundity
-# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
-
 ```
 
 
@@ -208,7 +205,7 @@ ggplot() +
   theme(legend.position = "right")
 ```
 
-Size also varied both between and within species. 
+Size also varied, but primarily between rather than within species. 
 
 ```{r size-timeseries, fig.width=10, fig.height=5}
 ggplot() + 
@@ -242,38 +239,37 @@ ggplot() +
   theme(legend.position = "right")
 ```
 
-For the three species with the most data (*Skistodiaptomus*, *L. minutus*, *Epischura*), shown below is CTmax and body size, plotted against the day of the year for each sex/stage separately. 
+Shown below is CTmax and body size for the species with the most data (*Skistodiaptomus*, *L. minutus*, *L. sicilis*, and *Epischura*), plotted against the day of the year for each sex/stage separately. 
 
 ```{r trait-doy-feature, fig.width = 14, fig.height = 7}
 ctmax_feature = full_data %>%  
   mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus","Epischura lacustris")) %>% 
+  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
   ggplot(aes(x = as.Date(collection_date), y = ctmax, colour = sp_name)) + 
   facet_grid(sp_name~sex) + 
   geom_point() + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Day of the Year", 
        y = "CTmax (°C)") + 
-  guides(color = FALSE) + 
   theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
+        legend.position = "none")
 
 size_feature = full_data %>%  
   mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Epischura lacustris")) %>% 
+  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
   ggplot(aes(x = as.Date(collection_date), y = size, colour = sp_name)) + 
   facet_grid(sp_name~sex) + 
   geom_point() + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Day of the Year", 
        y = "Size (mm)") + 
-  guides(color = FALSE) + 
   theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
+        legend.position = "none")
 
-ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "bottom")
+ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "none")
 ```
-
 
 ## Temperature Variability
 Lake Champlain is highly seasonal, with both average temperatures and temperature variability changing throughout the year. These patterns in the experienced thermal environment may drive the observed variation in copepod thermal limits. However, the time period affecting copepod thermal limits is unknown. Depending the on the duration of time considered, there are large changes in the experienced environment, in particular regarding the temperature range and variance. Consider for example three time periods: the day of collection, one week prior to collection, and four weeks prior to collection. While the overall pattern is similar, we can see that, unsurprisingly, considering longer periods of time results in larger ranges and slightly changes the pattern of variance experienced. 
@@ -555,14 +551,7 @@ We can see that, in general, copepods are responding to proximate cues from the 
 
 ```{r}
 ### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
-
-words_to_numbers <- function(s) {
-  s <- stringr::str_to_lower(s)
-  for (i in 0:56)
-    s <- stringr::str_replace_all(s, words(i), as.character(i))
-  s
-}
-
+  
 num_colls = full_data %>% 
   filter(sex == "female") %>% 
   select(collection_date, sp_name) %>%  
@@ -616,6 +605,7 @@ coll_corr = full_data %>%
 corr_vals = corr_vals %>%  
   mutate(duration = as.numeric(duration)) %>% 
   bind_rows(coll_corr)
+
 ```
 
 ```{r fig.width=10, fig.height=6}
@@ -626,7 +616,8 @@ mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
 ggplot(aes(x = duration, y = correlation, colour = sp_name)) + 
   facet_wrap(.~parameter) + 
   geom_hline(yintercept = 0) + 
-  geom_line(linewidth = 1) + 
+  geom_point(size = 0.9) + 
+  geom_line(linewidth = 1.5) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Duration (days)",
        y = "Correlation", 
@@ -662,6 +653,32 @@ corr_vals %>%
   select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, "P-Value" = p.value) %>% 
   knitr::kable(align = "c")
 ```
+
+Phenotypic variation (like acclimation of thermal limits) is a physiological process. depending on the mechanistic underpinnings (changes in HSP expression, etc.), the amount of time it takes for an individual to acclimate may vary based on body size (larger species, more cells, more time required to acclimate). Shown here is the duration of the environmental acclimation window the copepods appear to be responding to. 
+
+```{r acc-duration-plot, fig.width=7, fig.height=4}
+mean_sizes = full_data %>% 
+  filter(sex == "female") %>% 
+  group_by(sp_name) %>%  
+  summarise(mean_size = mean(size, na.rm = T))
+
+corr_vals %>% 
+  group_by(sp_name) %>% 
+  filter(correlation == max(correlation)) %>%  
+  inner_join(mean_sizes, by = "sp_name") %>% 
+  select(sp_name, duration, mean_size) %>%  
+  ggplot(aes(x = mean_size, y = duration)) + 
+  geom_point(aes(colour = sp_name), 
+             size = 4) + 
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Mean Female Size (mm)",
+       y = "Acclimation Duration",
+       colour = "Species") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+
+```
+
 
 ## Trait Variation 
 ```{r ctmax-and-size-sum-plot, fig.width=20, fig.height=5}
@@ -786,11 +803,12 @@ full_data %>%
 ```{r ctmax-range-plot, include = F}
 full_data %>%  
   group_by(sp_name, collection_date, collection_temp) %>%  
-  summarise("ctmax_range" = max(ctmax) - min(ctmax)) %>% 
+  summarise("ctmax_range" = max(ctmax) - min(ctmax),
+            "ctmax_var" = var(ctmax)) %>% 
   ungroup() %>% 
   group_by(sp_name) %>% 
   filter(n() > 5) %>% 
-  ggplot(aes(x = collection_temp, y = ctmax_range, colour = sp_name)) + 
+  ggplot(aes(x = collection_temp, y = ctmax_var, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
   geom_smooth(method = "lm") + 
   geom_point() + 
@@ -823,7 +841,7 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
   facet_wrap(sp_name~.) + 
   geom_point(size = 4, alpha = 0.5) + 
   geom_smooth(method = "lm", se = F, linewidth = 1) + 
-  scale_x_continuous(breaks = c(0:5)) + 
+  #scale_x_continuous(breaks = c(0:5)) + 
   labs(x = "Days in lab", 
        y = "CTmax Residuals") + 
   scale_colour_manual(values = species_cols) + 
@@ -1011,7 +1029,6 @@ ctmax_resids %>%
   theme(legend.position = "none", 
         panel.grid = element_blank())
 ```
-
 
 ```{r trait-variance-coll-temp, include = F}
 # 

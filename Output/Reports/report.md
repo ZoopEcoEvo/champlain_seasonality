@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2023-12-14
+2024-01-03
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -13,9 +13,6 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 
 ``` r
 ### To Do 
-
-# Actual statistics for relationships between temperature and CTmax, size, and fecundity
-# Pull residuals from CTmax ~ temperature model, and examine the change over time in lab and the relationship with fecundity
 ```
 
 ## Copepod Collection
@@ -44,7 +41,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 27 collections were used to make a total of 724 thermal
+Copepods from 28 collections were used to make a total of 764 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 7 to 26.5°C.
 
@@ -125,7 +122,7 @@ ggplot() +
 
 <img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
 
-Size also varied both between and within species.
+Size also varied, but primarily between rather than within species.
 
 ``` r
 ggplot() + 
@@ -161,38 +158,38 @@ ggplot() +
 
 <img src="../Figures/markdown/size-timeseries-1.png" style="display: block; margin: auto;" />
 
-For the three species with the most data (*Skistodiaptomus*, *L.
-minutus*, *Epischura*), shown below is CTmax and body size, plotted
-against the day of the year for each sex/stage separately.
+Shown below is CTmax and body size for the species with the most data
+(*Skistodiaptomus*, *L. minutus*, *L. sicilis*, and *Epischura*),
+plotted against the day of the year for each sex/stage separately.
 
 ``` r
 ctmax_feature = full_data %>%  
   mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus","Epischura lacustris")) %>% 
+  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
   ggplot(aes(x = as.Date(collection_date), y = ctmax, colour = sp_name)) + 
   facet_grid(sp_name~sex) + 
   geom_point() + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Day of the Year", 
        y = "CTmax (°C)") + 
-  guides(color = FALSE) + 
   theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
+        legend.position = "none")
 
 size_feature = full_data %>%  
   mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Epischura lacustris")) %>% 
+  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
   ggplot(aes(x = as.Date(collection_date), y = size, colour = sp_name)) + 
   facet_grid(sp_name~sex) + 
   geom_point() + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Day of the Year", 
        y = "Size (mm)") + 
-  guides(color = FALSE) + 
   theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
+        legend.position = "none")
 
-ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "bottom")
+ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "none")
 ```
 
 <img src="../Figures/markdown/trait-doy-feature-1.png" style="display: block; margin: auto;" />
@@ -510,14 +507,7 @@ temperatures experienced over a 20 day time period.
 
 ``` r
 ### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
-
-words_to_numbers <- function(s) {
-  s <- stringr::str_to_lower(s)
-  for (i in 0:56)
-    s <- stringr::str_replace_all(s, words(i), as.character(i))
-  s
-}
-
+  
 num_colls = full_data %>% 
   filter(sex == "female") %>% 
   select(collection_date, sp_name) %>%  
@@ -581,7 +571,8 @@ mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
 ggplot(aes(x = duration, y = correlation, colour = sp_name)) + 
   facet_wrap(.~parameter) + 
   geom_hline(yintercept = 0) + 
-  geom_line(linewidth = 1) + 
+  geom_point(size = 0.9) + 
+  geom_line(linewidth = 1.5) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Duration (days)",
        y = "Correlation", 
@@ -628,12 +619,44 @@ corr_vals %>%
 |   Leptodiaptomus minutus    |    max    |    8     |  0.7427159  |    0    |
 |   Leptodiaptomus minutus    |    max    |    6     |  0.7423021  |    0    |
 |   Leptodiaptomus minutus    |    max    |    7     |  0.7422769  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.5724931  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    3     |  0.5663889  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    5     |  0.5663160  |    0    |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.7553293  |    0    |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.7473277  |    0    |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7468815  |    0    |
+|   Leptodiaptomus sicilis    |    max    |    4     |  0.5232677  |    0    |
+|   Leptodiaptomus sicilis    | coll_temp |    0     |  0.5226026  |    0    |
+|   Leptodiaptomus sicilis    |    max    |    3     |  0.5214429  |    0    |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.7470992  |    0    |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.7397123  |    0    |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7392686  |    0    |
+
+Phenotypic variation (like acclimation of thermal limits) is a
+physiological process. depending on the mechanistic underpinnings
+(changes in HSP expression, etc.), the amount of time it takes for an
+individual to acclimate may vary based on body size (larger species,
+more cells, more time required to acclimate). Shown here is the duration
+of the environmental acclimation window the copepods appear to be
+responding to.
+
+``` r
+mean_sizes = full_data %>% 
+  filter(sex == "female") %>% 
+  group_by(sp_name) %>%  
+  summarise(mean_size = mean(size, na.rm = T))
+
+corr_vals %>% 
+  group_by(sp_name) %>% 
+  filter(correlation == max(correlation)) %>%  
+  inner_join(mean_sizes, by = "sp_name") %>% 
+  select(sp_name, duration, mean_size) %>%  
+  ggplot(aes(x = mean_size, y = duration)) + 
+  geom_point(aes(colour = sp_name), 
+             size = 4) + 
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Mean Female Size (mm)",
+       y = "Acclimation Duration",
+       colour = "Species") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+```
+
+<img src="../Figures/markdown/acc-duration-plot-1.png" style="display: block; margin: auto;" />
 
 ## Trait Variation
 
@@ -840,17 +863,18 @@ ARR_vals %>%
 |:----------------------------|:---------|----:|-----------:|----------:|
 | Epischura lacustris         | juvenile |  18 | -0.0001189 | 0.1057432 |
 | Leptodiaptomus minutus      | male     |  33 |  0.2098892 | 0.0282213 |
+| Skistodiaptomus oregonensis | male     |  28 |  0.2135073 | 0.0367337 |
 | Leptodiaptomus minutus      | female   | 204 |  0.2442540 | 0.0174797 |
-| Skistodiaptomus oregonensis | male     |  27 |  0.2611101 | 0.0480816 |
-| Limnocalanus macrurus       | female   |  13 |  0.2710950 | 0.2180521 |
+| Limnocalanus macrurus       | female   |  15 |  0.2501880 | 0.2055755 |
 | Epischura lacustris         | male     |  19 |  0.3199615 | 0.0254948 |
-| Skistodiaptomus oregonensis | female   | 184 |  0.3361886 | 0.0245889 |
+| Skistodiaptomus oregonensis | female   | 185 |  0.3307448 | 0.0243307 |
+| Leptodiaptomus sicilis      | juvenile |  19 |  0.3544954 | 0.5809600 |
 | Skistodiaptomus oregonensis | juvenile |  14 |  0.3813308 | 0.0971708 |
-| Leptodiaptomus sicilis      | female   | 100 |  0.4195075 | 0.0585870 |
+| Leptodiaptomus sicilis      | female   | 107 |  0.4014892 | 0.0585063 |
 | Epischura lacustris         | female   |  45 |  0.4372314 | 0.0449520 |
+| Leptodiaptomus minutus      | juvenile |  11 |  0.4819851 | 0.0931804 |
 | Limnocalanus macrurus       | male     |  10 |  0.4835397 | 0.4040040 |
-| Leptodiaptomus minutus      | juvenile |  10 |  0.5756003 | 0.0575750 |
-| Leptodiaptomus sicilis      | male     |  26 |  0.7583888 | 0.2382118 |
+| Leptodiaptomus sicilis      | male     |  38 |  0.6292353 | 0.1924192 |
 
 ``` r
 
@@ -948,12 +972,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    18    |   45   |  19  |
-|   Leptodiaptomus minutus    |    9     |  204   |  33  |
-|   Leptodiaptomus sicilis    |    3     |  100   |  26  |
-|    Limnocalanus macrurus    |    2     |   13   |  10  |
+|   Leptodiaptomus minutus    |    10    |  204   |  33  |
+|   Leptodiaptomus sicilis    |    19    |  107   |  38  |
+|    Limnocalanus macrurus    |    2     |   15   |  10  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    0     |   1    |  0   |
-| Skistodiaptomus oregonensis |    14    |  183   |  27  |
+| Skistodiaptomus oregonensis |    14    |  184   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
