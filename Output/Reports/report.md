@@ -41,7 +41,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 28 collections were used to make a total of 764 thermal
+Copepods from 28 collections were used to make a total of 784 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 7 to 26.5°C.
 
@@ -619,9 +619,9 @@ corr_vals %>%
 |   Leptodiaptomus minutus    |    max    |    8     |  0.7427159  |    0    |
 |   Leptodiaptomus minutus    |    max    |    6     |  0.7423021  |    0    |
 |   Leptodiaptomus minutus    |    max    |    7     |  0.7422769  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.5232677  |    0    |
-|   Leptodiaptomus sicilis    | coll_temp |    0     |  0.5226026  |    0    |
-|   Leptodiaptomus sicilis    |    max    |    3     |  0.5214429  |    0    |
+|   Leptodiaptomus sicilis    | coll_temp |    0     |  0.5096660  |    0    |
+|   Leptodiaptomus sicilis    |    max    |    3     |  0.4980545  |    0    |
+|   Leptodiaptomus sicilis    |    max    |    4     |  0.4975140  |    0    |
 | Skistodiaptomus oregonensis |    max    |    2     |  0.7470992  |    0    |
 | Skistodiaptomus oregonensis |    max    |    1     |  0.7397123  |    0    |
 | Skistodiaptomus oregonensis | mean_max  |    2     |  0.7392686  |    0    |
@@ -812,7 +812,7 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
   facet_wrap(sp_name~.) + 
   geom_point(size = 4, alpha = 0.5) + 
   geom_smooth(method = "lm", se = F, linewidth = 1) + 
-  scale_x_continuous(breaks = c(0:5)) + 
+  #scale_x_continuous(breaks = c(0:5)) + 
   labs(x = "Days in lab", 
        y = "CTmax Residuals") + 
   scale_colour_manual(values = species_cols) + 
@@ -870,11 +870,11 @@ ARR_vals %>%
 | Skistodiaptomus oregonensis | female   | 185 |  0.3307448 | 0.0243307 |
 | Leptodiaptomus sicilis      | juvenile |  19 |  0.3544954 | 0.5809600 |
 | Skistodiaptomus oregonensis | juvenile |  14 |  0.3813308 | 0.0971708 |
-| Leptodiaptomus sicilis      | female   | 107 |  0.4014892 | 0.0585063 |
+| Leptodiaptomus sicilis      | female   | 119 |  0.3933473 | 0.0582020 |
 | Epischura lacustris         | female   |  45 |  0.4372314 | 0.0449520 |
 | Leptodiaptomus minutus      | juvenile |  11 |  0.4819851 | 0.0931804 |
 | Limnocalanus macrurus       | male     |  10 |  0.4835397 | 0.4040040 |
-| Leptodiaptomus sicilis      | male     |  38 |  0.6292353 | 0.1924192 |
+| Leptodiaptomus sicilis      | male     |  46 |  0.5865915 | 0.1782962 |
 
 ``` r
 
@@ -973,7 +973,7 @@ knitr::kable(sex_sample_sizes, align = "c")
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    18    |   45   |  19  |
 |   Leptodiaptomus minutus    |    10    |  204   |  33  |
-|   Leptodiaptomus sicilis    |    19    |  107   |  38  |
+|   Leptodiaptomus sicilis    |    19    |  119   |  46  |
 |    Limnocalanus macrurus    |    2     |   15   |  10  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    0     |   1    |  0   |
