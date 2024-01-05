@@ -654,7 +654,7 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-Phenotypic variation (like acclimation of thermal limits) is a physiological process. depending on the mechanistic underpinnings (changes in HSP expression, etc.), the amount of time it takes for an individual to acclimate may vary based on body size (larger species, more cells, more time required to acclimate). Shown here is the duration of the environmental acclimation window the copepods appear to be responding to. 
+Phenotypic variation (like acclimation of thermal limits) is a physiological process. depending on the mechanistic underpinnings (changes in HSP expression, etc.), the amount of time it takes for an individual to acclimate may vary based on body size (larger species, more cells, more time required to acclimate). Shown here is the duration of the environmental acclimation window the copepods appear to be responding to.  
 
 ```{r acc-duration-plot, fig.width=7, fig.height=4}
 mean_sizes = full_data %>% 
