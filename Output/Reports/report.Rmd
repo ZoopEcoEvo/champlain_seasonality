@@ -1431,6 +1431,7 @@ ggplot(synthesis, aes(x = doy, y = lim_diff, colour = method)) +
   geom_point(alpha = 0.1) + 
   labs(x = "Day of Year", 
        y = "Predicted Warming Tolerance (°C Above Daily Max)") + 
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
   theme_matt_facets(base_size = 18) + 
   theme(strip.text.x.top = element_text(size = 10))
 ```
