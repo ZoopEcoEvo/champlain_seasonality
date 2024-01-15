@@ -1,6 +1,7 @@
 # Load in required packages
 library(rmarkdown)
 library(tidyverse)
+library(ggridges)
 library(readxl)
 library(ggpubr)
 library(patchwork)

@@ -1163,11 +1163,51 @@ ctmax_resids %>%
   theme(legend.position = "right")
 ```
 
+## Other patterns in variation 
+
+*Leptodiaptomus sicilis* is the most abundant species during the winter. There was a large shift in the size of mature females towards the end of December. Pending validation that large and small individuals are the same species, this shift may reflect a transition from one generation to another, suggesting that unlike in other lakes there are two generations of *L. sicilis* per year in Lake Champlain. This size difference may be caused by differences in the developmental environments. For example, individuals developing in January grow up at very low temperatures, and therefore may reach larger sizes. These individuals oversummer in deep waters, then re-emerge in October and produce a new generation. Water temperatures are still fairly high through November, which results in a generation of smaller individuals, which mature in time to produce a new generation in January. 
+
+```{r}
+full_data %>%  
+  filter(sp_name == "Leptodiaptomus sicilis") %>% 
+  filter(sex == "female") %>% 
+  group_by(collection_date) %>% 
+  mutate(size_center = scale(size, center = T, scale = F)) %>% 
+  ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  geom_density_ridges(bandwidth = 0.04) + 
+  geom_vline(xintercept = 0.89) + 
+  labs(x = "Size (mm)",
+       y = "Date", 
+       fill = "Coll. Temp. (°C)") + 
+  theme_matt() + 
+  theme(legend.position = "right",
+        axis.text.y = element_text(size = 12))
+```
+
+```{r}
+full_data %>%  
+  filter(sp_name == "Leptodiaptomus minutus") %>% 
+  filter(sex == "female") %>% 
+  group_by(collection_date) %>% 
+  mutate(size_center = scale(size, center = T, scale = F)) %>% 
+  ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  geom_density_ridges(bandwidth = 0.04) + 
+  geom_vline(xintercept = 0.69) + 
+  labs(x = "Size (mm)",
+       y = "Date", 
+       fill = "Coll. Temp. (°C)") + 
+  coord_cartesian(xlim = c(0.5,0.9)) + 
+  theme_matt() + 
+  theme(legend.position = "right",
+        axis.text.y = element_text(size = 12))
+```
+
 ```{r}
 if(predict_vuln == F){
   knitr::knit_exit()
 }
 ```
+
 
 
 ## Predicting Vulnerability 
