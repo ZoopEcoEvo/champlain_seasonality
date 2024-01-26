@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-01-18
+2024-01-25
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -11,10 +11,6 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   - [Trait Correlations and
     Trade-offs](#trait-correlations-and-trade-offs)
 - [Other patterns in variation](#other-patterns-in-variation)
-
-``` r
-### To Do 
-```
 
 ## Copepod Collection
 
@@ -42,7 +38,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 31 collections were used to make a total of 864 thermal
+Copepods from 32 collections were used to make a total of 903 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 3 to 26.5°C.
 
@@ -110,8 +106,11 @@ ggplot() +
   #                   colour = sp_name),
   #               position = position_dodge(width = 1),
   #               width = 5, linewidth = 1) +
-  geom_point(data = adult_summaries, 
-             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
+  # geom_point(data = adult_summaries, 
+  #            aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
+  geom_point(data = full_data, 
+             aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
+             size = 2, position = position_jitter(width = 1, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Date", 
        y = "Temperature (°C)", 
@@ -194,6 +193,31 @@ ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "none")
 ```
 
 <img src="../Figures/markdown/trait-doy-feature-1.png" style="display: block; margin: auto;" />
+
+``` r
+adult_summaries %>% 
+  ungroup() %>% 
+  mutate(collection_num = as.numeric(factor(collection_date))) %>% 
+  group_by(collection_date) %>%  
+  arrange(collection_date) %>% 
+  select(sp_name, collection_date, collection_num, sample_size) %>% 
+  mutate(sample_size = replace_na(sample_size, 0)) %>% 
+  mutate(total = sum(sample_size),
+         percentage = sample_size / total,
+         collection_date = lubridate::as_date(collection_date)) %>% 
+  ggplot(aes(x = collection_date, y = percentage, fill = sp_name)) + 
+  geom_area() + 
+  scale_fill_manual(values = species_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Species") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
+```
+
+<img src="../Figures/markdown/sp-props-1.png" style="display: block; margin: auto;" />
 
 ## Temperature Variability
 
@@ -461,7 +485,7 @@ one_week_temp_circle = ggplot(one_week_doy_data, aes(x = seven_day_mean_max, y =
     high = "dodgerblue4",
     mid = "coral2",
     low = "dodgerblue4",
-      midpoint = 182.5) + 
+    midpoint = 182.5) + 
   labs(x = "Max. Temp. (°C)",
        y = "Min. Temp. (°C)") + 
   labs(x = "Max. Temp. (°C)",
@@ -478,7 +502,7 @@ four_week_temp_circle = ggplot(four_week_doy_data, aes(x = `twenty-eight_day_max
     high = "dodgerblue4",
     mid = "coral2",
     low = "dodgerblue4",
-      midpoint = 182.5) + 
+    midpoint = 182.5) + 
   labs(x = "Max. Temp. (°C)",
        y = "Min. Temp. (°C)") + 
   ggtitle("Four Week") + 
@@ -508,7 +532,7 @@ temperatures experienced over a 20 day time period.
 
 ``` r
 ### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
-  
+
 num_colls = full_data %>% 
   filter(sex == "female") %>% 
   select(collection_date, sp_name) %>%  
@@ -522,8 +546,8 @@ dur_vals = c(1:50)
 for(i in dur_vals){
   
   duration_temps = get_predictors(daily_values = daily_temp_data, 
-                             raw_temp = temp_data, 
-                             n_days = i) %>% 
+                                  raw_temp = temp_data, 
+                                  n_days = i) %>% 
     filter(date %in% as_date(unique(full_data$collection_date)))
   
   corr_data = full_data %>%
@@ -538,7 +562,8 @@ for(i in dur_vals){
     summarise(correlation = cor.test(ctmax, value)$estimate,
               p.value = cor.test(ctmax, value)$p.value,
               ci_low = cor.test(ctmax, value)$conf.int[1],
-              ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
+              ci_high = cor.test(ctmax, value)$conf.int[2],
+              .groups = "keep") %>% 
     filter(predictor != "collection_temp") %>% 
     mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
     separate(predictor, "_day_", into = c(NA, "parameter")) %>% 
@@ -548,16 +573,16 @@ for(i in dur_vals){
 }
 
 coll_corr = full_data %>%
-    filter(sp_name %in% num_colls$sp_name) %>% 
-    filter(sex == "female") %>% 
-    group_by(sp_name) %>% 
-    summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
-              p.value = cor.test(ctmax, collection_temp)$p.value,
-              ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
-              ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
-    mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
-    mutate(duration = 0,
-           parameter = "coll_temp")
+  filter(sp_name %in% num_colls$sp_name) %>% 
+  filter(sex == "female") %>% 
+  group_by(sp_name) %>% 
+  summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
+            p.value = cor.test(ctmax, collection_temp)$p.value,
+            ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
+            ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
+  mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
+  mutate(duration = 0,
+         parameter = "coll_temp")
 
 corr_vals = corr_vals %>%  
   mutate(duration = as.numeric(duration)) %>% 
@@ -566,10 +591,10 @@ corr_vals = corr_vals %>%
 
 ``` r
 corr_vals %>% 
-mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
-                                            "mean", "med", "var",
-                                            "mean_min", "mean_max", "mean_range"))) %>% 
-ggplot(aes(x = duration, y = correlation, colour = sp_name)) + 
+  mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
+                                              "mean", "med", "var",
+                                              "mean_min", "mean_max", "mean_range"))) %>% 
+  ggplot(aes(x = duration, y = correlation, colour = sp_name)) + 
   facet_wrap(.~parameter) + 
   geom_hline(yintercept = 0) + 
   geom_point(size = 0.9) + 
@@ -612,23 +637,23 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-|           Species           | Predictor | Duration | Correlation |  P-Value  |
-|:---------------------------:|:---------:|:--------:|:-----------:|:---------:|
-|     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
-|     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
-|     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7500915  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    9     |  0.7497274  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7496009  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.4935826  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    max    |    3     |  0.4929877  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    max    |    2     |  0.4905206  | 0.0000000 |
-|    Limnocalanus macrurus    |    max    |    16    |  0.4416032  | 0.0396343 |
-|    Limnocalanus macrurus    |    max    |    15    |  0.4412186  | 0.0398270 |
-|    Limnocalanus macrurus    |    max    |    14    |  0.4410677  | 0.0399028 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.7889442  | 0.0000000 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.7825976  | 0.0000000 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7818669  | 0.0000000 |
+|           Species           | Predictor | Duration | Correlation | P-Value  |
+|:---------------------------:|:---------:|:--------:|:-----------:|:--------:|
+|     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.00e+00 |
+|     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.00e+00 |
+|     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.00e+00 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7500915  | 0.00e+00 |
+|   Leptodiaptomus minutus    |    max    |    9     |  0.7497274  | 0.00e+00 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7496009  | 0.00e+00 |
+|   Leptodiaptomus sicilis    |    max    |    4     |  0.4656244  | 0.00e+00 |
+|   Leptodiaptomus sicilis    |    max    |    3     |  0.4654356  | 0.00e+00 |
+|   Leptodiaptomus sicilis    |    max    |    2     |  0.4632291  | 0.00e+00 |
+|    Limnocalanus macrurus    | mean_min  |    1     |  0.6898831  | 3.47e-05 |
+|    Limnocalanus macrurus    |    min    |    1     |  0.6880796  | 3.70e-05 |
+|    Limnocalanus macrurus    | mean_min  |    3     |  0.6840514  | 4.29e-05 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.7889442  | 0.00e+00 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.7825976  | 0.00e+00 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7818669  | 0.00e+00 |
 
 Phenotypic variation (like acclimation of thermal limits) is a
 physiological process. depending on the mechanistic underpinnings
@@ -837,81 +862,6 @@ The estimated ARR values were generally highly similar between the model
 types used.
 
 ``` r
-coef_model_data = full_data %>% 
-  group_by(sp_name, sex) %>% 
-  filter(n() > 3 & !str_detect(sp_name, pattern = "kindti")) 
-
-coef_n = full_data %>% 
-  group_by(sp_name, sex) %>% 
-  filter(n() > 5) %>% 
-  summarise(sample_n = n(), 
-            mean_ctmax = mean(ctmax))
-
-ARR_vals = coef_model_data %>% 
-  do(broom::tidy(lm(ctmax ~ collection_temp + size, data = .))) %>% 
-  filter(term == "collection_temp") %>% 
-  select(sp_name, sex, "ARR" = estimate, std.error) %>% 
-  arrange(ARR) %>% 
-  inner_join(coef_n, by = c("sp_name", "sex"))
-  
-ARR_vals %>% 
-  select("Species" = sp_name, 
-         "Group" = sex, 
-         "N" = sample_n,
-         ARR, 
-         "Error" = std.error) %>% 
-  knitr::kable()
-```
-
-| Species                     | Group    |   N |        ARR |     Error |
-|:----------------------------|:---------|----:|-----------:|----------:|
-| Epischura lacustris         | juvenile |  18 | -0.0001189 | 0.1057432 |
-| Leptodiaptomus sicilis      | juvenile |  20 |  0.1214402 | 0.4491227 |
-| Leptodiaptomus minutus      | male     |  33 |  0.2098892 | 0.0282213 |
-| Skistodiaptomus oregonensis | male     |  28 |  0.2135073 | 0.0367337 |
-| Limnocalanus macrurus       | female   |  22 |  0.2154396 | 0.1411879 |
-| Leptodiaptomus minutus      | female   | 205 |  0.2477718 | 0.0172982 |
-| Leptodiaptomus sicilis      | female   | 159 |  0.2823607 | 0.0386111 |
-| Epischura lacustris         | male     |  19 |  0.3199615 | 0.0254948 |
-| Skistodiaptomus oregonensis | female   | 191 |  0.3487211 | 0.0222074 |
-| Leptodiaptomus sicilis      | male     |  55 |  0.3491718 | 0.1080161 |
-| Limnocalanus macrurus       | male     |  22 |  0.3718830 | 0.1578877 |
-| Skistodiaptomus oregonensis | juvenile |  14 |  0.3813308 | 0.0971708 |
-| Epischura lacustris         | female   |  45 |  0.4372314 | 0.0449520 |
-| Leptodiaptomus minutus      | juvenile |  11 |  0.4819851 | 0.0931804 |
-
-``` r
-
-mle.model = lmer(data = model_data,
-     ctmax ~ collection_temp + size + sex + (size + collection_temp|sex:sp_name))
-
-mle_coefs = coefficients(mle.model)$`sex:sp_name` %>% 
-  mutate("group" = rownames(.)) %>% 
-  select(group, "intercept" = "(Intercept)", "ARR" = collection_temp, size) %>% 
-  separate(group, into = c("sex", "species"), sep = ":", remove = TRUE) %>% 
-  remove_rownames()
-
-mle_ARR = mle_coefs %>%  
-  select(sp_name = species, sex, ARR) %>% 
-  mutate("model" = "mixed effects")  %>% 
-  inner_join(coef_n, by = c("sp_name", "sex"))
-
-ARR_comp = bind_rows(mle_ARR, 
-                     mutate(ARR_vals, "model" = "linear"))
-
-ARR_comp %>% 
-ggplot(aes(x = model, y = ARR, group = sp_name)) + 
-  facet_grid(sp_name~sex) +
-  geom_point(size = 3) + 
-  geom_line(linewidth = 1.5) + 
-  scale_y_continuous(breaks = c(0, 0.5, 1)) + 
-  theme_matt_facets() + 
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
-```
-
-<img src="../Figures/markdown/arr-comp-plot-1.png" style="display: block; margin: auto;" />
-
-``` r
 coef_plot = mle_ARR %>% 
   mutate("abbr" = case_when(
     sp_name == "Epischura lacustris" ~ "E. lac",
@@ -924,7 +874,7 @@ coef_plot = mle_ARR %>%
   # geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),
   #               width = 0.35, linewidth = 1, position = position_dodge(width = 0.5)) + 
   geom_point(size = 5,
-    position = position_dodge(width = 0.5)) + 
+             position = position_dodge(width = 0.5)) + 
   scale_colour_manual(values = species_cols) + 
   guides(colour = "none") + 
   labs(x = "Species", 
@@ -939,7 +889,7 @@ coef_lim_plot = ggplot(mle_ARR, aes(x = mean_ctmax, y = ARR)) +
   #               width = 0.5, linewidth = 1, position = position_dodge(width = 0.5)) + 
   geom_point(aes(colour = sp_name, shape = sex ),
              size = 5,
-    position = position_dodge(width = 0.5)) +
+             position = position_dodge(width = 0.5)) +
   scale_colour_manual(values = species_cols) + 
   guides(colour = "none") + 
   labs(x = "Mean CTmax (°C)", 
@@ -977,10 +927,10 @@ knitr::kable(sex_sample_sizes, align = "c")
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    18    |   45   |  19  |
 |   Leptodiaptomus minutus    |    10    |  205   |  33  |
-|   Leptodiaptomus sicilis    |    20    |  159   |  55  |
-|    Limnocalanus macrurus    |    2     |   22   |  22  |
+|   Leptodiaptomus sicilis    |    25    |  174   |  64  |
+|    Limnocalanus macrurus    |    2     |   29   |  24  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
-|    Senecella calanoides     |    0     |   5    |  0   |
+|    Senecella calanoides     |    1     |   4    |  1   |
 | Skistodiaptomus oregonensis |    14    |  190   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
@@ -1032,14 +982,9 @@ A relationship between size and upper thermal limits has been suggested
 in a wide range of other taxa. Shown below are the measured upper
 thermal limits plotted against prosome length. The overall relationship
 (inclusive of all species) is shown as the black line in the background.
-Regressions for each individual species are also shown. For the three
-diaptomids and *Epischura* there is a slight negative relationship
-between size and thermal limits. However, across the entire assemblage,
-there is a slight increase in thermal limits with increasing size. This
-may, however, be due to the relative overrepresentation of larger summer
-species like *Skistodiaptomus*. Increasing the measurements on larger,
-cold-water species like *L. sicilis* and *Limnocalanus* may alter this
-observed pattern.
+Regressions for each individual species are also shown. Across the
+entire assemblage, there is a strong decrease in thermal limits with
+increasing size.
 
 ``` r
 
@@ -1051,7 +996,7 @@ full_data %>%
               method = "lm", 
               colour ="black", 
               linewidth = 2.5) + 
-  geom_point(size = 2, alpha = 0.8) + 
+  geom_point(size = 2, alpha = 0.3) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   labs(x = "Length (mm)", 
        y = "CTmax (°C)",
@@ -1092,10 +1037,10 @@ full_data %>%
   group_by(sp_name, sex) %>% 
   summarize(mean_ctmax = mean(ctmax, na.rm = T),
             mean_size = mean(size, na.rm = T)) %>% 
-  filter(sex == "female") %>% 
+  #filter(sex == "female") %>% 
   ggplot(aes(x = mean_size, y = mean_ctmax)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2, colour = "black") + 
-  geom_point(aes(colour = sp_name),
+  geom_point(aes(colour = sp_name, shape = sex),
              size = 5) + 
   labs(x = "Length (mm)", 
        y = "CTmax (°C)",
@@ -1113,7 +1058,7 @@ classic pattern of increasing egg production with increasing size.
 ``` r
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-ggplot(aes(x = size, y = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = size, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
   labs(x = "Prosome length (mm)", 

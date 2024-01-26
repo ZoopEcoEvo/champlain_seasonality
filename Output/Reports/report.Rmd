@@ -194,8 +194,11 @@ ggplot() +
   #                   colour = sp_name),
   #               position = position_dodge(width = 1),
   #               width = 5, linewidth = 1) +
-  geom_point(data = adult_summaries, 
-             aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
+  # geom_point(data = adult_summaries, 
+  #            aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
+  geom_point(data = full_data, 
+             aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
+             size = 2, position = position_jitter(width = 1, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Date", 
        y = "Temperature (°C)", 
@@ -270,6 +273,30 @@ size_feature = full_data %>%
 
 ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "none")
 ```
+
+```{r sp-props, fig.width = 12, fig.height = 5}
+adult_summaries %>% 
+  ungroup() %>% 
+  mutate(collection_num = as.numeric(factor(collection_date))) %>% 
+  group_by(collection_date) %>%  
+  arrange(collection_date) %>% 
+  select(sp_name, collection_date, collection_num, sample_size) %>% 
+  mutate(sample_size = replace_na(sample_size, 0)) %>% 
+  mutate(total = sum(sample_size),
+         percentage = sample_size / total,
+         collection_date = lubridate::as_date(collection_date)) %>% 
+  ggplot(aes(x = collection_date, y = percentage, fill = sp_name)) + 
+  geom_area() + 
+  scale_fill_manual(values = species_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Species") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
+```
+
 
 ## Temperature Variability
 Lake Champlain is highly seasonal, with both average temperatures and temperature variability changing throughout the year. These patterns in the experienced thermal environment may drive the observed variation in copepod thermal limits. However, the time period affecting copepod thermal limits is unknown. Depending the on the duration of time considered, there are large changes in the experienced environment, in particular regarding the temperature range and variance. Consider for example three time periods: the day of collection, one week prior to collection, and four weeks prior to collection. While the overall pattern is similar, we can see that, unsurprisingly, considering longer periods of time results in larger ranges and slightly changes the pattern of variance experienced. 
@@ -518,7 +545,7 @@ one_week_temp_circle = ggplot(one_week_doy_data, aes(x = seven_day_mean_max, y =
     high = "dodgerblue4",
     mid = "coral2",
     low = "dodgerblue4",
-      midpoint = 182.5) + 
+    midpoint = 182.5) + 
   labs(x = "Max. Temp. (°C)",
        y = "Min. Temp. (°C)") + 
   labs(x = "Max. Temp. (°C)",
@@ -535,7 +562,7 @@ four_week_temp_circle = ggplot(four_week_doy_data, aes(x = `twenty-eight_day_max
     high = "dodgerblue4",
     mid = "coral2",
     low = "dodgerblue4",
-      midpoint = 182.5) + 
+    midpoint = 182.5) + 
   labs(x = "Max. Temp. (°C)",
        y = "Min. Temp. (°C)") + 
   ggtitle("Four Week") + 
@@ -551,7 +578,7 @@ We can see that, in general, copepods are responding to proximate cues from the 
 
 ```{r}
 ### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
-  
+
 num_colls = full_data %>% 
   filter(sex == "female") %>% 
   select(collection_date, sp_name) %>%  
@@ -565,8 +592,8 @@ dur_vals = c(1:50)
 for(i in dur_vals){
   
   duration_temps = get_predictors(daily_values = daily_temp_data, 
-                             raw_temp = temp_data, 
-                             n_days = i) %>% 
+                                  raw_temp = temp_data, 
+                                  n_days = i) %>% 
     filter(date %in% as_date(unique(full_data$collection_date)))
   
   corr_data = full_data %>%
@@ -581,7 +608,8 @@ for(i in dur_vals){
     summarise(correlation = cor.test(ctmax, value)$estimate,
               p.value = cor.test(ctmax, value)$p.value,
               ci_low = cor.test(ctmax, value)$conf.int[1],
-              ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
+              ci_high = cor.test(ctmax, value)$conf.int[2],
+              .groups = "keep") %>% 
     filter(predictor != "collection_temp") %>% 
     mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
     separate(predictor, "_day_", into = c(NA, "parameter")) %>% 
@@ -591,16 +619,16 @@ for(i in dur_vals){
 }
 
 coll_corr = full_data %>%
-    filter(sp_name %in% num_colls$sp_name) %>% 
-    filter(sex == "female") %>% 
-    group_by(sp_name) %>% 
-    summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
-              p.value = cor.test(ctmax, collection_temp)$p.value,
-              ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
-              ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
-    mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
-    mutate(duration = 0,
-           parameter = "coll_temp")
+  filter(sp_name %in% num_colls$sp_name) %>% 
+  filter(sex == "female") %>% 
+  group_by(sp_name) %>% 
+  summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
+            p.value = cor.test(ctmax, collection_temp)$p.value,
+            ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
+            ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
+  mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
+  mutate(duration = 0,
+         parameter = "coll_temp")
 
 corr_vals = corr_vals %>%  
   mutate(duration = as.numeric(duration)) %>% 
@@ -610,10 +638,10 @@ corr_vals = corr_vals %>%
 
 ```{r fig.width=10, fig.height=6}
 corr_vals %>% 
-mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
-                                            "mean", "med", "var",
-                                            "mean_min", "mean_max", "mean_range"))) %>% 
-ggplot(aes(x = duration, y = correlation, colour = sp_name)) + 
+  mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
+                                              "mean", "med", "var",
+                                              "mean_min", "mean_max", "mean_range"))) %>% 
+  ggplot(aes(x = duration, y = correlation, colour = sp_name)) + 
   facet_wrap(.~parameter) + 
   geom_hline(yintercept = 0) + 
   geom_point(size = 0.9) + 
@@ -676,7 +704,6 @@ corr_vals %>%
        colour = "Species") + 
   theme_matt() + 
   theme(legend.position = "right")
-
 ```
 
 
@@ -802,16 +829,19 @@ full_data %>%
 
 ```{r ctmax-range-plot, include = F}
 full_data %>%  
+  filter(sex == "female") %>% 
   group_by(sp_name, collection_date, collection_temp) %>%  
   summarise("ctmax_range" = max(ctmax) - min(ctmax),
-            "ctmax_var" = var(ctmax)) %>% 
+            "ctmax_var" = var(ctmax),
+            "sample_size" = n()) %>% 
   ungroup() %>% 
   group_by(sp_name) %>% 
-  filter(n() > 5) %>% 
+  filter(sp_name != "Leptodora kindti") %>% 
+  filter(sample_size > 3) %>% 
   ggplot(aes(x = collection_temp, y = ctmax_var, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
-  geom_smooth(method = "lm") + 
   geom_point() + 
+  geom_smooth(method = "lm", colour = "black") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt_facets()
 ```
@@ -825,8 +855,8 @@ model_data = full_data %>%
   mutate(temp_cent = scale(collection_temp, center = T, scale = F),
          size_cent = scale(size, center = T, scale = F))
 
-ctmax_temp.model = lm(data = model_data, ctmax ~ collection_temp * sp_name)
-size_temp.model = lm(data = model_data, size ~ collection_temp * sp_name )
+ctmax_temp.model = lm(data = model_data, ctmax ~ temp_cent * sp_name)
+size_temp.model = lm(data = model_data, size ~ collection_temp * sp_name)
 
 knitr::kable(car::Anova(ctmax_temp.model))
 
@@ -851,22 +881,20 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
 
 ```{r include = F}
 full.model = lme4::lmer(data = model_data,
-           ctmax ~ temp_cent + size_cent + days_in_lab + 
-             (1 + temp_cent + size_cent|sp_name:sex))
+                        ctmax ~ sex + temp_cent + size_cent +
+                          (1 + days_in_lab + temp_cent + size_cent|sp_name:sex))
 
 car::Anova(full.model)
+
+fixed = fixef(full.model)
 
 model_coefs = coefficients(full.model)$`sp_name:sex` %>%  
   rownames_to_column(var = "species") %>% 
   separate(species, into = c("species", "sex"), sep = ":") %>% 
   select(species, sex, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
 
-ggplot(model_coefs, aes(x = sex, y = intercept, colour = species)) + 
-  facet_wrap(species~.) + 
-  geom_point(size = 3) + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt_facets() + 
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+ggplot(model_coefs, aes(x = days_in_lab)) + 
+  geom_histogram()
 
 ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
   geom_smooth(method = "lm", colour = "black") +
@@ -882,7 +910,7 @@ ggplot(model_coefs, aes(x = intercept, y = temp_cent)) +
 
 The term "acclimation response ratio" is often used to describe the effect of temperature on thermal limits. The ARR is calculated as the change in thermal limits per degree change in acclimation temperature. For our data, we will estimate ARR as the slope of CTmax against collection temperature. These slopes were taken from a regression of CTmax against collection temperature and body size. Two different model types were used, a simple linear regression and a mixed effects model. The estimated ARR values were generally highly similar between the model types used.
 
-```{r arr-comp-plot, fig.width=8, fig.height=10}
+```{r arr-comp-plot, fig.width=8, fig.height=10, include = F}
 coef_model_data = full_data %>% 
   group_by(sp_name, sex) %>% 
   filter(n() > 3 & !str_detect(sp_name, pattern = "kindti")) 
@@ -899,7 +927,7 @@ ARR_vals = coef_model_data %>%
   select(sp_name, sex, "ARR" = estimate, std.error) %>% 
   arrange(ARR) %>% 
   inner_join(coef_n, by = c("sp_name", "sex"))
-  
+
 ARR_vals %>% 
   select("Species" = sp_name, 
          "Group" = sex, 
@@ -908,13 +936,10 @@ ARR_vals %>%
          "Error" = std.error) %>% 
   knitr::kable()
 
-mle.model = lmer(data = model_data,
-     ctmax ~ collection_temp + size + sex + (size + collection_temp|sex:sp_name))
-
-mle_coefs = coefficients(mle.model)$`sex:sp_name` %>% 
+mle_coefs = coefficients(full.model)$`sp_name:sex` %>% 
   mutate("group" = rownames(.)) %>% 
-  select(group, "intercept" = "(Intercept)", "ARR" = collection_temp, size) %>% 
-  separate(group, into = c("sex", "species"), sep = ":", remove = TRUE) %>% 
+  select(group, "intercept" = "(Intercept)", "ARR" = temp_cent, size_cent) %>% 
+  separate(group, into = c("species", "sex"), sep = ":", remove = TRUE) %>% 
   remove_rownames()
 
 mle_ARR = mle_coefs %>%  
@@ -926,7 +951,7 @@ ARR_comp = bind_rows(mle_ARR,
                      mutate(ARR_vals, "model" = "linear"))
 
 ARR_comp %>% 
-ggplot(aes(x = model, y = ARR, group = sp_name)) + 
+  ggplot(aes(x = model, y = ARR, group = sp_name)) + 
   facet_grid(sp_name~sex) +
   geom_point(size = 3) + 
   geom_line(linewidth = 1.5) + 
@@ -949,7 +974,7 @@ coef_plot = mle_ARR %>%
   # geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),
   #               width = 0.35, linewidth = 1, position = position_dodge(width = 0.5)) + 
   geom_point(size = 5,
-    position = position_dodge(width = 0.5)) + 
+             position = position_dodge(width = 0.5)) + 
   scale_colour_manual(values = species_cols) + 
   guides(colour = "none") + 
   labs(x = "Species", 
@@ -964,7 +989,7 @@ coef_lim_plot = ggplot(mle_ARR, aes(x = mean_ctmax, y = ARR)) +
   #               width = 0.5, linewidth = 1, position = position_dodge(width = 0.5)) + 
   geom_point(aes(colour = sp_name, shape = sex ),
              size = 5,
-    position = position_dodge(width = 0.5)) +
+             position = position_dodge(width = 0.5)) +
   scale_colour_manual(values = species_cols) + 
   guides(colour = "none") + 
   labs(x = "Mean CTmax (°C)", 
@@ -1058,7 +1083,7 @@ ctmax_resids %>%
 
 ### Trait Correlations and Trade-offs
 
-A relationship between size and upper thermal limits has been suggested in a wide range of other taxa. Shown below are the measured upper thermal limits plotted against prosome length. The overall relationship (inclusive of all species) is shown as the black line in the background. Regressions for each individual species are also shown. For the three diaptomids and *Epischura* there is a slight negative relationship between size and thermal limits. However, across the entire assemblage, there is a slight increase in thermal limits with increasing size. This may, however, be due to the relative overrepresentation of larger summer species like *Skistodiaptomus*. Increasing the measurements on larger, cold-water species like *L. sicilis* and *Limnocalanus* may alter this observed pattern. 
+A relationship between size and upper thermal limits has been suggested in a wide range of other taxa. Shown below are the measured upper thermal limits plotted against prosome length. The overall relationship (inclusive of all species) is shown as the black line in the background. Regressions for each individual species are also shown. Across the entire assemblage, there is a strong decrease in thermal limits with increasing size.  
 
 ```{r ctmax-size, fig.width=10, fig.height=7}
 
@@ -1070,7 +1095,7 @@ full_data %>%
               method = "lm", 
               colour ="black", 
               linewidth = 2.5) + 
-  geom_point(size = 2, alpha = 0.8) + 
+  geom_point(size = 2, alpha = 0.3) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   labs(x = "Length (mm)", 
        y = "CTmax (°C)",
@@ -1078,6 +1103,7 @@ full_data %>%
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
+
 ```
 
 Shown here is the relationship for each species individually. 
@@ -1105,10 +1131,10 @@ full_data %>%
   group_by(sp_name, sex) %>% 
   summarize(mean_ctmax = mean(ctmax, na.rm = T),
             mean_size = mean(size, na.rm = T)) %>% 
-  filter(sex == "female") %>% 
+  #filter(sex == "female") %>% 
   ggplot(aes(x = mean_size, y = mean_ctmax)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2, colour = "black") + 
-  geom_point(aes(colour = sp_name),
+  geom_point(aes(colour = sp_name, shape = sex),
              size = 5) + 
   labs(x = "Length (mm)", 
        y = "CTmax (°C)",
@@ -1137,7 +1163,7 @@ Shown here is the relationship between fecundity and size, showing the classic p
 ```{r fecundity-size, fig.width=10, fig.height=7}
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-ggplot(aes(x = size, y = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = size, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
   labs(x = "Prosome length (mm)", 
@@ -1480,8 +1506,8 @@ ggplot(synthesis, aes(x = doy, y = lim_diff, colour = method)) +
 yearly_summary = synthesis %>%  
   mutate("year" = year(date)) %>% 
   group_by(species, year, method) %>% 
-    summarise("min_wt" = min(lim_diff),
-              "max_wt" = max(lim_diff)) %>% 
+  summarise("min_wt" = min(lim_diff),
+            "max_wt" = max(lim_diff)) %>% 
   pivot_longer(cols = c(min_wt, max_wt), 
                names_to = "metric", 
                values_to = "wt")
