@@ -1,0 +1,11 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
+1/24/24,3,1,1,leptodiaptomus_sicilis,1,86,14,NA,0.998
+1/24/24,3,1,1,leptodiaptomus_sicilis,2,82,36,NA,1.014
+1/24/24,3,1,1,limnocalanus_macrurus,3,62,49,NA,1.407
+1/24/24,3,1,1,leptodiaptomus_sicilis,4,58,22,NA,0.965
+1/24/24,3,1,1,leptodiaptomus_sicilis,5,95,23,6,0.888
+1/24/24,3,1,1,leptodiaptomus_sicilis,6,90,17,NA,0.813
+1/24/24,3,1,1,leptodiaptomus_sicilis,7,99,3,7,0.805
+1/24/24,3,1,1,limnocalanus_macrurus_male,8,53,5,NA,1.25
+1/24/24,3,1,1,skistodiaptomus_oregonensis,9,91,10,NA,0.923
+1/24/24,3,1,1,leptodiaptomus_sicilis,10,87,13,NA,0.79

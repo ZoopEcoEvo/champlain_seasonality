@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-01-25
+2024-01-26
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -11,6 +11,10 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   - [Trait Correlations and
     Trade-offs](#trait-correlations-and-trade-offs)
 - [Other patterns in variation](#other-patterns-in-variation)
+
+``` r
+### To Do 
+```
 
 ## Copepod Collection
 
@@ -38,7 +42,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 32 collections were used to make a total of 903 thermal
+Copepods from 32 collections were used to make a total of 913 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 3 to 26.5°C.
 
@@ -645,15 +649,15 @@ corr_vals %>%
 |   Leptodiaptomus minutus    |    max    |    8     |  0.7500915  | 0.00e+00 |
 |   Leptodiaptomus minutus    |    max    |    9     |  0.7497274  | 0.00e+00 |
 |   Leptodiaptomus minutus    |    max    |    6     |  0.7496009  | 0.00e+00 |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.4656244  | 0.00e+00 |
-|   Leptodiaptomus sicilis    |    max    |    3     |  0.4654356  | 0.00e+00 |
-|   Leptodiaptomus sicilis    |    max    |    2     |  0.4632291  | 0.00e+00 |
-|    Limnocalanus macrurus    | mean_min  |    1     |  0.6898831  | 3.47e-05 |
-|    Limnocalanus macrurus    |    min    |    1     |  0.6880796  | 3.70e-05 |
-|    Limnocalanus macrurus    | mean_min  |    3     |  0.6840514  | 4.29e-05 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.7889442  | 0.00e+00 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.7825976  | 0.00e+00 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7818669  | 0.00e+00 |
+|   Leptodiaptomus sicilis    |    max    |    3     |  0.4606378  | 0.00e+00 |
+|   Leptodiaptomus sicilis    |    max    |    4     |  0.4602316  | 0.00e+00 |
+|   Leptodiaptomus sicilis    |    max    |    2     |  0.4579975  | 0.00e+00 |
+|    Limnocalanus macrurus    | mean_min  |    1     |  0.6897255  | 2.48e-05 |
+|    Limnocalanus macrurus    |    min    |    1     |  0.6880414  | 2.65e-05 |
+|    Limnocalanus macrurus    | mean_min  |    3     |  0.6841532  | 3.06e-05 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.7964802  | 0.00e+00 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.7903638  | 0.00e+00 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7896567  | 0.00e+00 |
 
 Phenotypic variation (like acclimation of thermal limits) is a
 physiological process. depending on the mechanistic underpinnings
@@ -927,11 +931,11 @@ knitr::kable(sex_sample_sizes, align = "c")
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    18    |   45   |  19  |
 |   Leptodiaptomus minutus    |    10    |  205   |  33  |
-|   Leptodiaptomus sicilis    |    25    |  174   |  64  |
-|    Limnocalanus macrurus    |    2     |   29   |  24  |
+|   Leptodiaptomus sicilis    |    25    |  181   |  64  |
+|    Limnocalanus macrurus    |    2     |   30   |  25  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    1     |   4    |  1   |
-| Skistodiaptomus oregonensis |    14    |  190   |  28  |
+| Skistodiaptomus oregonensis |    14    |  191   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
