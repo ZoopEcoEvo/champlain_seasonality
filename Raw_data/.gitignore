@@ -4,3 +4,7 @@
 .Ruserdata
 .DS_Store
 size_images
+*.pdf
+*.phd.1
+*.scf
+*.seq
