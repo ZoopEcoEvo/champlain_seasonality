@@ -13,6 +13,7 @@ library(lme4)
 
 #Determine which scripts should be run
 process_all_data = F #Runs data analysis 
+process_sequences = F #Analyzes the COI sequence data
 make_report = T #Runs project summary
 predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 
 knit_manuscript = F #Compiles manuscript draft
@@ -22,6 +23,7 @@ knit_manuscript = F #Compiles manuscript draft
 ############################
 
 source(file = "Scripts/01_data_processing.R")
+source(file = "Scripts/02_ab1_to_fasta.R")
 
 ##################################
 ### Read in the PROCESSED data ###

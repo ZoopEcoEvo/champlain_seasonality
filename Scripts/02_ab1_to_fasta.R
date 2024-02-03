@@ -1,0 +1,20 @@
+if(process_sequences == T){
+  
+  library(sangeranalyseR)
+  library(msa)
+  library(tidyverse)
+  library(kableExtra)
+  
+  alignments = SangerAlignment(ABIF_Directory      = paste0("Raw_data/sequence_data/"),
+                               processMethod       = "REGEX",
+                               REGEX_SuffixForward = paste0("_F_.*ab1$"),
+                               REGEX_SuffixReverse = paste0("_R_.*ab1$"))
+  
+  writeFasta(alignments, outputDir = paste0("Output/Sequence_data/"))
+  
+  generateReport(alignments,
+                 outputDir = paste0("Output/Sequences/"),
+                 includeSangerRead = T, 
+                 includeSangerContig = F)
+  
+}
