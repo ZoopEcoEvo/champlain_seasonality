@@ -709,34 +709,34 @@ corr_vals %>%
 
 ## Trait Variation 
 ```{r ctmax-and-size-sum-plot, fig.width=20, fig.height=5}
-# ctmax_plot = full_data %>% 
+# ctmax_plot = full_data %>%
 #   mutate( #sp_name = str_replace(sp_name, pattern = " ",
 #     #                              replacement = "\n"),
-#     sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
-#   ggplot(aes(y = sp_name, x = ctmax)) + 
+#     sp_name = fct_reorder(sp_name, ctmax, mean)) %>%
+#   ggplot(aes(y = sp_name, x = ctmax)) +
 #   geom_point(aes(colour= sp_name_sub),
 #              position = position_dodge(width = 0.3),
-#              size = 4) + 
-#   scale_colour_manual(values = species_cols) + 
-#   xlab(NULL) + 
+#              size = 4) +
+#   scale_colour_manual(values = species_cols) +
+#   xlab(NULL) +
 #   labs(y = "",
 #        x = "CTmax (°C)",
-#        colour = "Group") + 
-#   theme_matt() + 
+#        colour = "Group") +
+#   theme_matt() +
 #   theme(legend.position = "none")
 # 
-# size_plot = full_data %>% 
-#   mutate(sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
-#   ggplot(aes(y = sp_name, x = size)) + 
+# size_plot = full_data %>%
+#   mutate(sp_name = fct_reorder(sp_name, ctmax, mean)) %>%
+#   ggplot(aes(y = sp_name, x = size)) +
 #   geom_point(aes(colour= sp_name_sub),
 #              position = position_dodge(width = 0.3),
-#              size = 4) + 
-#   scale_colour_manual(values = species_cols) + 
+#              size = 4) +
+#   scale_colour_manual(values = species_cols) +
 #   labs(x = "Prosome Length (mm)",
-#        y = "", 
-#        colour = "Group") + 
+#        y = "",
+#        colour = "Group") +
 #   guides(color = guide_legend(ncol = 1)) +
-#   theme_matt(base_size = ) + 
+#   theme_matt(base_size = ) +
 #   theme(legend.position = "right",
 #         axis.text.y = element_blank(),
 #         plot.margin = margin(0, 0, 0, 0,"cm"))
@@ -825,6 +825,33 @@ full_data %>%
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "none")
+```
+
+Temperature dependence is relatively weak in *L. sicilis*, especially at cooler temperatures. We will return to this feature later in the report, but for now we will note that there are two size morphs in this species, which appear to respond differently to decreases in temperature. There are significant differences between the morphs and how temperature affects CTmax. 
+
+```{r}
+morph_data = full_data %>% 
+  filter(sex == "female" & sp_name == "Leptodiaptomus sicilis") %>% 
+  mutate(morph = if_else(size > 0.89, "large", "small"))
+
+ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = morph)) + 
+  geom_point(size = 2, alpha = 0.8) + 
+  geom_smooth(method = "lm", se = T, linewidth = 2) + 
+  labs(x = "Collection Temp. (°C)", 
+       y = "CTmax (°C)") + 
+  theme_matt() + 
+  theme(legend.position = "none")
+
+morph.model = lm(data = morph_data, 
+                 ctmax ~ collection_temp * morph)
+
+knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
+
+#summary(morph.model)
+
+#morph.em = emmeans::emmeans(morph.model, pairwise ~ morph)
+
+#plot(morph.em)
 ```
 
 ```{r ctmax-range-plot, include = F}

@@ -10,7 +10,7 @@ if(process_sequences == T){
                                REGEX_SuffixForward = paste0("_F_.*ab1$"),
                                REGEX_SuffixReverse = paste0("_R_.*ab1$"))
   
-  writeFasta(alignments, outputDir = paste0("Output/Sequence_data/"))
+  writeFasta(alignments, outputDir = "Output/Sequences/")
   
   generateReport(alignments,
                  outputDir = paste0("Output/Sequences/"),
