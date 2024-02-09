@@ -906,7 +906,7 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
   theme(legend.position = "none")
 ```
 
-```{r include = F}
+```{r ARR-limits-plot, fig.width=8, fig.height=6}
 full.model = lme4::lmer(data = model_data,
                         ctmax ~ sex + temp_cent + size_cent +
                           (1 + days_in_lab + temp_cent + size_cent|sp_name:sex))
@@ -919,9 +919,6 @@ model_coefs = coefficients(full.model)$`sp_name:sex` %>%
   rownames_to_column(var = "species") %>% 
   separate(species, into = c("species", "sex"), sep = ":") %>% 
   select(species, sex, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
-
-ggplot(model_coefs, aes(x = days_in_lab)) + 
-  geom_histogram()
 
 ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
   geom_smooth(method = "lm", colour = "black") +
@@ -988,7 +985,7 @@ ARR_comp %>%
 
 ```
 
-```{r coef-summary, fig.width=10, fig.height=5}
+```{r coef-summary, fig.width=10, fig.height=5, include = F}
 coef_plot = mle_ARR %>% 
   mutate("abbr" = case_when(
     sp_name == "Epischura lacustris" ~ "E. lac",
@@ -1206,19 +1203,81 @@ Individuals may also allocate energy to different fitness related traits, priori
 ```{r, ctmax-fecundity, fig.width=10, fig.height=7}
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(y = resids, x = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
-  labs(y = "CTmax (°C)", 
-       x = "Fecundity (# Eggs)") + 
+  labs(x = "CTmax Residuals", 
+       y = "Fecundity (# Eggs)") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
+
+fitness.model = lm(data = ctmax_resids, 
+   fecundity ~ resids * sp_name)
+
+car::Anova(fitness.model)
+
+emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ```
 
 ## Other patterns in variation 
 
-*Leptodiaptomus sicilis* is the most abundant species during the winter. There was a large shift in the size of mature females towards the end of December. Pending validation that large and small individuals are the same species, this shift may reflect a transition from one generation to another, suggesting that unlike in other lakes there are two generations of *L. sicilis* per year in Lake Champlain. This size difference may be caused by differences in the developmental environments. For example, individuals developing in January grow up at very low temperatures, and therefore may reach larger sizes. These individuals oversummer in deep waters, then re-emerge in October and produce a new generation. Water temperatures are still fairly high through November, which results in a generation of smaller individuals, which mature in time to produce a new generation in January. 
+*Leptodiaptomus sicilis* is the most abundant species during the winter. There was a large shift in the size of mature females towards the end of December. These large and small individuals are the same species (confirmed via COI sequencing), suggesting this shift may reflect a transition from one generation to another and that, unlike in many other lakes, there are two generations of *L. sicilis* per year in Lake Champlain. This size difference may be caused by differences in the developmental environments. For example, individuals developing in January grow up at very low temperatures, and therefore may reach larger sizes. These individuals oversummer in deep waters, then re-emerge in October and produce a new generation. Water temperatures are still fairly high through November, which results in a generation of smaller individuals, which mature in time to produce a new generation in January. 
+
+Shown below is the distribution of pairwise distances between COI sequences of large and small morphs. Distances in both within- and across-morph comparisons are small. 
+
+```{r}
+ind_dist = dist.dna(sic_dnabin, model = "raw") %>% as.matrix %>% 
+  as_tibble() %>%
+  mutate("ind1" = colnames(.)) %>% 
+  pivot_longer(-ind1, names_to = "ind2", values_to = "dist") %>%
+  mutate(ind1 = factor(ind1),
+         ind2 = factor(ind2)) %>% 
+  filter(!(ind1 == "sore1" | ind2 == "sore1")) %>% 
+  mutate(
+    ind1 = case_when(
+      ind1 == "S1" ~ "small1",
+      ind1 == "S3" ~ "small3",
+      ind1 == "lsic3" ~ "small4",
+      ind1 == "lsic5" ~ "small6",
+      ind1 == "lsic9" ~ "small8",
+      ind1 == "lsic10" ~ "small9",
+      ind1 == "lsic11" ~ "small10",
+      ind1 == "L1" ~ "large1",
+      ind1 == "L2" ~ "large2",
+      ind1 == "L3" ~ "large3",
+      ind1 == "lsic1" ~ "large4",
+      ind1 == "lsic2" ~ "large5",
+      ind1 == "lsic7" ~ "large6",
+      ind1 == "lsic8" ~ "large7"),
+    ind2 = case_when(
+      ind2 == "S1" ~ "small1",
+      ind2 == "S3" ~ "small3",
+      ind2 == "lsic3" ~ "small4",
+      ind2 == "lsic5" ~ "small6",
+      ind2 == "lsic9" ~ "small8",
+      ind2 == "lsic10" ~ "small9",
+      ind2 == "lsic11" ~ "small10",
+      ind2 == "L1" ~ "large1",
+      ind2 == "L2" ~ "large2",
+      ind2 == "L3" ~ "large3",
+      ind2 == "lsic1" ~ "large4",
+      ind2 == "lsic2" ~ "large5",
+      ind2 == "lsic7" ~ "large6",
+      ind2 == "lsic8" ~ "large7"),
+    'comparison' = case_when(
+      str_detect(ind1, pattern = "large") & str_detect(ind2, pattern = "large") ~ "within",
+      str_detect(ind1, pattern = "small") & str_detect(ind2, pattern = "small") ~ "within", 
+      str_detect(ind1, pattern = "large") & str_detect(ind2, pattern = "small") ~ "across",
+      str_detect(ind1, pattern = "small") & str_detect(ind2, pattern = "large") ~ "across"
+    )) 
+
+ggplot(ind_dist, aes(dist, fill = comparison)) +
+  geom_histogram(binwidth = 0.005) + 
+  labs(x = "Distance") + 
+  theme_matt()
+```
+
 
 ```{r}
 full_data %>%  

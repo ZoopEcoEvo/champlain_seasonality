@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-02-02
+2024-02-08
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -42,9 +42,9 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 32 collections were used to make a total of 932 thermal
+Copepods from 34 collections were used to make a total of 951 thermal
 limit measurements. Over this time period, collection temperatures
-ranged from 3 to 26.5°C.
+ranged from 2.5 to 26.5°C.
 
 There is substantial variation in thermal limits across the species
 collected. There is also some degree of variation within the species,
@@ -649,12 +649,12 @@ corr_vals %>%
 |   Leptodiaptomus minutus    |    max    |    8     |  0.7500915  | 0.00e+00 |
 |   Leptodiaptomus minutus    |    max    |    9     |  0.7497274  | 0.00e+00 |
 |   Leptodiaptomus minutus    |    max    |    6     |  0.7496009  | 0.00e+00 |
-|   Leptodiaptomus sicilis    |    max    |    4     |  0.3737923  | 1.00e-07 |
-|   Leptodiaptomus sicilis    |    max    |    2     |  0.3726513  | 1.00e-07 |
-|   Leptodiaptomus sicilis    |    max    |    5     |  0.3718793  | 1.00e-07 |
-|    Limnocalanus macrurus    | mean_min  |    1     |  0.6474168  | 8.26e-05 |
-|    Limnocalanus macrurus    |    min    |    1     |  0.6460416  | 8.65e-05 |
-|    Limnocalanus macrurus    | mean_min  |    3     |  0.6423878  | 9.77e-05 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3482356  | 3.00e-07 |
+|   Leptodiaptomus sicilis    |    var    |    20    |  0.3477437  | 3.00e-07 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3441275  | 4.00e-07 |
+|    Limnocalanus macrurus    | mean_max  |    18    |  0.6359677  | 9.16e-05 |
+|    Limnocalanus macrurus    | mean_max  |    17    |  0.6354300  | 9.33e-05 |
+|    Limnocalanus macrurus    | mean_max  |    16    |  0.6347446  | 9.54e-05 |
 | Skistodiaptomus oregonensis |    max    |    2     |  0.7964802  | 0.00e+00 |
 | Skistodiaptomus oregonensis |    max    |    1     |  0.7903638  | 0.00e+00 |
 | Skistodiaptomus oregonensis | mean_max  |    2     |  0.7896567  | 0.00e+00 |
@@ -694,34 +694,34 @@ corr_vals %>%
 ## Trait Variation
 
 ``` r
-# ctmax_plot = full_data %>% 
+# ctmax_plot = full_data %>%
 #   mutate( #sp_name = str_replace(sp_name, pattern = " ",
 #     #                              replacement = "\n"),
-#     sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
-#   ggplot(aes(y = sp_name, x = ctmax)) + 
+#     sp_name = fct_reorder(sp_name, ctmax, mean)) %>%
+#   ggplot(aes(y = sp_name, x = ctmax)) +
 #   geom_point(aes(colour= sp_name_sub),
 #              position = position_dodge(width = 0.3),
-#              size = 4) + 
-#   scale_colour_manual(values = species_cols) + 
-#   xlab(NULL) + 
+#              size = 4) +
+#   scale_colour_manual(values = species_cols) +
+#   xlab(NULL) +
 #   labs(y = "",
 #        x = "CTmax (°C)",
-#        colour = "Group") + 
-#   theme_matt() + 
+#        colour = "Group") +
+#   theme_matt() +
 #   theme(legend.position = "none")
 # 
-# size_plot = full_data %>% 
-#   mutate(sp_name = fct_reorder(sp_name, ctmax, mean)) %>% 
-#   ggplot(aes(y = sp_name, x = size)) + 
+# size_plot = full_data %>%
+#   mutate(sp_name = fct_reorder(sp_name, ctmax, mean)) %>%
+#   ggplot(aes(y = sp_name, x = size)) +
 #   geom_point(aes(colour= sp_name_sub),
 #              position = position_dodge(width = 0.3),
-#              size = 4) + 
-#   scale_colour_manual(values = species_cols) + 
+#              size = 4) +
+#   scale_colour_manual(values = species_cols) +
 #   labs(x = "Prosome Length (mm)",
-#        y = "", 
-#        colour = "Group") + 
+#        y = "",
+#        colour = "Group") +
 #   guides(color = guide_legend(ncol = 1)) +
-#   theme_matt(base_size = ) + 
+#   theme_matt(base_size = ) +
 #   theme(legend.position = "right",
 #         axis.text.y = element_blank(),
 #         plot.margin = margin(0, 0, 0, 0,"cm"))
@@ -833,6 +833,54 @@ full_data %>%
 
 <img src="../Figures/markdown/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
 
+Temperature dependence is relatively weak in *L. sicilis*, especially at
+cooler temperatures. We will return to this feature later in the report,
+but for now we will note that there are two size morphs in this species,
+which appear to respond differently to decreases in temperature. There
+are significant differences between the morphs and how temperature
+affects CTmax.
+
+``` r
+morph_data = full_data %>% 
+  filter(sex == "female" & sp_name == "Leptodiaptomus sicilis") %>% 
+  mutate(morph = if_else(size > 0.89, "large", "small"))
+
+ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = morph)) + 
+  geom_point(size = 2, alpha = 0.8) + 
+  geom_smooth(method = "lm", se = T, linewidth = 2) + 
+  labs(x = "Collection Temp. (°C)", 
+       y = "CTmax (°C)") + 
+  theme_matt() + 
+  theme(legend.position = "none")
+```
+
+<img src="../Figures/markdown/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+morph.model = lm(data = morph_data, 
+                 ctmax ~ collection_temp * morph)
+
+knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
+```
+
+|                       |     Sum Sq |  Df |    F value |   Pr(\>F) |
+|:----------------------|-----------:|----:|-----------:|----------:|
+| (Intercept)           | 7103.89877 |   1 | 3376.12219 | 0.0000000 |
+| collection_temp       |  103.51196 |   1 |   49.19398 | 0.0000000 |
+| morph                 |   51.46089 |   1 |   24.45675 | 0.0000016 |
+| collection_temp:morph |   26.55122 |   1 |   12.61845 | 0.0004744 |
+| Residuals             |  429.24849 | 204 |         NA |        NA |
+
+``` r
+
+#summary(morph.model)
+
+#morph.em = emmeans::emmeans(morph.model, pairwise ~ morph)
+
+#plot(morph.em)
+```
+
 Copepods spent several days in lab during experiments. Shown below are
 the CTmax residuals (taken from a model of CTmax against collection
 temperature) plotted against the time spent in lab before measurements
@@ -855,6 +903,42 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
 
 <img src="../Figures/markdown/ctmax-time-in-lab-1.png" style="display: block; margin: auto;" />
 
+``` r
+full.model = lme4::lmer(data = model_data,
+                        ctmax ~ sex + temp_cent + size_cent +
+                          (1 + days_in_lab + temp_cent + size_cent|sp_name:sex))
+
+car::Anova(full.model)
+## Analysis of Deviance Table (Type II Wald chisquare tests)
+## 
+## Response: ctmax
+##             Chisq Df Pr(>Chisq)    
+## sex        3.7503  2   0.153335    
+## temp_cent 81.3763  1  < 2.2e-16 ***
+## size_cent  6.9407  1   0.008426 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+fixed = fixef(full.model)
+
+model_coefs = coefficients(full.model)$`sp_name:sex` %>%  
+  rownames_to_column(var = "species") %>% 
+  separate(species, into = c("species", "sex"), sep = ":") %>% 
+  select(species, sex, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
+
+ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
+  geom_smooth(method = "lm", colour = "black") +
+  geom_point(aes(colour = species, shape = sex),
+             size = 6) + 
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Species Intercept", 
+       y = "ARR") +
+  theme_matt() + 
+  theme(legend.position = "right")
+```
+
+<img src="../Figures/markdown/ARR-limits-plot-1.png" style="display: block; margin: auto;" />
+
 The term “acclimation response ratio” is often used to describe the
 effect of temperature on thermal limits. The ARR is calculated as the
 change in thermal limits per degree change in acclimation temperature.
@@ -864,48 +948,6 @@ CTmax against collection temperature and body size. Two different model
 types were used, a simple linear regression and a mixed effects model.
 The estimated ARR values were generally highly similar between the model
 types used.
-
-``` r
-coef_plot = mle_ARR %>% 
-  mutate("abbr" = case_when(
-    sp_name == "Epischura lacustris" ~ "E. lac",
-    sp_name == "Leptodiaptomus minutus" ~ "L. min", 
-    sp_name == "Skistodiaptomus oregonensis" ~ "S. ore",
-    sp_name == "Leptodiaptomus sicilis" ~ "L. sic",
-    sp_name == "Limnocalanus macrurus" ~ "L. mac"
-  )) %>% 
-  ggplot(aes(x = abbr, y = ARR, colour = sp_name, shape = sex)) + 
-  # geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),
-  #               width = 0.35, linewidth = 1, position = position_dodge(width = 0.5)) + 
-  geom_point(size = 5,
-             position = position_dodge(width = 0.5)) + 
-  scale_colour_manual(values = species_cols) + 
-  guides(colour = "none") + 
-  labs(x = "Species", 
-       y = "ARR", 
-       shape = "Group") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-
-coef_lim_plot = ggplot(mle_ARR, aes(x = mean_ctmax, y = ARR)) + 
-  geom_smooth(method = "lm", colour = "grey70", se = F, linewidth = 2) + 
-  # geom_errorbar(aes(colour = sp_name, ymin = ARR - std.error, ymax = ARR + std.error),
-  #               width = 0.5, linewidth = 1, position = position_dodge(width = 0.5)) + 
-  geom_point(aes(colour = sp_name, shape = sex ),
-             size = 5,
-             position = position_dodge(width = 0.5)) +
-  scale_colour_manual(values = species_cols) + 
-  guides(colour = "none") + 
-  labs(x = "Mean CTmax (°C)", 
-       y = "ARR", 
-       shape = "Group") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-
-ggarrange(coef_plot, coef_lim_plot, common.legend = T, legend = "right")
-```
-
-<img src="../Figures/markdown/coef-summary-1.png" style="display: block; margin: auto;" />
 
 ### Sex and stage variation in thermal limits
 
@@ -931,10 +973,10 @@ knitr::kable(sex_sample_sizes, align = "c")
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    18    |   45   |  19  |
 |   Leptodiaptomus minutus    |    10    |  205   |  33  |
-|   Leptodiaptomus sicilis    |    25    |  198   |  64  |
-|    Limnocalanus macrurus    |    2     |   31   |  26  |
+|   Leptodiaptomus sicilis    |    28    |  208   |  64  |
+|    Limnocalanus macrurus    |    2     |   32   |  27  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
-|    Senecella calanoides     |    1     |   4    |  1   |
+|    Senecella calanoides     |    1     |   6    |  3   |
 | Skistodiaptomus oregonensis |    14    |  191   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
@@ -1086,11 +1128,11 @@ trade-off between these traits.
 ``` r
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(y = resids, x = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
-  labs(y = "CTmax (°C)", 
-       x = "Fecundity (# Eggs)") + 
+  labs(x = "CTmax Residuals", 
+       y = "Fecundity (# Eggs)") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
@@ -1098,21 +1140,106 @@ ctmax_resids %>%
 
 <img src="../Figures/markdown/ctmax-fecundity-1.png" style="display: block; margin: auto;" />
 
+``` r
+
+fitness.model = lm(data = ctmax_resids, 
+   fecundity ~ resids * sp_name)
+
+car::Anova(fitness.model)
+## Anova Table (Type II tests)
+## 
+## Response: fecundity
+##                Sum Sq  Df  F value    Pr(>F)    
+## resids            0.9   1   0.0494  0.824349    
+## sp_name        7960.7   2 217.3168 < 2.2e-16 ***
+## resids:sp_name  196.0   2   5.3511  0.005316 ** 
+## Residuals      4469.1 244                       
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+emmeans::emtrends(fitness.model,  var = "resids","sp_name")
+##  sp_name                     resids.trend    SE  df lower.CL upper.CL
+##  Leptodiaptomus minutus            0.5038 0.301 244  -0.0885    1.096
+##  Leptodiaptomus sicilis           -0.0149 0.363 244  -0.7292    0.699
+##  Skistodiaptomus oregonensis      -1.2129 0.430 244  -2.0606   -0.365
+## 
+## Confidence level used: 0.95
+```
+
 ## Other patterns in variation
 
 *Leptodiaptomus sicilis* is the most abundant species during the winter.
 There was a large shift in the size of mature females towards the end of
-December. Pending validation that large and small individuals are the
-same species, this shift may reflect a transition from one generation to
-another, suggesting that unlike in other lakes there are two generations
-of *L. sicilis* per year in Lake Champlain. This size difference may be
-caused by differences in the developmental environments. For example,
-individuals developing in January grow up at very low temperatures, and
-therefore may reach larger sizes. These individuals oversummer in deep
-waters, then re-emerge in October and produce a new generation. Water
-temperatures are still fairly high through November, which results in a
-generation of smaller individuals, which mature in time to produce a new
-generation in January.
+December. These large and small individuals are the same species
+(confirmed via COI sequencing), suggesting this shift may reflect a
+transition from one generation to another and that, unlike in many other
+lakes, there are two generations of *L. sicilis* per year in Lake
+Champlain. This size difference may be caused by differences in the
+developmental environments. For example, individuals developing in
+January grow up at very low temperatures, and therefore may reach larger
+sizes. These individuals oversummer in deep waters, then re-emerge in
+October and produce a new generation. Water temperatures are still
+fairly high through November, which results in a generation of smaller
+individuals, which mature in time to produce a new generation in
+January.
+
+Shown below is the distribution of pairwise distances between COI
+sequences of large and small morphs. Distances in both within- and
+across-morph comparisons are small.
+
+``` r
+ind_dist = dist.dna(sic_dnabin, model = "raw") %>% as.matrix %>% 
+  as_tibble() %>%
+  mutate("ind1" = colnames(.)) %>% 
+  pivot_longer(-ind1, names_to = "ind2", values_to = "dist") %>%
+  mutate(ind1 = factor(ind1),
+         ind2 = factor(ind2)) %>% 
+  filter(!(ind1 == "sore1" | ind2 == "sore1")) %>% 
+  mutate(
+    ind1 = case_when(
+      ind1 == "S1" ~ "small1",
+      ind1 == "S3" ~ "small3",
+      ind1 == "lsic3" ~ "small4",
+      ind1 == "lsic5" ~ "small6",
+      ind1 == "lsic9" ~ "small8",
+      ind1 == "lsic10" ~ "small9",
+      ind1 == "lsic11" ~ "small10",
+      ind1 == "L1" ~ "large1",
+      ind1 == "L2" ~ "large2",
+      ind1 == "L3" ~ "large3",
+      ind1 == "lsic1" ~ "large4",
+      ind1 == "lsic2" ~ "large5",
+      ind1 == "lsic7" ~ "large6",
+      ind1 == "lsic8" ~ "large7"),
+    ind2 = case_when(
+      ind2 == "S1" ~ "small1",
+      ind2 == "S3" ~ "small3",
+      ind2 == "lsic3" ~ "small4",
+      ind2 == "lsic5" ~ "small6",
+      ind2 == "lsic9" ~ "small8",
+      ind2 == "lsic10" ~ "small9",
+      ind2 == "lsic11" ~ "small10",
+      ind2 == "L1" ~ "large1",
+      ind2 == "L2" ~ "large2",
+      ind2 == "L3" ~ "large3",
+      ind2 == "lsic1" ~ "large4",
+      ind2 == "lsic2" ~ "large5",
+      ind2 == "lsic7" ~ "large6",
+      ind2 == "lsic8" ~ "large7"),
+    'comparison' = case_when(
+      str_detect(ind1, pattern = "large") & str_detect(ind2, pattern = "large") ~ "within",
+      str_detect(ind1, pattern = "small") & str_detect(ind2, pattern = "small") ~ "within", 
+      str_detect(ind1, pattern = "large") & str_detect(ind2, pattern = "small") ~ "across",
+      str_detect(ind1, pattern = "small") & str_detect(ind2, pattern = "large") ~ "across"
+    )) 
+
+ggplot(ind_dist, aes(dist, fill = comparison)) +
+  geom_histogram(binwidth = 0.005) + 
+  labs(x = "Distance") + 
+  theme_matt()
+```
+
+<img src="../Figures/markdown/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
@@ -1131,7 +1258,7 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
@@ -1151,7 +1278,7 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
 ``` r
 if(predict_vuln == F){

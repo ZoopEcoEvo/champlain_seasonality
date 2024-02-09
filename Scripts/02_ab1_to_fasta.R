@@ -1,6 +1,7 @@
 if(process_sequences == T){
   
   library(sangeranalyseR)
+  library(seqinr)
   library(msa)
   library(tidyverse)
   library(kableExtra)
@@ -16,5 +17,6 @@ if(process_sequences == T){
                  outputDir = paste0("Output/Sequences/"),
                  includeSangerRead = T, 
                  includeSangerContig = F)
-  
 }
+
+
