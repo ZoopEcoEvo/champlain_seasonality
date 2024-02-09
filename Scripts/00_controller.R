@@ -10,8 +10,7 @@ library(lubridate)
 library(slider)
 library(english)
 library(lme4)
-library(pegas)
-library(adegenet)
+
 
 
 #Determine which scripts should be run

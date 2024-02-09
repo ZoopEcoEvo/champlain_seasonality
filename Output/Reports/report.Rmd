@@ -1227,7 +1227,7 @@ emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 Shown below is the distribution of pairwise distances between COI sequences of large and small morphs. Distances in both within- and across-morph comparisons are small. 
 
 ```{r}
-ind_dist = dist.dna(sic_dnabin, model = "raw") %>% as.matrix %>% 
+ind_dist = ape::dist.dna(sic_dnabin, model = "raw") %>% as.matrix %>% 
   as_tibble() %>%
   mutate("ind1" = colnames(.)) %>% 
   pivot_longer(-ind1, names_to = "ind2", values_to = "dist") %>%

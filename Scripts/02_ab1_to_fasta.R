@@ -5,6 +5,8 @@ if(process_sequences == T){
   library(msa)
   library(tidyverse)
   library(kableExtra)
+  library(pegas)
+  library(adegenet)
   
   alignments = SangerAlignment(ABIF_Directory      = paste0("Raw_data/sequence_data/"),
                                processMethod       = "REGEX",
