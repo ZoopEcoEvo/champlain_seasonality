@@ -11,8 +11,6 @@ library(slider)
 library(english)
 library(lme4)
 
-
-
 #Determine which scripts should be run
 process_all_data = F #Runs data analysis 
 process_sequences = F #Analyzes the COI sequence data
@@ -43,7 +41,7 @@ full_data = read.csv(file = "Output/Data/full_data.csv") %>%
 hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
   mutate(date = as_date(date))
 
-sic_dnabin = fasta2DNAbin(file = "Output/Sequences/Sanger_contigs_alignment.fa")
+sic_dnabin = adegenet::fasta2DNAbin(file = "Output/Sequences/Sanger_contigs_alignment.fa")
 
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
