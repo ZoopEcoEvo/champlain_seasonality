@@ -1,0 +1,11 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
+3/4/24,4,1,1,leptodiaptomus_sicilis,1,67,48,7,1.012
+3/4/24,4,1,1,leptodiaptomus_sicilis,2,70,1,8,0.734
+3/4/24,4,1,1,leptodiaptomus_sicilis,3,67,12,8,0.826
+3/4/24,4,1,1,leptodiaptomus_sicilis,4,75,47,6,0.803
+3/4/24,4,1,1,senecella_calanoides,5,52,57,NA,2.312
+3/4/24,4,1,1,limnocalanus_macrurus,6,56,52,NA,1.494
+3/4/24,4,1,1,limnocalanus_macrurus,7,56,5,NA,1.489
+3/4/24,4,1,1,senecella_calanoides_male,8,43,4,NA,1.988
+3/4/24,4,1,1,limnocalanus_macrurus,9,53,5,NA,1.406
+3/4/24,4,1,1,epischura_lacustris_juvenile,10,37,23,NA,0.674
