@@ -1,0 +1,4 @@
+"collection_date","collection_temp","exp_date","days_in_lab","run","experiment","replicate","species","tube","rank","size","fecundity","time","ramp_rate","ctmax","warming_tol"
+2024-03-04,4,2024-03-05,1,106,1,1,"limnocalanus_macrurus_male",2,1,1.466,NA,39.8166666666667,0.317832167832169,22.2291666666667,18.2291666666667
+2024-03-04,4,2024-03-05,1,106,1,1,"limnocalanus_macrurus_male",7,3,1.32,NA,32.0833333333333,0.323251748251744,19.796875,15.796875
+2024-03-04,4,2024-03-05,1,106,1,1,"epischura_lacustris_juvenile",10,2,0.8,NA,33.3333333333333,0.307342657342656,20.21875,16.21875

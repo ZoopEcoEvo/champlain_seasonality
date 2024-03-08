@@ -1061,12 +1061,12 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-```{r ctmax-stage, fig.width=3, fig.height=6}
+```{r ctmax-stage, fig.width=7, fig.height=7}
 ctmax_resids %>% 
   filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0 & Female > 0)$Species & 
            sex != "male") %>% 
   ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
-  facet_wrap(sp_name~., ncol = 1) + 
+  facet_wrap(sp_name~., ncol = 2) + 
   geom_smooth(method = "lm", se = F, linewidth = 1) + 
   geom_point(size = 3,
              alpha = 0.5,

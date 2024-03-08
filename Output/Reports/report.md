@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-03-04
+2024-03-08
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -11,10 +11,6 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   - [Trait Correlations and
     Trade-offs](#trait-correlations-and-trade-offs)
 - [Other patterns in variation](#other-patterns-in-variation)
-
-``` r
-### To Do 
-```
 
 ## Copepod Collection
 
@@ -42,7 +38,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 37 collections were used to make a total of 1030 thermal
+Copepods from 37 collections were used to make a total of 1046 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -641,23 +637,26 @@ corr_vals %>%
   knitr::kable(align = "c")
 ```
 
-|           Species           | Predictor | Duration | Correlation | P-Value  |
-|:---------------------------:|:---------:|:--------:|:-----------:|:--------:|
-|     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.00e+00 |
-|     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.00e+00 |
-|     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.00e+00 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7500915  | 0.00e+00 |
-|   Leptodiaptomus minutus    |    max    |    9     |  0.7497274  | 0.00e+00 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7496009  | 0.00e+00 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3406818  | 0.00e+00 |
-|   Leptodiaptomus sicilis    |   range   |    18    |  0.3362965  | 0.00e+00 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3362833  | 0.00e+00 |
-|    Limnocalanus macrurus    |    max    |    8     |  0.6091092  | 3.87e-05 |
-|    Limnocalanus macrurus    | mean_min  |    1     |  0.6077878  | 4.07e-05 |
-|    Limnocalanus macrurus    |    max    |    7     |  0.6073892  | 4.13e-05 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.7964802  | 0.00e+00 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.7903638  | 0.00e+00 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7896567  | 0.00e+00 |
+|           Species           | Predictor | Duration | Correlation |  P-Value  |
+|:---------------------------:|:---------:|:--------:|:-----------:|:---------:|
+|     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
+|     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
+|     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7513012  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7509629  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7508760  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3452512  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    24    |  0.3418488  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3417073  | 0.0000000 |
+|    Limnocalanus macrurus    |    max    |    8     |  0.6102854  | 0.0000227 |
+|    Limnocalanus macrurus    |    max    |    7     |  0.6087217  | 0.0000241 |
+|    Limnocalanus macrurus    | mean_min  |    1     |  0.6079027  | 0.0000249 |
+|    Senecella calanoides     | mean_max  |    5     |  0.5434258  | 0.0445959 |
+|    Senecella calanoides     |    max    |    4     |  0.5402865  | 0.0460906 |
+|    Senecella calanoides     |    max    |    5     |  0.5402865  | 0.0460906 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.7964802  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.7903638  | 0.0000000 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7896567  | 0.0000000 |
 
 Phenotypic variation (like acclimation of thermal limits) is a
 physiological process. depending on the mechanistic underpinnings
@@ -866,11 +865,11 @@ knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 
 |                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:----------------------|------------:|----:|------------:|----------:|
-| (Intercept)           | 10140.78252 |   1 | 3794.139616 | 0.0000000 |
-| collection_temp       |   103.93628 |   1 |   38.887410 | 0.0000000 |
-| morph                 |    37.37196 |   1 |   13.982591 | 0.0002294 |
-| collection_temp:morph |    15.91287 |   1 |    5.953746 | 0.0153901 |
-| Residuals             |   660.16898 | 247 |          NA |        NA |
+| (Intercept)           | 10775.18816 |   1 | 4043.224310 | 0.0000000 |
+| collection_temp       |   116.21769 |   1 |   43.608909 | 0.0000000 |
+| morph                 |    43.59700 |   1 |   16.359106 | 0.0000699 |
+| collection_temp:morph |    18.19148 |   1 |    6.826073 | 0.0095278 |
+| Residuals             |   666.24971 | 250 |          NA |        NA |
 
 ``` r
 
@@ -913,9 +912,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex        1.4704  2     0.4794    
-## temp_cent 50.6301  1  1.115e-12 ***
-## size_cent  2.0195  1     0.1553    
+## sex        1.7921  2    0.40818    
+## temp_cent 47.6375  1  5.128e-12 ***
+## size_cent  3.4494  1    0.06327 .  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -971,12 +970,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    19    |   45   |  19  |
-|   Leptodiaptomus minutus    |    10    |  205   |  33  |
-|   Leptodiaptomus sicilis    |    31    |  251   |  73  |
-|    Limnocalanus macrurus    |    2     |   39   |  30  |
+|     Epischura lacustris     |    20    |   45   |  19  |
+|   Leptodiaptomus minutus    |    10    |  206   |  33  |
+|   Leptodiaptomus sicilis    |    31    |  254   |  75  |
+|    Limnocalanus macrurus    |    2     |   41   |  33  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
-|    Senecella calanoides     |    1     |   13   |  8   |
+|    Senecella calanoides     |    1     |   14   |  8   |
 | Skistodiaptomus oregonensis |    14    |  191   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
@@ -1007,7 +1006,7 @@ ctmax_resids %>%
   filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0 & Female > 0)$Species & 
            sex != "male") %>% 
   ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
-  facet_wrap(sp_name~., ncol = 1) + 
+  facet_wrap(sp_name~., ncol = 2) + 
   geom_smooth(method = "lm", se = F, linewidth = 1) + 
   geom_point(size = 3,
              alpha = 0.5,
@@ -1150,18 +1149,18 @@ car::Anova(fitness.model)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            1.5   1   0.0868  0.768553    
-## sp_name        8183.9   2 238.5296 < 2.2e-16 ***
-## resids:sp_name  195.9   2   5.7085  0.003739 ** 
-## Residuals      4546.0 265                       
+## resids            4.2   1   0.2441  0.621663    
+## sp_name        8204.4   2 237.3688 < 2.2e-16 ***
+## resids:sp_name  196.9   2   5.6966  0.003779 ** 
+## Residuals      4614.3 267                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.5038 0.291 265  -0.0692    1.077
-##  Leptodiaptomus sicilis           -0.0454 0.279 265  -0.5957    0.505
-##  Skistodiaptomus oregonensis      -1.2129 0.416 265  -2.0329   -0.393
+##  Leptodiaptomus minutus             0.505 0.292 267  -0.0696    1.080
+##  Leptodiaptomus sicilis            -0.131 0.276 267  -0.6742    0.413
+##  Skistodiaptomus oregonensis       -1.213 0.418 267  -2.0359   -0.390
 ## 
 ## Confidence level used: 0.95
 ```
