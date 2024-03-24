@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-03-14
+2024-03-24
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -42,7 +42,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 38 collections were used to make a total of 1066 thermal
+Copepods from 39 collections were used to make a total of 1086 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -646,15 +646,15 @@ corr_vals %>%
 |     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
 |     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
 |     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7525474  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7523480  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7522122  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    24    |  0.3541739  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3539331  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3501043  | 0.0000000 |
-|    Limnocalanus macrurus    |    max    |    8     |  0.6102854  | 0.0000227 |
-|    Limnocalanus macrurus    |    max    |    7     |  0.6087217  | 0.0000241 |
-|    Limnocalanus macrurus    | mean_min  |    1     |  0.6079027  | 0.0000249 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7547703  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7547371  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7545529  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3468229  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    24    |  0.3457819  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3435719  | 0.0000000 |
+|    Limnocalanus macrurus    |    max    |    8     |  0.5542854  | 0.0001397 |
+|    Limnocalanus macrurus    |    max    |    7     |  0.5539836  | 0.0001412 |
+|    Limnocalanus macrurus    | mean_min  |    6     |  0.5530991  | 0.0001454 |
 |    Senecella calanoides     | mean_max  |    5     |  0.5434258  | 0.0445959 |
 |    Senecella calanoides     |    max    |    4     |  0.5402865  | 0.0460906 |
 |    Senecella calanoides     |    max    |    5     |  0.5402865  | 0.0460906 |
@@ -869,11 +869,11 @@ knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 
 |                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:----------------------|------------:|----:|------------:|----------:|
-| (Intercept)           | 11105.45340 |   1 | 4082.232114 | 0.0000000 |
-| collection_temp       |   114.17857 |   1 |   41.970681 | 0.0000000 |
-| morph                 |    34.39153 |   1 |   12.641917 | 0.0004463 |
-| collection_temp:morph |    13.84109 |   1 |    5.087821 | 0.0249072 |
-| Residuals             |   723.63612 | 266 |          NA |        NA |
+| (Intercept)           | 11346.62713 |   1 | 4238.107970 | 0.0000000 |
+| collection_temp       |   115.44002 |   1 |   43.118298 | 0.0000000 |
+| morph                 |    36.75982 |   1 |   13.730254 | 0.0002546 |
+| collection_temp:morph |    14.76000 |   1 |    5.513046 | 0.0195762 |
+| Residuals             |   744.28551 | 278 |          NA |        NA |
 
 ``` r
 
@@ -916,9 +916,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex        2.3886  2     0.3029    
-## temp_cent 46.2212  1  1.056e-11 ***
-## size_cent  2.5871  1     0.1077    
+## sex        2.8465  2     0.2409    
+## temp_cent 42.1916  1  8.275e-11 ***
+## size_cent  2.0467  1     0.1525    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -974,10 +974,10 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    20    |   45   |  19  |
-|   Leptodiaptomus minutus    |    10    |  207   |  33  |
-|   Leptodiaptomus sicilis    |    31    |  270   |  75  |
-|    Limnocalanus macrurus    |    2     |   41   |  36  |
+|     Epischura lacustris     |    22    |   45   |  19  |
+|   Leptodiaptomus minutus    |    10    |  209   |  33  |
+|   Leptodiaptomus sicilis    |    31    |  282   |  78  |
+|    Limnocalanus macrurus    |    2     |   42   |  36  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    1     |   14   |  8   |
 | Skistodiaptomus oregonensis |    14    |  191   |  28  |
@@ -1153,18 +1153,18 @@ car::Anova(fitness.model)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            5.0   1   0.2949  0.587541    
-## sp_name        8258.5   2 245.7994 < 2.2e-16 ***
-## resids:sp_name  197.6   2   5.8809  0.003151 ** 
-## Residuals      4670.2 278                       
+## resids            4.5   1   0.2756  0.600038    
+## sp_name        8291.3   2 252.5993 < 2.2e-16 ***
+## resids:sp_name  197.7   2   6.0234  0.002739 ** 
+## Residuals      4693.8 286                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus             0.507 0.288 278  -0.0595    1.074
-##  Leptodiaptomus sicilis            -0.140 0.258 278  -0.6479    0.368
-##  Skistodiaptomus oregonensis       -1.213 0.412 278  -2.0242   -0.402
+##  Leptodiaptomus minutus             0.508 0.284 286  -0.0515    1.068
+##  Leptodiaptomus sicilis            -0.129 0.250 286  -0.6217    0.364
+##  Skistodiaptomus oregonensis       -1.213 0.407 286  -2.0147   -0.411
 ## 
 ## Confidence level used: 0.95
 ```
