@@ -12,7 +12,7 @@ library(english)
 library(lme4)
 
 #Determine which scripts should be run
-process_all_data = F #Runs data analysis 
+process_all_data = T #Runs data analysis 
 process_sequences = F #Analyzes the COI sequence data
 make_report = T #Runs project summary
 predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 

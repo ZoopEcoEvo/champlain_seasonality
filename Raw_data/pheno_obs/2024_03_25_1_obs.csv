@@ -1,0 +1,10 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
+3/24/24,3,1,1,leptodiaptomus_sicilis_male,1,109,13,NA,0.775
+3/24/24,3,1,1,leptodiaptomus_sicilis,2,117,57,NA,0.701
+3/24/24,3,1,1,leptodiaptomus_sicilis,3,110,55,NA,0.765
+3/24/24,3,1,1,leptodiaptomus_minutus_male,4,113,7,NA,0.62
+3/24/24,3,1,1,leptodiaptomus_sicilis,5,104,0,NA,0.834
+3/24/24,3,1,1,leptodiaptomus_minutus_male,7,111,55,NA,0.715
+3/24/24,3,1,1,leptodiaptomus_sicilis_male,8,105,49,NA,0.763
+3/24/24,3,1,1,leptodiaptomus_minutus,9,114,36,NA,0.724
+3/24/24,3,1,1,leptodiaptomus_minutus_male,10,108,16,NA,0.666

@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-03-25
+2024-03-26
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -42,7 +42,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 40 collections were used to make a total of 1105 thermal
+Copepods from 40 collections were used to make a total of 1114 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -646,12 +646,12 @@ corr_vals %>%
 |     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
 |     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
 |     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7665589  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7664842  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7662607  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    24    |  0.3545218  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3517243  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3516818  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7605586  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7605197  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7603574  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    24    |  0.3488609  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3467020  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3465359  | 0.0000000 |
 |    Limnocalanus macrurus    |    max    |    8     |  0.5542854  | 0.0001397 |
 |    Limnocalanus macrurus    |    max    |    7     |  0.5539836  | 0.0001412 |
 |    Limnocalanus macrurus    | mean_min  |    6     |  0.5530991  | 0.0001454 |
@@ -869,11 +869,11 @@ knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 
 |                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:----------------------|------------:|----:|------------:|----------:|
-| (Intercept)           | 11346.62713 |   1 | 3939.925538 | 0.0000000 |
-| collection_temp       |   115.44002 |   1 |   40.084605 | 0.0000000 |
-| morph                 |    30.09872 |   1 |   10.451275 | 0.0013696 |
-| collection_temp:morph |    12.05424 |   1 |    4.185633 | 0.0416857 |
-| Residuals             |   820.77407 | 285 |          NA |        NA |
+| (Intercept)           | 11347.53433 |   1 | 3992.080203 | 0.0000000 |
+| collection_temp       |   115.36469 |   1 |   40.585479 | 0.0000000 |
+| morph                 |    31.66015 |   1 |   11.138090 | 0.0009561 |
+| collection_temp:morph |    12.72393 |   1 |    4.476297 | 0.0352204 |
+| Residuals             |   824.32837 | 290 |          NA |        NA |
 
 ``` r
 
@@ -916,9 +916,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex        2.5972  2     0.2729    
-## temp_cent 47.1794  1  6.478e-12 ***
-## size_cent  1.6555  1     0.1982    
+## sex        3.0993  2     0.2123    
+## temp_cent 43.2445  1  4.831e-11 ***
+## size_cent  2.0728  1     0.1499    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -975,8 +975,8 @@ knitr::kable(sex_sample_sizes, align = "c")
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    22    |   45   |  19  |
-|   Leptodiaptomus minutus    |    10    |  211   |  33  |
-|   Leptodiaptomus sicilis    |    31    |  289   |  85  |
+|   Leptodiaptomus minutus    |    11    |  212   |  36  |
+|   Leptodiaptomus sicilis    |    31    |  294   |  89  |
 |    Limnocalanus macrurus    |    2     |   42   |  36  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    1     |   16   |  8   |
@@ -1153,18 +1153,18 @@ car::Anova(fitness.model)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            5.6   1   0.3428  0.558645    
-## sp_name        8356.9   2 257.5428 < 2.2e-16 ***
-## resids:sp_name  195.2   2   6.0166  0.002752 ** 
-## Residuals      4721.3 291                       
+## resids            4.8   1   0.2961  0.586782    
+## sp_name        8334.1   2 257.0889 < 2.2e-16 ***
+## resids:sp_name  200.5   2   6.1864  0.002338 ** 
+## Residuals      4716.7 291                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus             0.497 0.283 291  -0.0594    1.054
-##  Leptodiaptomus sicilis            -0.139 0.246 291  -0.6240    0.346
-##  Skistodiaptomus oregonensis       -1.213 0.405 291  -2.0100   -0.416
+##  Leptodiaptomus minutus             0.517 0.282 291  -0.0378    1.072
+##  Leptodiaptomus sicilis            -0.142 0.247 291  -0.6269    0.344
+##  Skistodiaptomus oregonensis       -1.213 0.405 291  -2.0097   -0.416
 ## 
 ## Confidence level used: 0.95
 ```
