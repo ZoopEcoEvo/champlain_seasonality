@@ -1213,7 +1213,7 @@ ctmax_resids %>%
   theme(legend.position = "right")
 
 fitness.model = lm(data = ctmax_resids, 
-   fecundity ~ resids * sp_name)
+                   fecundity ~ resids * sp_name)
 
 car::Anova(fitness.model)
 
@@ -1282,10 +1282,11 @@ ggplot(ind_dist, aes(dist, fill = comparison)) +
 ```{r}
 full_data %>%  
   filter(sp_name == "Leptodiaptomus sicilis") %>% 
-  filter(sex == "female") %>% 
+  filter(sex != "juvenile") %>% 
   group_by(collection_date) %>% 
   mutate(size_center = scale(size, center = T, scale = F)) %>% 
   ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  facet_wrap(sex~.) + 
   geom_density_ridges(bandwidth = 0.04) + 
   geom_vline(xintercept = 0.89) + 
   labs(x = "Size (mm)",
@@ -1299,10 +1300,9 @@ full_data %>%
 ```{r}
 full_data %>%  
   filter(sp_name == "Leptodiaptomus minutus") %>% 
-  filter(sex == "female") %>% 
-  group_by(collection_date) %>% 
-  mutate(size_center = scale(size, center = T, scale = F)) %>% 
+  filter(sex != "juvenile") %>% 
   ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  facet_wrap(sex~.) + 
   geom_density_ridges(bandwidth = 0.04) + 
   geom_vline(xintercept = 0.69) + 
   labs(x = "Size (mm)",

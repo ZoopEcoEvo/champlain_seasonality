@@ -12,7 +12,7 @@ library(english)
 library(lme4)
 
 #Determine which scripts should be run
-process_all_data = T #Runs data analysis 
+process_all_data = F #Runs data analysis 
 process_sequences = F #Analyzes the COI sequence data
 make_report = T #Runs project summary
 predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 
@@ -29,7 +29,8 @@ source(file = "Scripts/02_ab1_to_fasta.R")
 ### Read in the PROCESSED data ###
 ##################################
 
-full_data = read.csv(file = "Output/Data/full_data.csv") %>% 
+full_data = read.csv(file = "Output/Data/full_data.csv") %>%  
+  drop_na(ctmax) %>% 
   mutate("sp_name_sub" = str_replace_all(species, pattern = "_", replacement = " "),
          sp_name_sub = str_to_sentence(sp_name_sub), 
          "sp_name" = word(sp_name_sub, start = 1, end = 2),

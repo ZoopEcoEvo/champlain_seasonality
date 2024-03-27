@@ -1,0 +1,7 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
+3/24/24,3,1,1,senecella_calanoides,1,42,40,NA,2.387
+3/24/24,3,1,1,senecella_calanoides,3,44,25,NA,2.338
+3/24/24,3,1,1,leptodiaptomus_minutus,5,55,7,NA,0.7
+3/24/24,3,1,1,senecella_calanoides,7,43,40,NA,2.127
+3/24/24,3,1,1,leptodiaptomus_minutus,9,66,42,NA,0.75
+3/24/24,3,1,1,leptodiaptomus_minutus,10,65,48,NA,0.612
