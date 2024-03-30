@@ -295,6 +295,107 @@ adult_summaries %>%
   theme_minimal(base_size = 20) + 
   theme(panel.grid = element_blank(),
         axis.ticks = element_line())
+
+pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
+
+full_data %>% 
+  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
+  group_by() %>% 
+  filter(sex != "juvenile") %>% 
+  group_by(collection_date) %>% 
+  count(pathogen) %>% 
+  filter(pathogen != "uncertain") %>% 
+  pivot_wider(id_cols = "collection_date", 
+              names_from = pathogen, 
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(total = sum(no, cloudy, spot, other)) %>% 
+  pivot_longer(cols = c(no, cloudy, spot, other),
+               names_to = "pathogen", 
+               values_to = "count") %>% 
+  mutate(percent = count/total,
+         collection_date = lubridate::as_date(collection_date),
+         pathogen = fct_relevel(pathogen, "no", "cloudy", "spot", "other")) %>% 
+  ggplot(aes(x = collection_date, y = percent, fill = pathogen)) + 
+  geom_area() + 
+  scale_fill_manual(values = pathogen_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Pathogen") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
+
+dev_eggs_cols = c("no" = "grey95", "yes" = "lightblue3")
+
+full_data %>% 
+  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
+  group_by(sp_name) %>% 
+  filter(sex != "juvenile") %>% 
+  group_by(sp_name, collection_date) %>% 
+  count(dev_eggs) %>% 
+  filter(dev_eggs != "uncertain") %>% 
+  pivot_wider(id_cols = c("collection_date", "sp_name"), 
+              names_from = dev_eggs, 
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(total = sum(no, yes)) %>% 
+  pivot_longer(cols = c(no, yes),
+               names_to = "dev_eggs", 
+               values_to = "count") %>% 
+  mutate(percent = count/total,
+         collection_date = lubridate::as_date(collection_date),
+         dev_eggs = fct_relevel(dev_eggs, "no", "yes")) %>% 
+  ungroup() %>% 
+  complete(collection_date, nesting(sp_name, dev_eggs), fill = list(percent = 1)) %>% 
+  mutate(percent = if_else(is.na(total) & dev_eggs == "yes", 0, percent)) %>% 
+  ggplot(aes(x = collection_date, y = percent, fill = dev_eggs)) + 
+  facet_wrap(sp_name~., ncol = 1) + 
+  geom_area() + 
+  scale_fill_manual(values = dev_eggs_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Developing \nEggs") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
+
+lipid_cols = c("no" = "grey95", "yes" = "sienna2")
+
+full_data %>% 
+  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
+  group_by(sp_name) %>% 
+  filter(sex != "juvenile") %>% 
+  group_by(sp_name, collection_date) %>% 
+  count(lipids) %>% 
+  filter(lipids != "uncertain") %>% 
+  pivot_wider(id_cols = c("collection_date", "sp_name"), 
+              names_from = lipids, 
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(total = sum(no, yes)) %>% 
+  pivot_longer(cols = c(no, yes),
+               names_to = "lipids", 
+               values_to = "count") %>% 
+  mutate(percent = count/total,
+         collection_date = lubridate::as_date(collection_date),
+         lipids = fct_relevel(lipids, "no", "yes")) %>% 
+  ungroup() %>% 
+  complete(collection_date, nesting(sp_name, lipids), fill = list(percent = 1)) %>% 
+  mutate(percent = if_else(is.na(total) & lipids == "yes", 0, percent)) %>% 
+  ggplot(aes(x = collection_date, y = percent, fill = lipids)) + 
+  facet_wrap(sp_name~., ncol = 1) + 
+  geom_area() + 
+  scale_fill_manual(values = lipid_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Lipids\nPresent") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
 ```
 
 
@@ -906,23 +1007,38 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
   theme(legend.position = "none")
 ```
 
+```{r include = F}
+ctmax_resids %>% 
+  filter(lipids != "uncertain") %>% 
+ggplot(aes(x = lipids, y = resids, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_smooth(method = "lm", se = F, linewidth = 1) + 
+  #scale_x_continuous(breaks = c(0:5)) + 
+  labs(x = "Days in lab", 
+       y = "CTmax Residuals") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt_facets() + 
+  theme(legend.position = "none")
+```
+
 ```{r ARR-limits-plot, fig.width=8, fig.height=6}
 full.model = lme4::lmer(data = model_data,
                         ctmax ~ sex + temp_cent + size_cent +
-                          (1 + days_in_lab + temp_cent + size_cent|sp_name:sex))
+                          (1 + days_in_lab + temp_cent + size_cent|sp_name))
 
 car::Anova(full.model)
 
 fixed = fixef(full.model)
 
-model_coefs = coefficients(full.model)$`sp_name:sex` %>%  
+model_coefs = coefficients(full.model)$`sp_name` %>%  
   rownames_to_column(var = "species") %>% 
-  separate(species, into = c("species", "sex"), sep = ":") %>% 
-  select(species, sex, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
+  separate(species, into = c("species"), sep = ":") %>% 
+  select(species, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
 
 ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
   geom_smooth(method = "lm", colour = "black") +
-  geom_point(aes(colour = species, shape = sex),
+  geom_point(aes(colour = species),
              size = 6) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Species Intercept", 
@@ -960,16 +1076,15 @@ ARR_vals %>%
          "Error" = std.error) %>% 
   knitr::kable()
 
-mle_coefs = coefficients(full.model)$`sp_name:sex` %>% 
+mle_coefs = coefficients(full.model)$`sp_name` %>% 
   mutate("group" = rownames(.)) %>% 
   select(group, "intercept" = "(Intercept)", "ARR" = temp_cent, size_cent) %>% 
-  separate(group, into = c("species", "sex"), sep = ":", remove = TRUE) %>% 
   remove_rownames()
 
 mle_ARR = mle_coefs %>%  
-  select(sp_name = species, sex, ARR) %>% 
+  select(sp_name = group, ARR) %>% 
   mutate("model" = "mixed effects")  %>% 
-  inner_join(coef_n, by = c("sp_name", "sex"))
+  inner_join(coef_n, by = c("sp_name"))
 
 ARR_comp = bind_rows(mle_ARR, 
                      mutate(ARR_vals, "model" = "linear"))
@@ -983,46 +1098,6 @@ ARR_comp %>%
   theme_matt_facets() + 
   theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
 
-```
-
-```{r coef-summary, fig.width=10, fig.height=5, include = F}
-coef_plot = mle_ARR %>% 
-  mutate("abbr" = case_when(
-    sp_name == "Epischura lacustris" ~ "E. lac",
-    sp_name == "Leptodiaptomus minutus" ~ "L. min", 
-    sp_name == "Skistodiaptomus oregonensis" ~ "S. ore",
-    sp_name == "Leptodiaptomus sicilis" ~ "L. sic",
-    sp_name == "Limnocalanus macrurus" ~ "L. mac"
-  )) %>% 
-  ggplot(aes(x = abbr, y = ARR, colour = sp_name, shape = sex)) + 
-  # geom_errorbar(aes(ymin = ARR - std.error, ymax = ARR + std.error),
-  #               width = 0.35, linewidth = 1, position = position_dodge(width = 0.5)) + 
-  geom_point(size = 5,
-             position = position_dodge(width = 0.5)) + 
-  scale_colour_manual(values = species_cols) + 
-  guides(colour = "none") + 
-  labs(x = "Species", 
-       y = "ARR", 
-       shape = "Group") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-
-coef_lim_plot = ggplot(mle_ARR, aes(x = mean_ctmax, y = ARR)) + 
-  geom_smooth(method = "lm", colour = "grey70", se = F, linewidth = 2) + 
-  # geom_errorbar(aes(colour = sp_name, ymin = ARR - std.error, ymax = ARR + std.error),
-  #               width = 0.5, linewidth = 1, position = position_dodge(width = 0.5)) + 
-  geom_point(aes(colour = sp_name, shape = sex ),
-             size = 5,
-             position = position_dodge(width = 0.5)) +
-  scale_colour_manual(values = species_cols) + 
-  guides(colour = "none") + 
-  labs(x = "Mean CTmax (°C)", 
-       y = "ARR", 
-       shape = "Group") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-
-ggarrange(coef_plot, coef_lim_plot, common.legend = T, legend = "right")
 ```
 
 ### Sex and stage variation in thermal limits 

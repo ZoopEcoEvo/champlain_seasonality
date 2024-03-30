@@ -1,5 +1,5 @@
-"collection_date","collection_temp","exp_date","days_in_lab","run","experiment","replicate","species","tube","rank","size","fecundity","time","ramp_rate","ctmax","warming_tol"
-2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus",1,2,0.675,10,36.8833333333333,0.210839160839153,33.0625,8.5625
-2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus",2,3,0.71,11,34.0333333333333,0.202272727272722,32.4722222222222,7.97222222222222
-2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus_male",3,4,0.612,NA,33,0.203452797202794,32.2375,7.7375
-2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus_male",4,1,0.623,NA,38.8833333333333,0.211363636363627,33.4791666666667,8.97916666666666
+"collection_date","collection_temp","exp_date","days_in_lab","run","experiment","replicate","species","tube","rank","size","fecundity","dev_eggs","pathogen","lipids","time","ramp_rate","ctmax","warming_tol"
+2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus",1,2,0.675,10,"no","no","no",36.8833333333333,0.210839160839153,33.0625,8.5625
+2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus",2,3,0.71,11,"no","no","yes",34.0333333333333,0.202272727272722,32.4722222222222,7.97222222222222
+2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus_male",3,4,0.612,NA,"no","no","no",33,0.203452797202794,32.2375,7.7375
+2023-07-13,24.5,2023-07-13,0,19,1,1,"leptodiaptomus_minutus_male",4,1,0.623,NA,"no","cloudy","no",38.8833333333333,0.211363636363627,33.4791666666667,8.97916666666666

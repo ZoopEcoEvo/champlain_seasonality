@@ -1,11 +1,11 @@
-﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
-5/30/23,13.5,1,2,limnocalanus_macrurus,1,49,53,NA,1.24
-5/30/23,13.5,1,2,leptodiaptomus_sicilis,2,67,53,NA,1.135
-5/30/23,13.5,1,2,limnocalanus_macrurus_juvenile,3,50,19,NA,1.015
-5/30/23,13.5,1,2,limnocalanus_macrurus,4,35,32,NA,1.191
-5/30/23,13.5,1,2,limnocalanus_macrurus,5,52,24,NA,1.235
-5/30/23,13.5,1,2,limnocalanus_macrurus_male,6,45,15,NA,1.171
-5/30/23,13.5,1,2,senecella_calanoides_juvenile,7,43,32,NA,1.011
-5/30/23,13.5,1,2,limnocalanus_macrurus_juvenile,8,42,16,NA,0.963
-5/30/23,13.5,1,2,epischura_lacustris_male,9,77,4,NA,1.043
-5/30/23,13.5,1,2,epischura_lacustris_juvenile,10,80,27,NA,0.78
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size,dev_eggs,pathogen,lipids
+5/30/23,13.5,1,2,limnocalanus_macrurus,1,49,53,NA,1.24,no,no,no
+5/30/23,13.5,1,2,leptodiaptomus_sicilis,2,67,53,NA,1.135,yes,no,yes
+5/30/23,13.5,1,2,limnocalanus_macrurus_juvenile,3,50,19,NA,1.015,no,no,no
+5/30/23,13.5,1,2,limnocalanus_macrurus,4,35,32,NA,1.191,no,no,no
+5/30/23,13.5,1,2,limnocalanus_macrurus,5,52,24,NA,1.235, no,no,no
+5/30/23,13.5,1,2,limnocalanus_macrurus_male,6,45,15,NA,1.171,no,no,no
+5/30/23,13.5,1,2,senecella_calanoides_juvenile,7,43,32,NA,1.011,no,no,no
+5/30/23,13.5,1,2,limnocalanus_macrurus_juvenile,8,42,16,NA,0.963,no,no,no
+5/30/23,13.5,1,2,epischura_lacustris_male,9,77,4,NA,1.043,no,no,no
+5/30/23,13.5,1,2,epischura_lacustris_juvenile,10,80,27,NA,0.78,no,no,no

@@ -73,7 +73,7 @@ if(length(new_runs) > 0){ # If there are new data files to process...
     ct_data = inner_join(time_data, ind_measurements, by = c("tube")) %>% 
       mutate(run = run_id, 
              warming_tol = ctmax - collection_temp) %>% 
-      select(collection_date, collection_temp, exp_date, days_in_lab, run, experiment, replicate, species, tube, rank, size, fecundity, time, ramp_rate, ctmax, warming_tol)
+      select(collection_date, collection_temp, exp_date, days_in_lab, run, experiment, replicate, species, tube, rank, size, fecundity, dev_eggs, pathogen, lipids, time, ramp_rate, ctmax, warming_tol)
     
     write.csv(ct_data, file = paste("Output/Data/", file_name, "_ctmax.csv", sep = "", collapse = ""), row.names = F)
     

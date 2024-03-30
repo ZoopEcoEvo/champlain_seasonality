@@ -1,5 +1,5 @@
-"collection_date","collection_temp","exp_date","days_in_lab","run","experiment","replicate","species","tube","rank","size","fecundity","time","ramp_rate","ctmax","warming_tol"
-2024-03-04,4,2024-03-08,4,108,1,1,"limnocalanus_macrurus_male",1,2,1.334,NA,73.0833333333333,0.234090909090901,25.0555555555556,21.0555555555556
-2024-03-04,4,2024-03-08,4,108,1,1,"leptodiaptomus_sicilis_male",2,1,0.97,NA,81.6,0.233778721278722,27.0833333333333,23.0833333333333
-2024-03-04,4,2024-03-08,4,108,1,1,"limnocalanus_macrurus",3,3,1.329,NA,60.6666666666667,0.256118881118882,22.046875,18.046875
-2024-03-04,4,2024-03-08,4,108,1,1,"leptodiaptomus_sicilis_male",4,4,0.9,NA,55.2,0.255944055944052,20.6302083333333,16.6302083333333
+"collection_date","collection_temp","exp_date","days_in_lab","run","experiment","replicate","species","tube","rank","size","fecundity","dev_eggs","pathogen","lipids","time","ramp_rate","ctmax","warming_tol"
+2024-03-04,4,2024-03-08,4,108,1,1,"limnocalanus_macrurus_male",1,2,1.334,NA,"no","no","no",73.0833333333333,0.234090909090901,25.0555555555556,21.0555555555556
+2024-03-04,4,2024-03-08,4,108,1,1,"leptodiaptomus_sicilis_male",2,1,0.97,NA,"no","no","yes",81.6,0.233778721278722,27.0833333333333,23.0833333333333
+2024-03-04,4,2024-03-08,4,108,1,1,"limnocalanus_macrurus",3,3,1.329,NA,"no","no","no",60.6666666666667,0.256118881118882,22.046875,18.046875
+2024-03-04,4,2024-03-08,4,108,1,1,"leptodiaptomus_sicilis_male",4,4,0.9,NA,"no","no","yes",55.2,0.255944055944052,20.6302083333333,16.6302083333333

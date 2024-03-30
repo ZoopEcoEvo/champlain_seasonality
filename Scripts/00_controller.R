@@ -37,7 +37,8 @@ full_data = read.csv(file = "Output/Data/full_data.csv") %>%
          "sex" = case_when( # creates a new column called "sex" that is filled with different values when...
            word(sp_name_sub, start = 3, end = 3) == "male" ~ "male", #... the third word in sp_name_sub is 'male'
            word(sp_name_sub, start = 3, end = 3) == "juvenile" ~ "juvenile", #... or the third word in sp_name_sub is 'juvenile'
-           TRUE ~ "female")) # In all other cases, 'female' is used
+           TRUE ~ "female")) %>% # In all other cases, 'female' is used
+  filter(sp_name != "Leptodora kindti")
 
 hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
   mutate(date = as_date(date))

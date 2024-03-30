@@ -1,2 +1,2 @@
-﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size
-10/9/23,17.5,1,2,osphranticum_labronectum,5,73,14,NA,0.945
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size,dev_eggs,pathogen,lipids
+10/9/23,17.5,1,2,osphranticum_labronectum,5,73,14,NA,0.945,no,no,no
