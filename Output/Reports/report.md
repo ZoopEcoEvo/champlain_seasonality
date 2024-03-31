@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-03-27
+2024-03-31
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -42,7 +42,7 @@ temp_data = importWaterML1(url, asDateTime = T) %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 40 collections were used to make a total of 1120 thermal
+Copepods from 41 collections were used to make a total of 1115 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -222,6 +222,122 @@ adult_summaries %>%
 ```
 
 <img src="../Figures/markdown/sp-props-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
+
+full_data %>% 
+  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
+  group_by() %>% 
+  filter(sex != "juvenile") %>% 
+  group_by(collection_date) %>% 
+  count(pathogen) %>% 
+  filter(pathogen != "uncertain") %>% 
+  pivot_wider(id_cols = "collection_date", 
+              names_from = pathogen, 
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(total = sum(no, cloudy, spot, other)) %>% 
+  pivot_longer(cols = c(no, cloudy, spot, other),
+               names_to = "pathogen", 
+               values_to = "count") %>% 
+  mutate(percent = count/total,
+         collection_date = lubridate::as_date(collection_date),
+         pathogen = fct_relevel(pathogen, "no", "cloudy", "spot", "other")) %>% 
+  ggplot(aes(x = collection_date, y = percent, fill = pathogen)) + 
+  geom_area() + 
+  scale_fill_manual(values = pathogen_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Pathogen") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
+```
+
+<img src="../Figures/markdown/sp-props-2.png" style="display: block; margin: auto;" />
+
+``` r
+
+dev_eggs_cols = c("no" = "grey95", "yes" = "lightblue3")
+
+full_data %>% 
+  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
+  group_by(sp_name) %>% 
+  filter(sex != "juvenile") %>% 
+  group_by(sp_name, collection_date) %>% 
+  count(dev_eggs) %>% 
+  filter(dev_eggs != "uncertain") %>% 
+  pivot_wider(id_cols = c("collection_date", "sp_name"), 
+              names_from = dev_eggs, 
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(total = sum(no, yes)) %>% 
+  pivot_longer(cols = c(no, yes),
+               names_to = "dev_eggs", 
+               values_to = "count") %>% 
+  mutate(percent = count/total,
+         collection_date = lubridate::as_date(collection_date),
+         dev_eggs = fct_relevel(dev_eggs, "no", "yes")) %>% 
+  ungroup() %>% 
+  complete(collection_date, nesting(sp_name, dev_eggs), fill = list(percent = 1)) %>% 
+  mutate(percent = if_else(is.na(total) & dev_eggs == "yes", 0, percent)) %>% 
+  ggplot(aes(x = collection_date, y = percent, fill = dev_eggs)) + 
+  facet_wrap(sp_name~., ncol = 1) + 
+  geom_area() + 
+  scale_fill_manual(values = dev_eggs_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Developing \nEggs") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
+```
+
+<img src="../Figures/markdown/sp-props-3.png" style="display: block; margin: auto;" />
+
+``` r
+
+lipid_cols = c("no" = "grey95", "yes" = "sienna2")
+
+full_data %>% 
+  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
+  group_by(sp_name) %>% 
+  filter(sex != "juvenile") %>% 
+  group_by(sp_name, collection_date) %>% 
+  count(lipids) %>% 
+  filter(lipids != "uncertain") %>% 
+  pivot_wider(id_cols = c("collection_date", "sp_name"), 
+              names_from = lipids, 
+              values_from = n,
+              values_fill = 0) %>% 
+  mutate(total = sum(no, yes)) %>% 
+  pivot_longer(cols = c(no, yes),
+               names_to = "lipids", 
+               values_to = "count") %>% 
+  mutate(percent = count/total,
+         collection_date = lubridate::as_date(collection_date),
+         lipids = fct_relevel(lipids, "no", "yes")) %>% 
+  ungroup() %>% 
+  complete(collection_date, nesting(sp_name, lipids), fill = list(percent = 1)) %>% 
+  mutate(percent = if_else(is.na(total) & lipids == "yes", 0, percent)) %>% 
+  ggplot(aes(x = collection_date, y = percent, fill = lipids)) + 
+  facet_wrap(sp_name~., ncol = 1) + 
+  geom_area() + 
+  scale_fill_manual(values = lipid_cols) + 
+  scale_y_continuous(breaks = c(0,1)) + 
+  labs(x = "Collection Date", 
+       y = "Proportion", 
+       fill = "Lipids\nPresent") + 
+  theme_minimal(base_size = 20) + 
+  theme(panel.grid = element_blank(),
+        axis.ticks = element_line())
+```
+
+<img src="../Figures/markdown/sp-props-4.png" style="display: block; margin: auto;" />
 
 ## Temperature Variability
 
@@ -649,9 +765,9 @@ corr_vals %>%
 |   Leptodiaptomus minutus    |    max    |    6     |  0.7662726  | 0.0000000 |
 |   Leptodiaptomus minutus    |    max    |    8     |  0.7661815  | 0.0000000 |
 |   Leptodiaptomus minutus    |    max    |    7     |  0.7660927  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    24    |  0.3488609  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3467020  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3465359  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3418761  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    24    |  0.3415764  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3404894  | 0.0000000 |
 |    Limnocalanus macrurus    |    max    |    8     |  0.5542854  | 0.0001397 |
 |    Limnocalanus macrurus    |    max    |    7     |  0.5539836  | 0.0001412 |
 |    Limnocalanus macrurus    | mean_min  |    6     |  0.5530991  | 0.0001454 |
@@ -869,11 +985,11 @@ knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 
 |                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:----------------------|------------:|----:|------------:|----------:|
-| (Intercept)           | 11347.53433 |   1 | 3992.080203 | 0.0000000 |
-| collection_temp       |   115.36469 |   1 |   40.585479 | 0.0000000 |
-| morph                 |    31.66015 |   1 |   11.138090 | 0.0009561 |
-| collection_temp:morph |    12.72393 |   1 |    4.476297 | 0.0352204 |
-| Residuals             |   824.32837 | 290 |          NA |        NA |
+| (Intercept)           | 11347.53433 |   1 | 4056.602267 | 0.0000000 |
+| collection_temp       |   115.36469 |   1 |   41.241442 | 0.0000000 |
+| morph                 |    32.24189 |   1 |   11.526073 | 0.0007793 |
+| collection_temp:morph |    12.84016 |   1 |    4.590197 | 0.0329654 |
+| Residuals             |   833.59546 | 298 |          NA |        NA |
 
 ``` r
 
@@ -909,29 +1025,29 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
 ``` r
 full.model = lme4::lmer(data = model_data,
                         ctmax ~ sex + temp_cent + size_cent +
-                          (1 + days_in_lab + temp_cent + size_cent|sp_name:sex))
+                          (1 + days_in_lab + temp_cent + size_cent|sp_name))
 
 car::Anova(full.model)
 ## Analysis of Deviance Table (Type II Wald chisquare tests)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex        3.2495  2     0.1970    
-## temp_cent 44.1781  1  2.998e-11 ***
-## size_cent  2.0270  1     0.1545    
+## sex       34.9061  2  2.632e-08 ***
+## temp_cent  3.1156  1    0.07755 .  
+## size_cent  2.7465  1    0.09747 .  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 fixed = fixef(full.model)
 
-model_coefs = coefficients(full.model)$`sp_name:sex` %>%  
+model_coefs = coefficients(full.model)$`sp_name` %>%  
   rownames_to_column(var = "species") %>% 
-  separate(species, into = c("species", "sex"), sep = ":") %>% 
-  select(species, sex, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
+  separate(species, into = c("species"), sep = ":") %>% 
+  select(species, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
 
 ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
   geom_smooth(method = "lm", colour = "black") +
-  geom_point(aes(colour = species, shape = sex),
+  geom_point(aes(colour = species),
              size = 6) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Species Intercept", 
@@ -974,9 +1090,9 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    22    |   45   |  19  |
-|   Leptodiaptomus minutus    |    11    |  215   |  36  |
-|   Leptodiaptomus sicilis    |    31    |  294   |  89  |
+|     Epischura lacustris     |    24    |   45   |  19  |
+|   Leptodiaptomus minutus    |    11    |  215   |  35  |
+|   Leptodiaptomus sicilis    |    31    |  302   |  89  |
 |    Limnocalanus macrurus    |    2     |   42   |  36  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    1     |   19   |  8   |
@@ -1146,25 +1262,25 @@ ctmax_resids %>%
 ``` r
 
 fitness.model = lm(data = ctmax_resids, 
-   fecundity ~ resids * sp_name)
+                   fecundity ~ resids * sp_name)
 
 car::Anova(fitness.model)
 ## Anova Table (Type II tests)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            4.8   1   0.2933  0.588542    
-## sp_name        8333.3   2 257.0760 < 2.2e-16 ***
-## resids:sp_name  200.8   2   6.1950  0.002319 ** 
-## Residuals      4716.5 291                       
+## resids            0.9   1   0.0559  0.813246    
+## sp_name        8229.8   2 252.0381 < 2.2e-16 ***
+## resids:sp_name  199.3   2   6.1046  0.002523 ** 
+## Residuals      4849.0 297                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus             0.518 0.282 291  -0.0367    1.073
-##  Leptodiaptomus sicilis            -0.142 0.247 291  -0.6269    0.344
-##  Skistodiaptomus oregonensis       -1.213 0.405 291  -2.0096   -0.416
+##  Leptodiaptomus minutus            0.5170 0.283 297  -0.0398    1.074
+##  Leptodiaptomus sicilis           -0.0307 0.243 297  -0.5081    0.447
+##  Skistodiaptomus oregonensis      -1.2129 0.406 297  -2.0125   -0.413
 ## 
 ## Confidence level used: 0.95
 ```
@@ -1242,15 +1358,16 @@ ggplot(ind_dist, aes(dist, fill = comparison)) +
   theme_matt()
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
   filter(sp_name == "Leptodiaptomus sicilis") %>% 
-  filter(sex == "female") %>% 
+  filter(sex != "juvenile") %>% 
   group_by(collection_date) %>% 
   mutate(size_center = scale(size, center = T, scale = F)) %>% 
   ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  facet_wrap(sex~.) + 
   geom_density_ridges(bandwidth = 0.04) + 
   geom_vline(xintercept = 0.89) + 
   labs(x = "Size (mm)",
@@ -1261,15 +1378,14 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
   filter(sp_name == "Leptodiaptomus minutus") %>% 
-  filter(sex == "female") %>% 
-  group_by(collection_date) %>% 
-  mutate(size_center = scale(size, center = T, scale = F)) %>% 
+  filter(sex != "juvenile") %>% 
   ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  facet_wrap(sex~.) + 
   geom_density_ridges(bandwidth = 0.04) + 
   geom_vline(xintercept = 0.69) + 
   labs(x = "Size (mm)",
@@ -1281,7 +1397,7 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 
 ``` r
 if(predict_vuln == F){
