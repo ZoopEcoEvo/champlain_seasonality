@@ -13,12 +13,6 @@ output:
           toc_depth: 3
 ---
 
-```{r to-do}
-### To Do 
-
-```
-
-
 ```{r setup, include=T, message = F, warning = F, echo = F}
 knitr::opts_chunk$set(
   echo = knitr::is_html_output(),
@@ -125,9 +119,12 @@ endDate = ""
 url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd, 
                        startDate = startDate, endDate = endDate, service = "uv")
 
-temp_data = importWaterML1(url, asDateTime = T) %>% 
+raw_temps = importWaterML1(url, asDateTime = T) %>% 
   mutate("date" = as.Date(dateTime)) %>% 
-  select(date, "temp" = X_00010_00000)
+  select(dateTime, tz_cd, date, degC = X_00010_00000)
+
+temp_data =  raw_temps %>% 
+  select(date, "temp" = degC)
 ```
 
 Collections began in late May 2023. Several gaps are present, but collections have continued at roughly weekly intervals since then. Copepods from `r length(unique(full_data$collection_date))` collections were used to make a total of `r dim(full_data)[1]` thermal limit measurements. Over this time period, collection temperatures ranged from `r paste(min(full_data$collection_temp), " to ", max(full_data$collection_temp), sep = "")`°C.     
@@ -295,7 +292,10 @@ adult_summaries %>%
   theme_minimal(base_size = 20) + 
   theme(panel.grid = element_blank(),
         axis.ticks = element_line())
+```
 
+
+```{r other-props}
 pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
 
 full_data %>% 
@@ -1010,7 +1010,7 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
 ```{r include = F}
 ctmax_resids %>% 
   filter(lipids != "uncertain") %>% 
-ggplot(aes(x = lipids, y = resids, colour = sp_name)) + 
+  ggplot(aes(x = lipids, y = resids, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
   geom_point(size = 4, alpha = 0.5) + 
   geom_smooth(method = "lm", se = F, linewidth = 1) + 
@@ -1389,12 +1389,36 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
+## Distribution Lag Non-Linear Model (DLNM approach) 
+```{r}
+dlnm_data = full_data %>%  
+  filter(sex == "female") %>% 
+  select(collection_date, days_in_lab, collection_temp, replicate, sp_name, size, fecundity, ctmax) %>% 
+  group_by(collection_date, collection_temp, sp_name) %>%  
+  summarise(mean_ctmax = mean(ctmax, na.rm = T),
+            mean_size = mean(size, na.rm = T),
+            sample = n())
+```
+
+```{r}
+hourly_temps = raw_temps %>%  
+  mutate(hour = lubridate::hour(dateTime)) %>%  
+  group_by(date, hour) %>%  
+  summarise(mean_temp = mean(degC)) %>% 
+  ungroup() %>% 
+  complete(date, nesting(hour)) %>%  
+  mutate(timestep = ymd_hms(
+    paste(lubridate::as_date(date), 
+          paste0(hour, ":00:00"), sep = " ")),
+    observation = row_number()) 
+
+```
+
 ```{r}
 if(predict_vuln == F){
   knitr::knit_exit()
 }
 ```
-
 
 
 ## Predicting Vulnerability 

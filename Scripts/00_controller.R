@@ -10,6 +10,8 @@ library(lubridate)
 library(slider)
 library(english)
 library(lme4)
+library(mgcv)
+library(dlnm)
 
 #Determine which scripts should be run
 process_all_data = F #Runs data analysis 

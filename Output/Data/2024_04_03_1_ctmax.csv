@@ -1,0 +1,6 @@
+"collection_date","collection_temp","exp_date","days_in_lab","run","experiment","replicate","species","tube","rank","size","fecundity","dev_eggs","pathogen","lipids","time","ramp_rate","ctmax","warming_tol"
+2024-03-30,4,2024-04-03,4,118,1,1,"leptodiaptomus_minutus",1,1,0.666,NA,"no","no","no",90.45,0.223776223776233,31.3333333333333,27.3333333333333
+2024-03-30,4,2024-04-03,4,118,1,1,"leptodiaptomus_minutus",2,4,0.686,NA,"yes","no","yes",78.3666666666667,0.239685314685306,28.6541666666667,24.6541666666667
+2024-03-30,4,2024-04-03,4,118,1,1,"leptodiaptomus_sicilis",3,2,0.886,9,"no","no","yes",85.8,0.209790209790206,30.3125,26.3125
+2024-03-30,4,2024-04-03,4,118,1,1,"leptodiaptomus_minutus",4,3,0.7,NA,"yes","no","no",81.0666666666667,0.241083916083909,29.2760416666667,25.2760416666667
+2024-03-30,4,2024-04-03,4,118,1,1,"epischura_lacustris_juvenile",5,5,0.807,NA,"no","no","no",51.0833333333333,0.271328671328663,21.9513888888889,17.9513888888889

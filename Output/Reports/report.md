@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-03-31
+2024-04-22
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -11,10 +11,8 @@ Seasonality in Lake Champlain Copepod Thermal Limits
   - [Trait Correlations and
     Trade-offs](#trait-correlations-and-trade-offs)
 - [Other patterns in variation](#other-patterns-in-variation)
-
-``` r
-### To Do 
-```
+- [Distribution Lag Non-Linear Model (DLNM
+  approach)](#distribution-lag-non-linear-model-dlnm-approach)
 
 ## Copepod Collection
 
@@ -35,14 +33,17 @@ endDate = ""
 url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd, 
                        startDate = startDate, endDate = endDate, service = "uv")
 
-temp_data = importWaterML1(url, asDateTime = T) %>% 
+raw_temps = importWaterML1(url, asDateTime = T) %>% 
   mutate("date" = as.Date(dateTime)) %>% 
-  select(date, "temp" = X_00010_00000)
+  select(dateTime, tz_cd, date, degC = X_00010_00000)
+
+temp_data =  raw_temps %>% 
+  select(date, "temp" = degC)
 ```
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 41 collections were used to make a total of 1115 thermal
+Copepods from 42 collections were used to make a total of 1130 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -224,7 +225,6 @@ adult_summaries %>%
 <img src="../Figures/markdown/sp-props-1.png" style="display: block; margin: auto;" />
 
 ``` r
-
 pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
 
 full_data %>% 
@@ -257,7 +257,7 @@ full_data %>%
         axis.ticks = element_line())
 ```
 
-<img src="../Figures/markdown/sp-props-2.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/other-props-1.png" style="display: block; margin: auto;" />
 
 ``` r
 
@@ -297,7 +297,7 @@ full_data %>%
         axis.ticks = element_line())
 ```
 
-<img src="../Figures/markdown/sp-props-3.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/other-props-2.png" style="display: block; margin: auto;" />
 
 ``` r
 
@@ -337,7 +337,7 @@ full_data %>%
         axis.ticks = element_line())
 ```
 
-<img src="../Figures/markdown/sp-props-4.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/other-props-3.png" style="display: block; margin: auto;" />
 
 ## Temperature Variability
 
@@ -762,18 +762,15 @@ corr_vals %>%
 |     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
 |     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
 |     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7662726  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7661815  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7660927  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3418761  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    24    |  0.3415764  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3404894  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7680372  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7677621  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7677149  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    24    |  0.3375596  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3372144  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3368199  | 0.0000000 |
 |    Limnocalanus macrurus    |    max    |    8     |  0.5542854  | 0.0001397 |
 |    Limnocalanus macrurus    |    max    |    7     |  0.5539836  | 0.0001412 |
 |    Limnocalanus macrurus    | mean_min  |    6     |  0.5530991  | 0.0001454 |
-|    Senecella calanoides     |    max    |    6     |  0.5852941  | 0.0084722 |
-|    Senecella calanoides     |    max    |    7     |  0.5686772  | 0.0110624 |
-|    Senecella calanoides     | mean_max  |    6     |  0.5375991  | 0.0175996 |
 | Skistodiaptomus oregonensis |    max    |    2     |  0.7964802  | 0.0000000 |
 | Skistodiaptomus oregonensis |    max    |    1     |  0.7903638  | 0.0000000 |
 | Skistodiaptomus oregonensis | mean_max  |    2     |  0.7896567  | 0.0000000 |
@@ -985,11 +982,11 @@ knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 
 |                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
 |:----------------------|------------:|----:|------------:|----------:|
-| (Intercept)           | 11347.53433 |   1 | 4056.602267 | 0.0000000 |
-| collection_temp       |   115.36469 |   1 |   41.241442 | 0.0000000 |
-| morph                 |    32.24189 |   1 |   11.526073 | 0.0007793 |
-| collection_temp:morph |    12.84016 |   1 |    4.590197 | 0.0329654 |
-| Residuals             |   833.59546 | 298 |          NA |        NA |
+| (Intercept)           | 11408.08883 |   1 | 4115.495182 | 0.0000000 |
+| collection_temp       |   114.78189 |   1 |   41.407839 | 0.0000000 |
+| morph                 |    32.06480 |   1 |   11.567451 | 0.0007612 |
+| collection_temp:morph |    12.77976 |   1 |    4.610331 | 0.0325732 |
+| Residuals             |   839.91130 | 303 |          NA |        NA |
 
 ``` r
 
@@ -1032,9 +1029,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       34.9061  2  2.632e-08 ***
-## temp_cent  3.1156  1    0.07755 .  
-## size_cent  2.7465  1    0.09747 .  
+## sex       35.8919  2  1.608e-08 ***
+## temp_cent 15.0021  1  0.0001074 ***
+## size_cent  1.1636  1  0.2807102    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1090,12 +1087,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    24    |   45   |  19  |
-|   Leptodiaptomus minutus    |    11    |  215   |  35  |
-|   Leptodiaptomus sicilis    |    31    |  302   |  89  |
-|    Limnocalanus macrurus    |    2     |   42   |  36  |
+|     Epischura lacustris     |    25    |   45   |  19  |
+|   Leptodiaptomus minutus    |    11    |  219   |  35  |
+|   Leptodiaptomus sicilis    |    31    |  307   |  89  |
+|    Limnocalanus macrurus    |    2     |   42   |  38  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
-|    Senecella calanoides     |    1     |   19   |  8   |
+|    Senecella calanoides     |    3     |   20   |  8   |
 | Skistodiaptomus oregonensis |    14    |  191   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
@@ -1269,18 +1266,18 @@ car::Anova(fitness.model)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            0.9   1   0.0559  0.813246    
-## sp_name        8229.8   2 252.0381 < 2.2e-16 ***
-## resids:sp_name  199.3   2   6.1046  0.002523 ** 
-## Residuals      4849.0 297                       
+## resids            0.4   1   0.0225  0.880973    
+## sp_name        8192.7   2 251.1667 < 2.2e-16 ***
+## resids:sp_name  200.2   2   6.1390  0.002436 ** 
+## Residuals      4925.4 302                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.5170 0.283 297  -0.0398    1.074
-##  Leptodiaptomus sicilis           -0.0307 0.243 297  -0.5081    0.447
-##  Skistodiaptomus oregonensis      -1.2129 0.406 297  -2.0125   -0.413
+##  Leptodiaptomus minutus           0.51867 0.282 302  -0.0365    1.074
+##  Leptodiaptomus sicilis          -0.00361 0.240 302  -0.4751    0.468
+##  Skistodiaptomus oregonensis     -1.21286 0.406 302  -2.0120   -0.414
 ## 
 ## Confidence level used: 0.95
 ```
@@ -1398,6 +1395,31 @@ full_data %>%
 ```
 
 <img src="../Figures/markdown/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+
+## Distribution Lag Non-Linear Model (DLNM approach)
+
+``` r
+dlnm_data = full_data %>%  
+  filter(sex == "female") %>% 
+  select(collection_date, days_in_lab, collection_temp, replicate, sp_name, size, fecundity, ctmax) %>% 
+  group_by(collection_date, collection_temp, sp_name) %>%  
+  summarise(mean_ctmax = mean(ctmax, na.rm = T),
+            mean_size = mean(size, na.rm = T),
+            sample = n())
+```
+
+``` r
+hourly_temps = raw_temps %>%  
+  mutate(hour = lubridate::hour(dateTime)) %>%  
+  group_by(date, hour) %>%  
+  summarise(mean_temp = mean(degC)) %>% 
+  ungroup() %>% 
+  complete(date, nesting(hour)) %>%  
+  mutate(timestep = ymd_hms(
+    paste(lubridate::as_date(date), 
+          paste0(hour, ":00:00"), sep = " ")),
+    observation = row_number()) 
+```
 
 ``` r
 if(predict_vuln == F){

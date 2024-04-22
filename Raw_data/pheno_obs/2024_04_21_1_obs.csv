@@ -1,0 +1,11 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size,dev_eggs,pathogen,lipids
+4/21/24,7,1,1,leptodiaptomus_sicilis,1,63,26,7,0.769,yes,no,yes
+4/21/24,7,1,1,leptodiaptomus_sicilis,2,59,6,15,0.793,no,no,no
+4/21/24,7,1,1,senecella_calanoides_juvenile,3,40,31,NA,1.431,no,no,no
+4/21/24,7,1,1,leptodiaptomus_sicilis,4,59,39,NA,0.958,yes,no,yes
+4/21/24,7,1,1,leptodiaptomus_sicilis,5,53,41,8,0.804,no,no,yes
+4/21/24,7,1,1,senecella_calanoides_juvenile,6,41,6,NA,1.109,no,no,no
+4/21/24,7,1,1,leptodiaptomus_minutus,7,55,55,7,0.7,no,no,no
+4/21/24,7,1,1,limnocalanus_macrurus_male,8,38,32,NA,1.43,no,no,no
+4/21/24,7,1,1,senecella_calanoides,9,34,2,NA,2.127,no,no,yes
+4/21/24,7,1,1,limnocalanus_macrurus_male,10,41,36,NA,1.474,no,no,no
