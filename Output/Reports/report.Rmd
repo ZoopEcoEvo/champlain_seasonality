@@ -295,7 +295,7 @@ adult_summaries %>%
 ```
 
 
-```{r other-props}
+```{r pathogen-props}
 pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
 
 full_data %>% 
@@ -326,7 +326,10 @@ full_data %>%
   theme_minimal(base_size = 20) + 
   theme(panel.grid = element_blank(),
         axis.ticks = element_line())
+```
 
+
+```{r deveggs-props, fig.height = 12, fig.width = 8}
 dev_eggs_cols = c("no" = "grey95", "yes" = "lightblue3")
 
 full_data %>% 
@@ -361,7 +364,10 @@ full_data %>%
   theme_minimal(base_size = 20) + 
   theme(panel.grid = element_blank(),
         axis.ticks = element_line())
+```
 
+
+```{r lipids-props, fig.height = 12, fig.width = 8}
 lipid_cols = c("no" = "grey95", "yes" = "sienna2")
 
 full_data %>% 
