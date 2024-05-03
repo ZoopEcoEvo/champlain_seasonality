@@ -1,0 +1,3 @@
+"collection_date","collection_temp","exp_date","days_in_lab","run","experiment","replicate","species","tube","rank","size","fecundity","dev_eggs","pathogen","lipids","time","ramp_rate","ctmax","warming_tol"
+2024-04-26,7,2024-05-01,5,125,1,1,"leptodiaptomus_sicilis",1,1,0.805,NA,"no","no","yes",67.35,0.238636363636354,30.3333333333333,23.3333333333333
+2024-04-26,7,2024-05-01,5,125,1,1,"leptodiaptomus_minutus",2,2,0.678,6,"yes","no","no",60.9333333333333,0.244055944055941,28.7395833333333,21.7395833333333
