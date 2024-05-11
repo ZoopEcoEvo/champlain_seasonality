@@ -205,6 +205,46 @@ ggplot() +
   theme(legend.position = "right")
 ```
 
+```{r round-summary-1, fig.width=11, fig.height=11}
+round_summary = full_data %>% 
+  group_by(collection_date, collection_temp) %>% 
+  summarise(mean_ctmax = mean(ctmax))
+
+
+
+ggplot(data = round_summary) + 
+  geom_point(aes(x = as_date(collection_date), y = mean_ctmax),
+             colour = "tomato3",
+             size = 5) +
+  geom_bar(aes(x = as_date(collection_date), y = mean_ctmax),
+           stat = "identity",
+           fill = "white", 
+           colour = "grey30") +
+  geom_bar(aes(x = as_date(collection_date), y = collection_temp),
+           stat = "identity",
+           fill = "darkgoldenrod1") + 
+  ylim(-3, 40) + 
+  coord_polar(start = 0) + 
+  theme_void()
+```
+
+```{r round-summary-2, fig.width=11, fig.height=11}
+ggplot() + 
+  geom_bar(data = unique(select(full_data, collection_date, collection_temp)), 
+           aes(x = as_date(collection_date), y = collection_temp),
+           stat = "identity",
+           fill = "grey30") + 
+  geom_point(data = full_data, 
+             aes(x = as_date(collection_date), y = ctmax),
+             position = position_jitter(width = 0.7, height = 0),
+             colour = "grey30",
+             alpha = 0.5) + 
+  ylim(-3, 40) + 
+  coord_polar(start = 0) + 
+  theme_void()
+```
+
+
 Size also varied, but primarily between rather than within species. 
 
 ```{r size-timeseries, fig.width=10, fig.height=5}

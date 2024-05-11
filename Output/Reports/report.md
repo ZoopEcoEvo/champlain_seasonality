@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-07
+2024-05-11
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -126,6 +126,25 @@ ggplot() +
 ```
 
 <img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+ggplot() + 
+  geom_bar(data = unique(select(full_data, collection_date, collection_temp)), 
+           aes(x = as_date(collection_date), y = collection_temp),
+           stat = "identity",
+           fill = "grey30") + 
+  geom_point(data = full_data, 
+             aes(x = as_date(collection_date), y = ctmax),
+             position = position_jitter(width = 0.7, height = 0),
+             colour = "grey30",
+             alpha = 0.5) + 
+  ylim(-3, 40) + 
+  coord_polar(start = 0) + 
+  theme_void()
+```
+
+<img src="../Figures/markdown/round-summary-1.png" style="display: block; margin: auto;" />
 
 Size also varied, but primarily between rather than within species.
 
@@ -1027,10 +1046,10 @@ car::Anova(full.model)
 ## Analysis of Deviance Table (Type II Wald chisquare tests)
 ## 
 ## Response: ctmax
-##            Chisq Df Pr(>Chisq)    
-## sex       32.871  2   7.28e-08 ***
-## temp_cent 21.451  1   3.63e-06 ***
-## size_cent  1.558  1      0.212    
+##             Chisq Df Pr(>Chisq)    
+## sex       32.8698  2  7.285e-08 ***
+## temp_cent 21.4662  1  3.601e-06 ***
+## size_cent  1.5594  1     0.2118    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
