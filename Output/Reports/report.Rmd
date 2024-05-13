@@ -210,9 +210,8 @@ round_summary = full_data %>%
   group_by(collection_date, collection_temp) %>% 
   summarise(mean_ctmax = mean(ctmax))
 
-
-
 ggplot(data = round_summary) + 
+  geom_hline(yintercept = 40) + 
   geom_point(aes(x = as_date(collection_date), y = mean_ctmax),
              colour = "tomato3",
              size = 5) +
@@ -230,6 +229,12 @@ ggplot(data = round_summary) +
 
 ```{r round-summary-2, fig.width=11, fig.height=11}
 ggplot() + 
+  geom_hline(yintercept = 
+               c(max(full_data$collection_temp),
+                 min(full_data$collection_temp)), 
+             colour = "grey60",
+             linewidth = c(2,1), 
+             alpha = 0.5) + 
   geom_bar(data = unique(select(full_data, collection_date, collection_temp)), 
            aes(x = as_date(collection_date), y = collection_temp),
            stat = "identity",

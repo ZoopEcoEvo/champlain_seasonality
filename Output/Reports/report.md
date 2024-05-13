@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-11
+2024-05-13
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -43,7 +43,7 @@ temp_data =  raw_temps %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 45 collections were used to make a total of 1222 thermal
+Copepods from 46 collections were used to make a total of 1232 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -128,8 +128,37 @@ ggplot() +
 <img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
 
 ``` r
+round_summary = full_data %>% 
+  group_by(collection_date, collection_temp) %>% 
+  summarise(mean_ctmax = mean(ctmax))
 
+ggplot(data = round_summary) + 
+  geom_hline(yintercept = 40) + 
+  geom_point(aes(x = as_date(collection_date), y = mean_ctmax),
+             colour = "tomato3",
+             size = 5) +
+  geom_bar(aes(x = as_date(collection_date), y = mean_ctmax),
+           stat = "identity",
+           fill = "white", 
+           colour = "grey30") +
+  geom_bar(aes(x = as_date(collection_date), y = collection_temp),
+           stat = "identity",
+           fill = "darkgoldenrod1") + 
+  ylim(-3, 40) + 
+  coord_polar(start = 0) + 
+  theme_void()
+```
+
+<img src="../Figures/markdown/round-summary-1-1.png" style="display: block; margin: auto;" />
+
+``` r
 ggplot() + 
+  geom_hline(yintercept = 
+               c(max(full_data$collection_temp),
+                 min(full_data$collection_temp)), 
+             colour = "grey60",
+             linewidth = c(2,1), 
+             alpha = 0.5) + 
   geom_bar(data = unique(select(full_data, collection_date, collection_temp)), 
            aes(x = as_date(collection_date), y = collection_temp),
            stat = "identity",
@@ -144,7 +173,7 @@ ggplot() +
   theme_void()
 ```
 
-<img src="../Figures/markdown/round-summary-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/round-summary-2-1.png" style="display: block; margin: auto;" />
 
 Size also varied, but primarily between rather than within species.
 
@@ -779,19 +808,19 @@ corr_vals %>%
 |     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
 |     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
 |     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7880527  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7878402  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7877978  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3037780  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3037122  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    24    |  0.3025085  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7902471  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7900914  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7900796  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3036325  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3030822  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    24    |  0.3019057  | 0.0000000 |
 |    Limnocalanus macrurus    |    max    |    7     |  0.5521216  | 0.0001239 |
 |    Limnocalanus macrurus    |    max    |    8     |  0.5520367  | 0.0001242 |
 |    Limnocalanus macrurus    | mean_min  |    6     |  0.5512902  | 0.0001274 |
 |    Senecella calanoides     |    var    |    7     |  0.4342229  | 0.0492015 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.8048390  | 0.0000000 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.7992525  | 0.0000000 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7984065  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.8070436  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.8014254  | 0.0000000 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.8009108  | 0.0000000 |
 
 Phenotypic variation (like acclimation of thermal limits) is a
 physiological process. depending on the mechanistic underpinnings
@@ -998,13 +1027,13 @@ morph.model = lm(data = morph_data,
 knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 ```
 
-|                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
-|:----------------------|------------:|----:|------------:|----------:|
-| (Intercept)           | 11464.46170 |   1 | 3782.575999 | 0.0000000 |
-| collection_temp       |   107.82264 |   1 |   35.574923 | 0.0000000 |
-| morph                 |    34.73455 |   1 |   11.460292 | 0.0007922 |
-| collection_temp:morph |    17.30803 |   1 |    5.710599 | 0.0173945 |
-| Residuals             |  1054.73959 | 348 |          NA |        NA |
+|                       |      Sum Sq |  Df |    F value |   Pr(\>F) |
+|:----------------------|------------:|----:|-----------:|----------:|
+| (Intercept)           | 11464.46170 |   1 | 3791.83208 | 0.0000000 |
+| collection_temp       |   107.82264 |   1 |   35.66198 | 0.0000000 |
+| morph                 |    35.16622 |   1 |   11.63111 | 0.0007246 |
+| collection_temp:morph |    17.95299 |   1 |    5.93789 | 0.0153180 |
+| Residuals             |  1055.18838 | 349 |         NA |        NA |
 
 ``` r
 
@@ -1047,9 +1076,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       32.8698  2  7.285e-08 ***
-## temp_cent 21.4662  1  3.601e-06 ***
-## size_cent  1.5594  1     0.2118    
+## sex       32.9478  2  7.006e-08 ***
+## temp_cent 20.8535  1  4.958e-06 ***
+## size_cent  1.7818  1     0.1819    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1106,12 +1135,12 @@ knitr::kable(sex_sample_sizes, align = "c")
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
 |     Epischura lacustris     |    26    |   45   |  19  |
-|   Leptodiaptomus minutus    |    11    |  248   |  35  |
-|   Leptodiaptomus sicilis    |    31    |  352   |  91  |
+|   Leptodiaptomus minutus    |    11    |  254   |  35  |
+|   Leptodiaptomus sicilis    |    31    |  353   |  93  |
 |    Limnocalanus macrurus    |    4     |   43   |  39  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    11    |   21   |  8   |
-| Skistodiaptomus oregonensis |    14    |  193   |  28  |
+| Skistodiaptomus oregonensis |    14    |  194   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
@@ -1284,18 +1313,18 @@ car::Anova(fitness.model)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            0.0   1   0.0012  0.972106    
-## sp_name        8268.5   2 266.6010 < 2.2e-16 ***
-## resids:sp_name  196.4   2   6.3339  0.001996 ** 
-## Residuals      5163.9 333                       
+## resids            0.0   1   0.0000  0.998808    
+## sp_name        8278.1   2 269.1981 < 2.2e-16 ***
+## resids:sp_name  202.6   2   6.5895  0.001558 ** 
+## Residuals      5196.9 338                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.4431 0.270 333  -0.0881    0.974
-##  Leptodiaptomus sicilis            0.0732 0.205 333  -0.3306    0.477
-##  Skistodiaptomus oregonensis      -1.2243 0.390 333  -1.9917   -0.457
+##  Leptodiaptomus minutus            0.4600 0.267 338  -0.0645    0.985
+##  Leptodiaptomus sicilis            0.0731 0.204 338  -0.3290    0.475
+##  Skistodiaptomus oregonensis      -1.2274 0.387 338  -1.9880   -0.467
 ## 
 ## Confidence level used: 0.95
 ```

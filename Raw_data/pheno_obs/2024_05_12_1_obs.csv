@@ -1,0 +1,11 @@
+﻿collection_date,collection_temp,experiment,replicate,species,tube,ctmax_minute,ctmax_second,fecundity,size,dev_eggs,pathogen,lipids
+5/12/24,10,1,1,leptodiaptomus_minutus,1,36,20,8,0.618,no,no,yes
+5/12/24,10,1,1,leptodiaptomus_sicilis_male,2,31,12,NA,0.889,no,no,yes
+5/12/24,10,1,1,leptodiaptomus_sicilis,3,30,11,NA,0.841,yes,no,yes
+5/12/24,10,1,1,leptodiaptomus_minutus,4,32,2,10,0.662,no,no,no
+5/12/24,10,1,1,leptodiaptomus_minutus,5,30,37,4,0.694,no,no,yes
+5/12/24,10,1,1,leptodiaptomus_minutus,6,35,24,11,0.65,no,no,no
+5/12/24,10,1,1,leptodiaptomus_minutus,7,27,16,NA,0.653,yes,no,yes
+5/12/24,10,1,1,leptodiaptomus_sicilis_male,8,27,38,NA,0.766,no,no,yes
+5/12/24,10,1,1,skistodiaptomus_oregonensis,9,38,15,NA,0.956,no,no,no
+5/12/24,10,1,1,leptodiaptomus_minutus,10,29,38,5,0.659,no,no,yes
