@@ -40,7 +40,8 @@ full_data = read.csv(file = "Output/Data/full_data.csv") %>%
            word(sp_name_sub, start = 3, end = 3) == "male" ~ "male", #... the third word in sp_name_sub is 'male'
            word(sp_name_sub, start = 3, end = 3) == "juvenile" ~ "juvenile", #... or the third word in sp_name_sub is 'juvenile'
            TRUE ~ "female")) %>% # In all other cases, 'female' is used
-  filter(sp_name != "Leptodora kindti")
+  filter(sp_name != "Leptodora kindti") %>% 
+  mutate(collection_date = as_date(collection_date))
 
 hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
   mutate(date = as_date(date))

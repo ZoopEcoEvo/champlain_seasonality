@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-13
+2024-05-16
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -43,7 +43,7 @@ temp_data =  raw_temps %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 46 collections were used to make a total of 1232 thermal
+Copepods from 48 collections were used to make a total of 1252 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -64,7 +64,8 @@ collection_conditions = temp_data %>%
   mutate("range_temp" = max_temp - min_temp,
          date = as.Date(date)) %>% 
   ungroup() %>%  
-  filter(date >= (min(as.Date(full_data$collection_date)) - 7))
+  filter(date >= (min(as.Date(full_data$collection_date)) - 7)) %>% 
+  left_join(unique(select(full_data, collection_date, collection_temp)), by = join_by(date == collection_date))
 
 ## Mean female thermal limits for each species, grouped by collection
 species_summaries = full_data %>%  
@@ -126,6 +127,22 @@ ggplot() +
 ```
 
 <img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
+
+``` r
+collection_conditions %>% 
+  drop_na(collection_temp) %>%  
+  ggplot(aes(x = max_temp, y = collection_temp)) + 
+  geom_abline(intercept = 0, slope = 1,
+              linewidth = 1, colour = "grey") + 
+  geom_point(size = 3) +
+  scale_x_continuous(breaks = c(5,15,25)) + 
+  scale_y_continuous(breaks = c(5,15,25)) + 
+  labs(x = "Max. Temp. from Sensor (°C)",
+       y = "Collection Temp. (°C)") + 
+  theme_matt()
+```
+
+<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
 
 ``` r
 round_summary = full_data %>% 
@@ -246,6 +263,42 @@ ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "none")
 ```
 
 <img src="../Figures/markdown/trait-doy-feature-1.png" style="display: block; margin: auto;" />
+
+``` r
+full_data %>%  
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  mutate(sp_name = as.factor(sp_name),
+         sp_name = fct_reorder(sp_name, ctmax)) %>% 
+ggplot(aes(x = lubridate::as_date(collection_date), 
+                      y = sp_name, fill = sp_name)) + 
+  # geom_vline(xintercept = as_date(
+  #   c("2023-05-01",
+  #     "2023-09-01",
+  #     "2024-01-01",
+  #     "2024-05-01")),
+  #   colour = "grey",
+  #   linewidth = 1) + 
+  geom_density_ridges(bandwidth = 30,
+                      jittered_points = TRUE, 
+                      point_shape = 21,
+                      point_size = 1,
+                      point_colour = "grey30",
+                      point_alpha = 0.6,
+                      alpha = 0.9,
+                      position = position_points_jitter(
+                        height = 0.1, width = 0)) + 
+  scale_fill_manual(values = species_cols) + 
+  scale_x_date(date_breaks = "4 months",
+               date_labels = "%b") + 
+  labs(x = "Day of Year", 
+       y = "Species") + 
+  theme_matt() + 
+  #theme_ridges(grid = T) + 
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+```
+
+<img src="../Figures/markdown/sp-occurences-1.png" style="display: block; margin: auto;" />
 
 ``` r
 adult_summaries %>% 
@@ -678,7 +731,7 @@ ggarrange(one_week_temp_circle, four_week_temp_circle,
           common.legend = T, legend = "bottom")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
 The thermal environment over any period of time may drive patterns in
 thermal acclimation. To explore the potential effects of different
@@ -772,7 +825,7 @@ corr_vals %>%
   theme_matt_facets()
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
 
 Shown here are the top three factors for each species.
 
@@ -808,19 +861,19 @@ corr_vals %>%
 |     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
 |     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
 |     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7902471  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7900914  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7900796  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3036325  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3030822  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    24    |  0.3019057  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7906360  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7904786  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7904690  | 0.0000000 |
+|   Leptodiaptomus sicilis    |    var    |    21    |  0.3047143  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    23    |  0.3044320  | 0.0000000 |
+|   Leptodiaptomus sicilis    |   range   |    24    |  0.3031437  | 0.0000000 |
 |    Limnocalanus macrurus    |    max    |    7     |  0.5521216  | 0.0001239 |
 |    Limnocalanus macrurus    |    max    |    8     |  0.5520367  | 0.0001242 |
 |    Limnocalanus macrurus    | mean_min  |    6     |  0.5512902  | 0.0001274 |
 |    Senecella calanoides     |    var    |    7     |  0.4342229  | 0.0492015 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.8070436  | 0.0000000 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.8014254  | 0.0000000 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.8009108  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.8063405  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.8009183  | 0.0000000 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.8005747  | 0.0000000 |
 
 Phenotypic variation (like acclimation of thermal limits) is a
 physiological process. depending on the mechanistic underpinnings
@@ -994,7 +1047,7 @@ full_data %>%
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
 
 Temperature dependence is relatively weak in *L. sicilis*, especially at
 cooler temperatures. We will return to this feature later in the report,
@@ -1017,7 +1070,7 @@ ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = morph)) +
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
 
 ``` r
 
@@ -1027,13 +1080,13 @@ morph.model = lm(data = morph_data,
 knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 ```
 
-|                       |      Sum Sq |  Df |    F value |   Pr(\>F) |
-|:----------------------|------------:|----:|-----------:|----------:|
-| (Intercept)           | 11464.46170 |   1 | 3791.83208 | 0.0000000 |
-| collection_temp       |   107.82264 |   1 |   35.66198 | 0.0000000 |
-| morph                 |    35.16622 |   1 |   11.63111 | 0.0007246 |
-| collection_temp:morph |    17.95299 |   1 |    5.93789 | 0.0153180 |
-| Residuals             |  1055.18838 | 349 |         NA |        NA |
+|                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
+|:----------------------|------------:|----:|------------:|----------:|
+| (Intercept)           | 11465.51972 |   1 | 3801.879311 | 0.0000000 |
+| collection_temp       |   108.74424 |   1 |   36.058764 | 0.0000000 |
+| morph                 |    35.26787 |   1 |   11.694559 | 0.0007008 |
+| collection_temp:morph |    18.16667 |   1 |    6.023929 | 0.0145995 |
+| Residuals             |  1055.51270 | 350 |          NA |        NA |
 
 ``` r
 
@@ -1076,9 +1129,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       32.9478  2  7.006e-08 ***
-## temp_cent 20.8535  1  4.958e-06 ***
-## size_cent  1.7818  1     0.1819    
+## sex       33.2570  2  6.003e-08 ***
+## temp_cent 19.9817  1  7.819e-06 ***
+## size_cent  1.8907  1     0.1691    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1134,13 +1187,13 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    26    |   45   |  19  |
-|   Leptodiaptomus minutus    |    11    |  254   |  35  |
-|   Leptodiaptomus sicilis    |    31    |  353   |  93  |
+|     Epischura lacustris     |    29    |   45   |  19  |
+|   Leptodiaptomus minutus    |    12    |  259   |  35  |
+|   Leptodiaptomus sicilis    |    31    |  354   |  93  |
 |    Limnocalanus macrurus    |    4     |   43   |  39  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
-|    Senecella calanoides     |    11    |   21   |  8   |
-| Skistodiaptomus oregonensis |    14    |  194   |  28  |
+|    Senecella calanoides     |    13    |   21   |  8   |
+| Skistodiaptomus oregonensis |    14    |  202   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
@@ -1313,18 +1366,18 @@ car::Anova(fitness.model)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            0.0   1   0.0000  0.998808    
-## sp_name        8278.1   2 269.1981 < 2.2e-16 ***
-## resids:sp_name  202.6   2   6.5895  0.001558 ** 
-## Residuals      5196.9 338                       
+## resids            1.2   1   0.0755 0.7836531    
+## sp_name        8519.6   2 276.3523 < 2.2e-16 ***
+## resids:sp_name  228.7   2   7.4180 0.0007017 ***
+## Residuals      5287.2 343                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.4600 0.267 338  -0.0645    0.985
-##  Leptodiaptomus sicilis            0.0731 0.204 338  -0.3290    0.475
-##  Skistodiaptomus oregonensis      -1.2274 0.387 338  -1.9880   -0.467
+##  Leptodiaptomus minutus            0.4413 0.266 343  -0.0814    0.964
+##  Leptodiaptomus sicilis            0.0763 0.205 343  -0.3261    0.479
+##  Skistodiaptomus oregonensis      -1.2087 0.349 343  -1.8945   -0.523
 ## 
 ## Confidence level used: 0.95
 ```
@@ -1402,7 +1455,7 @@ ggplot(ind_dist, aes(dist, fill = comparison)) +
   theme_matt()
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
@@ -1410,7 +1463,7 @@ full_data %>%
   filter(sex != "juvenile") %>% 
   group_by(collection_date) %>% 
   mutate(size_center = scale(size, center = T, scale = F)) %>% 
-  ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  ggplot(aes(y = factor(collection_date), x = size, fill = collection_temp)) + 
   facet_wrap(sex~.) + 
   geom_density_ridges(bandwidth = 0.04) + 
   geom_vline(xintercept = 0.89) + 
@@ -1422,13 +1475,13 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
   filter(sp_name == "Leptodiaptomus minutus") %>% 
   filter(sex != "juvenile") %>% 
-  ggplot(aes(y = collection_date, x = size, fill = collection_temp)) + 
+  ggplot(aes(y = factor(collection_date), x = size, fill = collection_temp)) + 
   facet_wrap(sex~.) + 
   geom_density_ridges(bandwidth = 0.04) + 
   geom_vline(xintercept = 0.69) + 
@@ -1441,7 +1494,7 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 
 ## Distribution Lag Non-Linear Model (DLNM approach)
 
