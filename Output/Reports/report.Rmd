@@ -337,8 +337,8 @@ full_data %>%
   filter(sp_name != "Osphranticum labronectum") %>% 
   mutate(sp_name = as.factor(sp_name),
          sp_name = fct_reorder(sp_name, ctmax)) %>% 
-ggplot(aes(x = lubridate::as_date(collection_date), 
-                      y = sp_name, fill = sp_name)) + 
+  ggplot(aes(x = lubridate::as_date(collection_date), 
+             y = sp_name, fill = sp_name)) + 
   # geom_vline(xintercept = as_date(
   #   c("2023-05-01",
   #     "2023-09-01",
@@ -389,7 +389,6 @@ adult_summaries %>%
         axis.ticks = element_line())
 ```
 
-
 ```{r pathogen-props}
 pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
 
@@ -422,7 +421,6 @@ full_data %>%
   theme(panel.grid = element_blank(),
         axis.ticks = element_line())
 ```
-
 
 ```{r deveggs-props, fig.height = 12, fig.width = 8}
 dev_eggs_cols = c("no" = "grey95", "yes" = "lightblue3")
@@ -460,7 +458,6 @@ full_data %>%
   theme(panel.grid = element_blank(),
         axis.ticks = element_line())
 ```
-
 
 ```{r lipids-props, fig.height = 12, fig.width = 8}
 lipid_cols = c("no" = "grey95", "yes" = "sienna2")
@@ -1033,10 +1030,14 @@ Temperature dependence is relatively weak in *L. sicilis*, especially at cooler 
 
 ```{r}
 morph_data = full_data %>% 
-  filter(sex == "female" & sp_name == "Leptodiaptomus sicilis") %>% 
-  mutate(morph = if_else(size > 0.89, "large", "small"))
+  filter(sex == "female" & species == "leptodiaptomus_sicilis") %>%  mutate(sp_name = case_when(
+    sp_name == "Leptodiaptomus sicilis" & size >= 0.89 ~ "Large",
+    sp_name == "Leptodiaptomus sicilis" & size < 0.89 ~ "Small",
+    .default = sp_name
+  ))
 
-ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = morph)) + 
+
+ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
   geom_point(size = 2, alpha = 0.8) + 
   geom_smooth(method = "lm", se = T, linewidth = 2) + 
   labs(x = "Collection Temp. (°C)", 
@@ -1045,15 +1046,14 @@ ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = morph)) +
   theme(legend.position = "none")
 
 morph.model = lm(data = morph_data, 
-                 ctmax ~ collection_temp * morph)
+                 ctmax ~ collection_temp * sp_name)
 
 knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 
-#summary(morph.model)
+summary(morph.model)
 
-#morph.em = emmeans::emmeans(morph.model, pairwise ~ morph)
-
-#plot(morph.em)
+morph.em = emmeans::emtrends(morph.model, "sp_name", var = "collection_temp")
+pairs(morph.em)
 ```
 
 ```{r ctmax-range-plot, include = F}
@@ -1116,7 +1116,7 @@ ctmax_resids %>%
   geom_point(size = 4, alpha = 0.5) + 
   geom_smooth(method = "lm", se = F, linewidth = 1) + 
   #scale_x_continuous(breaks = c(0:5)) + 
-  labs(x = "Days in lab", 
+  labs(x = "Lipids", 
        y = "CTmax Residuals") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt_facets() + 
@@ -1379,7 +1379,7 @@ Individuals may also allocate energy to different fitness related traits, priori
 ```{r, ctmax-fecundity, fig.width=10, fig.height=7}
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = ctmax, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
   labs(x = "CTmax Residuals", 

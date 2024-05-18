@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-16
+2024-05-17
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -43,7 +43,7 @@ temp_data =  raw_temps %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 48 collections were used to make a total of 1252 thermal
+Copepods from 48 collections were used to make a total of 1262 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -269,8 +269,8 @@ full_data %>%
   filter(sp_name != "Osphranticum labronectum") %>% 
   mutate(sp_name = as.factor(sp_name),
          sp_name = fct_reorder(sp_name, ctmax)) %>% 
-ggplot(aes(x = lubridate::as_date(collection_date), 
-                      y = sp_name, fill = sp_name)) + 
+  ggplot(aes(x = lubridate::as_date(collection_date), 
+             y = sp_name, fill = sp_name)) + 
   # geom_vline(xintercept = as_date(
   #   c("2023-05-01",
   #     "2023-09-01",
@@ -861,9 +861,9 @@ corr_vals %>%
 |     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
 |     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
 |     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7906360  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7904786  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7904690  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7911239  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7909746  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7909612  | 0.0000000 |
 |   Leptodiaptomus sicilis    |    var    |    21    |  0.3047143  | 0.0000000 |
 |   Leptodiaptomus sicilis    |   range   |    23    |  0.3044320  | 0.0000000 |
 |   Leptodiaptomus sicilis    |   range   |    24    |  0.3031437  | 0.0000000 |
@@ -871,9 +871,9 @@ corr_vals %>%
 |    Limnocalanus macrurus    |    max    |    8     |  0.5520367  | 0.0001242 |
 |    Limnocalanus macrurus    | mean_min  |    6     |  0.5512902  | 0.0001274 |
 |    Senecella calanoides     |    var    |    7     |  0.4342229  | 0.0492015 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.8063405  | 0.0000000 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.8009183  | 0.0000000 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.8005747  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.8046779  | 0.0000000 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7997551  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.7990241  | 0.0000000 |
 
 Phenotypic variation (like acclimation of thermal limits) is a
 physiological process. depending on the mechanistic underpinnings
@@ -1058,10 +1058,14 @@ affects CTmax.
 
 ``` r
 morph_data = full_data %>% 
-  filter(sex == "female" & sp_name == "Leptodiaptomus sicilis") %>% 
-  mutate(morph = if_else(size > 0.89, "large", "small"))
+  filter(sex == "female" & species == "leptodiaptomus_sicilis") %>%  mutate(sp_name = case_when(
+    sp_name == "Leptodiaptomus sicilis" & size >= 0.89 ~ "Large",
+    sp_name == "Leptodiaptomus sicilis" & size < 0.89 ~ "Small",
+    .default = sp_name
+  ))
 
-ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = morph)) + 
+
+ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
   geom_point(size = 2, alpha = 0.8) + 
   geom_smooth(method = "lm", se = T, linewidth = 2) + 
   labs(x = "Collection Temp. (°C)", 
@@ -1075,26 +1079,47 @@ ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = morph)) +
 ``` r
 
 morph.model = lm(data = morph_data, 
-                 ctmax ~ collection_temp * morph)
+                 ctmax ~ collection_temp * sp_name)
 
 knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 ```
 
-|                       |      Sum Sq |  Df |     F value |   Pr(\>F) |
-|:----------------------|------------:|----:|------------:|----------:|
-| (Intercept)           | 11465.51972 |   1 | 3801.879311 | 0.0000000 |
-| collection_temp       |   108.74424 |   1 |   36.058764 | 0.0000000 |
-| morph                 |    35.26787 |   1 |   11.694559 | 0.0007008 |
-| collection_temp:morph |    18.16667 |   1 |    6.023929 | 0.0145995 |
-| Residuals             |  1055.51270 | 350 |          NA |        NA |
+|                         |      Sum Sq |  Df |     F value |   Pr(\>F) |
+|:------------------------|------------:|----:|------------:|----------:|
+| (Intercept)             | 11838.75134 |   1 | 3920.784378 | 0.0000000 |
+| collection_temp         |   107.57172 |   1 |   35.625845 | 0.0000000 |
+| sp_name                 |    34.01852 |   1 |   11.266331 | 0.0008759 |
+| collection_temp:sp_name |    17.33459 |   1 |    5.740908 | 0.0170987 |
+| Residuals               |  1056.81990 | 350 |          NA |        NA |
 
 ``` r
 
-#summary(morph.model)
+summary(morph.model)
+## 
+## Call:
+## lm(formula = ctmax ~ collection_temp * sp_name, data = morph_data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.7412 -0.7556  0.1901  1.0546  4.0070 
+## 
+## Coefficients:
+##                              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)                  26.79205    0.42788  62.616  < 2e-16 ***
+## collection_temp               0.29268    0.04903   5.969 5.86e-09 ***
+## sp_nameSmall                  1.67780    0.49986   3.357 0.000876 ***
+## collection_temp:sp_nameSmall -0.16091    0.06716  -2.396 0.017099 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.738 on 350 degrees of freedom
+## Multiple R-squared:  0.1115, Adjusted R-squared:  0.1038 
+## F-statistic: 14.63 on 3 and 350 DF,  p-value: 5.328e-09
 
-#morph.em = emmeans::emmeans(morph.model, pairwise ~ morph)
-
-#plot(morph.em)
+morph.em = emmeans::emtrends(morph.model, "sp_name", var = "collection_temp")
+pairs(morph.em)
+##  contrast      estimate     SE  df t.ratio p.value
+##  Large - Small    0.161 0.0672 350   2.396  0.0171
 ```
 
 Copepods spent several days in lab during experiments. Shown below are
@@ -1129,9 +1154,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       33.2570  2  6.003e-08 ***
-## temp_cent 19.9817  1  7.819e-06 ***
-## size_cent  1.8907  1     0.1691    
+## sex       33.1945  2  6.193e-08 ***
+## temp_cent 19.9525  1  7.939e-06 ***
+## size_cent  1.5785  1      0.209    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1187,13 +1212,13 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    29    |   45   |  19  |
-|   Leptodiaptomus minutus    |    12    |  259   |  35  |
+|     Epischura lacustris     |    30    |   45   |  19  |
+|   Leptodiaptomus minutus    |    12    |  263   |  35  |
 |   Leptodiaptomus sicilis    |    31    |  354   |  93  |
 |    Limnocalanus macrurus    |    4     |   43   |  39  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    13    |   21   |  8   |
-| Skistodiaptomus oregonensis |    14    |  202   |  28  |
+| Skistodiaptomus oregonensis |    14    |  207   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
@@ -1344,7 +1369,7 @@ trade-off between these traits.
 ``` r
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = ctmax, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
   labs(x = "CTmax Residuals", 
@@ -1366,18 +1391,18 @@ car::Anova(fitness.model)
 ## 
 ## Response: fecundity
 ##                Sum Sq  Df  F value    Pr(>F)    
-## resids            1.2   1   0.0755 0.7836531    
-## sp_name        8519.6   2 276.3523 < 2.2e-16 ***
-## resids:sp_name  228.7   2   7.4180 0.0007017 ***
-## Residuals      5287.2 343                       
+## resids            0.0   1   0.0002  0.987965    
+## sp_name        8500.8   2 271.1767 < 2.2e-16 ***
+## resids:sp_name  152.4   2   4.8615  0.008274 ** 
+## Residuals      5438.9 347                       
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.4413 0.266 343  -0.0814    0.964
-##  Leptodiaptomus sicilis            0.0763 0.205 343  -0.3261    0.479
-##  Skistodiaptomus oregonensis      -1.2087 0.349 343  -1.8945   -0.523
+##  Leptodiaptomus minutus            0.4417 0.267 347  -0.0839    0.967
+##  Leptodiaptomus sicilis            0.0763 0.206 347  -0.3295    0.482
+##  Skistodiaptomus oregonensis      -0.8482 0.324 347  -1.4854   -0.211
 ## 
 ## Confidence level used: 0.95
 ```
