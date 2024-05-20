@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-18
+2024-05-20
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -43,7 +43,7 @@ temp_data =  raw_temps %>%
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 47 collections were used to make a total of 1282 thermal
+Copepods from 48 collections were used to make a total of 1292 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -861,9 +861,9 @@ corr_vals %>%
 |     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
 |     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
 |     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7904546  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7902546  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7902100  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    6     |  0.7864036  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    8     |  0.7862573  | 0.0000000 |
+|   Leptodiaptomus minutus    |    max    |    7     |  0.7862429  | 0.0000000 |
 |   Leptodiaptomus sicilis    |   range   |    23    |  0.3035589  | 0.0000000 |
 |   Leptodiaptomus sicilis    |    var    |    21    |  0.3031145  | 0.0000000 |
 |   Leptodiaptomus sicilis    |   range   |    24    |  0.3019967  | 0.0000000 |
@@ -871,9 +871,9 @@ corr_vals %>%
 |    Limnocalanus macrurus    |    max    |    8     |  0.5520367  | 0.0001242 |
 |    Limnocalanus macrurus    | mean_min  |    6     |  0.5512902  | 0.0001274 |
 |    Senecella calanoides     |    var    |    7     |  0.4342229  | 0.0492015 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.8019320  | 0.0000000 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7970519  | 0.0000000 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.7965109  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    2     |  0.8002749  | 0.0000000 |
+| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7952135  | 0.0000000 |
+| Skistodiaptomus oregonensis |    max    |    1     |  0.7948644  | 0.0000000 |
 
 Phenotypic variation (like acclimation of thermal limits) is a
 physiological process. depending on the mechanistic underpinnings
@@ -1154,9 +1154,9 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       37.9406  2  5.772e-09 ***
-## temp_cent 22.7078  1  1.886e-06 ***
-## size_cent  1.2835  1     0.2573    
+## sex       36.9544  2  9.451e-09 ***
+## temp_cent 22.5373  1  2.061e-06 ***
+## size_cent  1.2104  1     0.2713    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1212,13 +1212,13 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    31    |   45   |  19  |
-|   Leptodiaptomus minutus    |    12    |  271   |  38  |
+|     Epischura lacustris     |    32    |   45   |  19  |
+|   Leptodiaptomus minutus    |    12    |  272   |  38  |
 |   Leptodiaptomus sicilis    |    31    |  356   |  95  |
 |    Limnocalanus macrurus    |    4     |   43   |  39  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    13    |   21   |  8   |
-| Skistodiaptomus oregonensis |    14    |  211   |  28  |
+| Skistodiaptomus oregonensis |    14    |  219   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
@@ -1390,19 +1390,19 @@ car::Anova(fitness.model)
 ## Anova Table (Type II tests)
 ## 
 ## Response: fecundity
-##                Sum Sq  Df  F value    Pr(>F)    
-## resids            0.4   1   0.0247  0.875248    
-## sp_name        8543.4   2 272.3662 < 2.2e-16 ***
-## resids:sp_name  164.1   2   5.2308  0.005773 ** 
-## Residuals      5520.6 352                       
+##                Sum Sq  Df  F value  Pr(>F)    
+## resids            0.0   1   0.0000 0.99821    
+## sp_name        8443.9   2 263.7980 < 2e-16 ***
+## resids:sp_name  132.7   2   4.1457 0.01661 *  
+## Residuals      5665.6 354                     
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.4081 0.267 352   -0.118    0.934
-##  Leptodiaptomus sicilis            0.0846 0.206 352   -0.320    0.489
-##  Skistodiaptomus oregonensis      -0.9084 0.321 352   -1.541   -0.276
+##  Leptodiaptomus minutus            0.4089 0.270 354   -0.122    0.940
+##  Leptodiaptomus sicilis            0.0846 0.208 354   -0.324    0.493
+##  Skistodiaptomus oregonensis      -0.7693 0.319 354   -1.396   -0.143
 ## 
 ## Confidence level used: 0.95
 ```
