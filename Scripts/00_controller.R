@@ -43,6 +43,9 @@ full_data = read.csv(file = "Output/Data/full_data.csv") %>%
   filter(sp_name != "Leptodora kindti") %>% 
   mutate(collection_date = as_date(collection_date))
 
+temp_data = read.csv(file = "Output/Data/champlain_temps.csv") %>% 
+  mutate(date = lubridate::as_date(date))
+
 hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
   mutate(date = as_date(date))
 

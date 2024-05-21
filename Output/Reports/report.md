@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-20
+2024-05-21
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -21,24 +21,26 @@ Champlain (Burlington Fishing Pier). Plankton was collected from the top
 3 meters using a 250 um mesh net.
 
 ``` r
-# Lake Champlain near Burlington, VT
-siteNumber = "04294500"
-ChamplainInfo = readNWISsite(siteNumber)
-parameterCd = "00010"
-startDate = "2023-01-01"
-endDate = ""
-#statCd = c("00001", "00002","00003", "00011") # 1 - max, 2 - min, 3 = mean
-
-# Constructs the URL for the data wanted then downloads the data
-url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd, 
-                       startDate = startDate, endDate = endDate, service = "uv")
-
-raw_temps = importWaterML1(url, asDateTime = T) %>% 
-  mutate("date" = as.Date(dateTime)) %>% 
-  select(dateTime, tz_cd, date, degC = X_00010_00000)
-
-temp_data =  raw_temps %>% 
-  select(date, "temp" = degC)
+# # Lake Champlain near Burlington, VT
+# siteNumber = "04294500"
+# ChamplainInfo = readNWISsite(siteNumber)
+# parameterCd = "00010"
+# startDate = "2023-01-01"
+# endDate = ""
+# #statCd = c("00001", "00002","00003", "00011") # 1 - max, 2 - min, 3 = mean
+# 
+# # Constructs the URL for the data wanted then downloads the data
+# url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd, 
+#                        startDate = startDate, endDate = endDate, service = "uv")
+# 
+# raw_temps = importWaterML1(url, asDateTime = T) %>% 
+#   mutate("date" = as.Date(dateTime)) %>% 
+#   select(dateTime, tz_cd, date, degC = X_00010_00000)
+# 
+# temp_data =  raw_temps %>% 
+#   select(date, "temp" = degC)
+# 
+# write.csv(temp_data, file = "./Output/Data/champlain_temps.csv", row.names = F)
 ```
 
 Collections began in late May 2023. Several gaps are present, but
@@ -128,6 +130,12 @@ ggplot() +
 
 <img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
 
+Temperatures observed at the time of collection closely resembled the
+maximum daily temperature from the temperature sensor data. Maximum
+temperature was used as a proxy instead of mean temperature as
+collections were usually made during afternoons or early evenings, just
+following the warmest part of the day.
+
 ``` r
 collection_conditions %>% 
   drop_na(collection_temp) %>%  
@@ -143,54 +151,6 @@ collection_conditions %>%
 ```
 
 <img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
-
-``` r
-round_summary = full_data %>% 
-  group_by(collection_date, collection_temp) %>% 
-  summarise(mean_ctmax = mean(ctmax))
-
-ggplot(data = round_summary) + 
-  geom_hline(yintercept = 40) + 
-  geom_point(aes(x = as_date(collection_date), y = mean_ctmax),
-             colour = "tomato3",
-             size = 5) +
-  geom_bar(aes(x = as_date(collection_date), y = mean_ctmax),
-           stat = "identity",
-           fill = "white", 
-           colour = "grey30") +
-  geom_bar(aes(x = as_date(collection_date), y = collection_temp),
-           stat = "identity",
-           fill = "darkgoldenrod1") + 
-  ylim(-3, 40) + 
-  coord_polar(start = 0) + 
-  theme_void()
-```
-
-<img src="../Figures/markdown/round-summary-1-1.png" style="display: block; margin: auto;" />
-
-``` r
-ggplot() + 
-  geom_hline(yintercept = 
-               c(max(full_data$collection_temp),
-                 min(full_data$collection_temp)), 
-             colour = "grey60",
-             linewidth = c(2,1), 
-             alpha = 0.5) + 
-  geom_bar(data = unique(select(full_data, collection_date, collection_temp)), 
-           aes(x = as_date(collection_date), y = collection_temp),
-           stat = "identity",
-           fill = "grey30") + 
-  geom_point(data = full_data, 
-             aes(x = as_date(collection_date), y = ctmax),
-             position = position_jitter(width = 0.7, height = 0),
-             colour = "grey30",
-             alpha = 0.5) + 
-  ylim(-3, 40) + 
-  coord_polar(start = 0) + 
-  theme_void()
-```
-
-<img src="../Figures/markdown/round-summary-2-1.png" style="display: block; margin: auto;" />
 
 Size also varied, but primarily between rather than within species.
 
@@ -228,44 +188,8 @@ ggplot() +
 
 <img src="../Figures/markdown/size-timeseries-1.png" style="display: block; margin: auto;" />
 
-Shown below is CTmax and body size for the species with the most data
-(*Skistodiaptomus*, *L. minutus*, *L. sicilis*, and *Epischura*),
-plotted against the day of the year for each sex/stage separately.
-
 ``` r
-ctmax_feature = full_data %>%  
-  mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
-  ggplot(aes(x = as.Date(collection_date), y = ctmax, colour = sp_name)) + 
-  facet_grid(sp_name~sex) + 
-  geom_point() + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Day of the Year", 
-       y = "CTmax (°C)") + 
-  theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
-        legend.position = "none")
-
-size_feature = full_data %>%  
-  mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
-  ggplot(aes(x = as.Date(collection_date), y = size, colour = sp_name)) + 
-  facet_grid(sp_name~sex) + 
-  geom_point() + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Day of the Year", 
-       y = "Size (mm)") + 
-  theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
-        legend.position = "none")
-
-ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "none")
-```
-
-<img src="../Figures/markdown/trait-doy-feature-1.png" style="display: block; margin: auto;" />
-
-``` r
-full_data %>%  
+sample_dates_plot = full_data %>%  
   filter(sp_name != "Osphranticum labronectum") %>% 
   mutate(sp_name = as.factor(sp_name),
          sp_name = fct_reorder(sp_name, ctmax)) %>% 
@@ -288,8 +212,9 @@ full_data %>%
                       position = position_points_jitter(
                         height = 0.1, width = 0)) + 
   scale_fill_manual(values = species_cols) + 
-  scale_x_date(date_breaks = "4 months",
+  scale_x_date(date_breaks = "3 months",
                date_labels = "%b") + 
+  coord_cartesian(xlim = lubridate::as_date(c("2023-04-25", "2024-06-01"))) + 
   labs(x = "Day of Year", 
        y = "Species") + 
   theme_matt() + 
@@ -298,7 +223,10 @@ full_data %>%
         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
 ```
 
-<img src="../Figures/markdown/sp-occurences-1.png" style="display: block; margin: auto;" />
+The samples captured the broad seasonal changes in calanoid copepod
+community composition in the lake. We note, however, that rare species
+(e.g. *Senecella* and *Limnocalanus*) were often preferentially sampled,
+so are over-represented in the data set.
 
 ``` r
 adult_summaries %>% 
@@ -324,6 +252,10 @@ adult_summaries %>%
 ```
 
 <img src="../Figures/markdown/sp-props-1.png" style="display: block; margin: auto;" />
+
+Throughout the season, the prevalence of various unidentified pathogens
+also varied, with very little infection observed during the Winter and
+Spring.
 
 ``` r
 pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
@@ -359,6 +291,13 @@ full_data %>%
 ```
 
 <img src="../Figures/markdown/pathogen-props-1.png" style="display: block; margin: auto;" />
+
+The transparent bodies of these copepods also allowed us to examine
+seasonal patterns in lipid reserves and in the production of eggs.
+Maturing oocytes are visible in female copepods before they are
+released. There was no strong seasonal cycle in the production of these
+eggs in any species, and instead, females were reproductively active
+throughout their respective seasons of occurence.
 
 ``` r
 dev_eggs_cols = c("no" = "grey95", "yes" = "lightblue3")
@@ -398,6 +337,9 @@ full_data %>%
 ```
 
 <img src="../Figures/markdown/deveggs-props-1.png" style="display: block; margin: auto;" />
+
+The presence of lipids varied across species, with only *L. minutus*,
+*L. sicilis*, and *Limnocalanus* regularly possessing lipid stores.
 
 ``` r
 lipid_cols = c("no" = "grey95", "yes" = "sienna2")
@@ -454,52 +396,6 @@ periods of time results in larger ranges and slightly changes the
 pattern of variance experienced.
 
 ``` r
-## Daily values
-daily_temp_data = temp_data %>%
-  ungroup() %>% 
-  group_by(date) %>% 
-  summarise(mean_temp = mean(temp),
-            med_temp = median(temp),
-            var_temp = var(temp), 
-            min_temp = min(temp), 
-            max_temp = max(temp)) %>% 
-  mutate("range_temp" = max_temp - min_temp)
-
-day_prior_temp_data = temp_data %>% 
-  ungroup() %>% 
-  group_by(date) %>% 
-  summarise(mean_temp = mean(temp),
-            med_temp = median(temp),
-            var_temp = var(temp), 
-            min_temp = min(temp), 
-            max_temp = max(temp)) %>% 
-  mutate(date = date + 1) %>% 
-  rename_with(.fn = ~ paste0("prior_day_", .x), .cols = c(-date))
-
-daily_plot = daily_temp_data %>% 
-  pivot_longer(cols = c(-date),
-               names_to = "parameter", 
-               values_to = "temp") %>% 
-  ggplot(aes(x = date, y = temp, colour = parameter)) + 
-  geom_line(linewidth = 1) + 
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",  
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) + 
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-  ggtitle("Daily Values") + 
-  labs(y = "Temperature (°C)",
-       x = "") + 
-  theme_bw(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-```
-
-``` r
 ## Defining the function to get predictor values for periods of different lengths
 get_predictors = function(daily_values, raw_temp, n_days){
   prefix = str_replace_all(xfun::numbers_to_words(n_days), pattern = " ", replacement = "-")
@@ -534,417 +430,7 @@ get_predictors = function(daily_values, raw_temp, n_days){
 }
 ```
 
-``` r
-# ## Getting predictor variables for different periods
-# 
-# ### Short (three days)
-# three_day_temps = get_predictors(daily_values = daily_temp_data, 
-#                                  raw_temp = temp_data, 
-#                                  n_days = 3)
-# 
-# ### ONE WEEK
-week_temps = get_predictors(daily_values = daily_temp_data,
-                            raw_temp = temp_data,
-                            n_days = 7)
-
-week_plot = week_temps %>%
-  pivot_longer(cols = c(-date),
-               names_to = "parameter",
-               values_to = "temp") %>%
-  filter(parameter %in% c("seven_day_mean",
-                          "seven_day_med",
-                          "seven_day_max",
-                          "seven_day_min",
-                          "seven_day_var",
-                          "seven_day_range")) %>%
-  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>%
-  ggplot(aes(x = date, y = temp, colour = parameter)) +
-  geom_line(linewidth = 1) +
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) +
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) +
-  ggtitle("One Week") +
-  labs(y = "Temperature (°C)",
-       x = "") +
-  theme_bw(base_size = 20) +
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-# 
-# 
-# ### TWO WEEKS
-# two_week_temps = get_predictors(daily_values = daily_temp_data, 
-#                                 raw_temp = temp_data, 
-#                                 n_days = 14)
-# 
-# two_week_plot = two_week_temps %>% 
-#   pivot_longer(cols = c(-date),
-#                names_to = "parameter", 
-#                values_to = "temp") %>% 
-#   filter(parameter %in% c("fourteen_day_mean",
-#                           "fourteen_day_med",
-#                           "fourteen_day_max", 
-#                           "fourteen_day_min", 
-#                           "fourteen_day_var",
-#                           "fourteen_day_range")) %>% 
-#   mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
-#   ggplot(aes(x = date, y = temp, colour = parameter)) + 
-#   geom_line(linewidth = 1) + 
-#   scale_colour_manual(values = c(
-#     "mean_temp" = "olivedrab3",
-#     "med_temp" = "seagreen3",
-#     "max_temp" = "tomato",  
-#     "min_temp" = "dodgerblue",
-#     "range_temp" = "goldenrod3",
-#     "var_temp" = "darkgoldenrod1"
-#   )) + 
-#   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-#   ggtitle("Two Weeks") + 
-#   labs(y = "Temperature (°C)",
-#        x = "") + 
-#   theme_bw(base_size = 20) + 
-#   theme(panel.grid = element_blank(),
-#         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-# 
-# 
-# ### FOUR WEEKS
-four_week_temps = get_predictors(daily_values = daily_temp_data,
-                                 raw_temp = temp_data,
-                                 n_days = 28)
-
-four_week_plot = four_week_temps %>%
-  pivot_longer(cols = c(-date),
-               names_to = "parameter",
-               values_to = "temp") %>%
-  filter(parameter %in% c("twenty-eight_day_mean",
-                          "twenty-eight_day_med",
-                          "twenty-eight_day_max",
-                          "twenty-eight_day_min",
-                          "twenty-eight_day_var",
-                          "twenty-eight_day_range")) %>%
-  mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>%
-  ggplot(aes(x = date, y = temp, colour = parameter)) +
-  geom_line(linewidth = 1) +
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) +
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) +
-  ggtitle("Four Weeks") +
-  labs(y = "Temperature (°C)",
-       x = "") +
-  theme_bw(base_size = 20) +
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-# 
-# 
-# ### EIGHT WEEKS
-# eight_week_temps = get_predictors(daily_values = daily_temp_data, 
-#                                   raw_temp = temp_data, 
-#                                   n_days = 56)
-# 
-# eight_week_plot = eight_week_temps %>% 
-#   pivot_longer(cols = c(-date),
-#                names_to = "parameter", 
-#                values_to = "temp") %>% 
-#   filter(parameter %in% c("fifty-six_day_mean",
-#                           "fifty-six_day_med",
-#                           "fifty-six_day_max", 
-#                           "fifty-six_day_min", 
-#                           "fifty-six_day_var",
-#                           "fifty-six_day_range")) %>% 
-#   mutate(parameter = paste(word(parameter, start = 3, sep = fixed("_")), "_temp", sep = "")) %>% 
-#   ggplot(aes(x = date, y = temp, colour = parameter)) + 
-#   geom_line(linewidth = 1) + 
-#   scale_colour_manual(values = c(
-#     "mean_temp" = "olivedrab3",
-#     "med_temp" = "seagreen3",
-#     "max_temp" = "tomato",  
-#     "min_temp" = "dodgerblue",
-#     "range_temp" = "goldenrod3",
-#     "var_temp" = "darkgoldenrod1"
-#   )) + 
-#   scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-#   ggtitle("Eight Weeks") + 
-#   labs(y = "Temperature (°C)",
-#        x = "") + 
-#   theme_bw(base_size = 20) + 
-#   theme(panel.grid = element_blank(),
-#         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-# 
-ggarrange(daily_plot, week_plot, four_week_plot, 
-          common.legend = T, nrow = 1, legend = "bottom")
-```
-
-<img src="../Figures/markdown/predictors-and-plots-1.png" style="display: block; margin: auto;" />
-
-The different time periods examined by this climate data highlights that
-the relationship between minimum and maximum temperatures changes based
-on the window examined. For example, minimum and maximum temperatures
-experienced over weekly intervals are closely linked, whereas there is a
-distinct seasonal cycle in the relationship between minimum and maximum
-temperatures experienced over periods of four weeks.
-
-``` r
-one_week_doy_data = week_temps %>% 
-  mutate(doy = yday(date))
-
-one_week_temp_circle = ggplot(one_week_doy_data, aes(x = seven_day_mean_max, y = seven_day_mean_min, colour = doy)) + 
-  geom_point() + 
-  scale_colour_gradient2(
-    high = "dodgerblue4",
-    mid = "coral2",
-    low = "dodgerblue4",
-    midpoint = 182.5) + 
-  labs(x = "Max. Temp. (°C)",
-       y = "Min. Temp. (°C)") + 
-  labs(x = "Max. Temp. (°C)",
-       y = "Min. Temp. (°C)") + 
-  ggtitle("One Week") + 
-  theme_matt()
-
-four_week_doy_data = four_week_temps %>% 
-  mutate(doy = yday(date))
-
-four_week_temp_circle = ggplot(four_week_doy_data, aes(x = `twenty-eight_day_max`, y = `twenty-eight_day_min`, colour = doy)) + 
-  geom_point() + 
-  scale_colour_gradient2(
-    high = "dodgerblue4",
-    mid = "coral2",
-    low = "dodgerblue4",
-    midpoint = 182.5) + 
-  labs(x = "Max. Temp. (°C)",
-       y = "Min. Temp. (°C)") + 
-  ggtitle("Four Week") + 
-  theme_matt()
-
-ggarrange(one_week_temp_circle, four_week_temp_circle,
-          common.legend = T, legend = "bottom")
-```
-
-<img src="../Figures/markdown/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
-
-The thermal environment over any period of time may drive patterns in
-thermal acclimation. To explore the potential effects of different
-acclimation windows, we examined the correlation between thermal limits
-and different representations of the thermal environment for different
-periods of time. Shown below are the correlation coefficients for these
-relationships. Each facet shows the relationship for a different
-dimension of the thermal environment. Correlation coefficients are
-plotted for different durations, for species that were collected more
-than five times. Only data for mature female copepods was included.
-
-We can see that, in general, copepods are responding to proximate cues
-from the thermal environment, with correlations generally dropping off
-substantially as acclimation window duration increases. An exception is
-*Epischura lacustris*, which appears to be responding to maximum
-temperatures experienced over a 20 day time period.
-
-``` r
-### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
-
-num_colls = full_data %>% 
-  filter(sex == "female") %>% 
-  select(collection_date, sp_name) %>%  
-  distinct() %>%  
-  count(sp_name) %>% 
-  filter(n >= 5)
-
-corr_vals = data.frame()
-
-dur_vals = c(1:50)
-for(i in dur_vals){
-  
-  duration_temps = get_predictors(daily_values = daily_temp_data, 
-                                  raw_temp = temp_data, 
-                                  n_days = i) %>% 
-    filter(date %in% as_date(unique(full_data$collection_date)))
-  
-  corr_data = full_data %>%
-    filter(sp_name %in% num_colls$sp_name) %>% 
-    filter(sex == "female") %>% 
-    mutate(collection_date = as.Date(collection_date)) %>% 
-    inner_join(duration_temps, join_by(collection_date == date)) %>% 
-    pivot_longer(cols = c(collection_temp, contains("day_")),
-                 values_to = "value", 
-                 names_to = "predictor") %>%  
-    group_by(sp_name, predictor) %>% 
-    summarise(correlation = cor.test(ctmax, value)$estimate,
-              p.value = cor.test(ctmax, value)$p.value,
-              ci_low = cor.test(ctmax, value)$conf.int[1],
-              ci_high = cor.test(ctmax, value)$conf.int[2],
-              .groups = "keep") %>% 
-    filter(predictor != "collection_temp") %>% 
-    mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
-    separate(predictor, "_day_", into = c(NA, "parameter")) %>% 
-    mutate(duration = i)
-  
-  corr_vals = bind_rows(corr_vals, corr_data)
-}
-
-coll_corr = full_data %>%
-  filter(sp_name %in% num_colls$sp_name) %>% 
-  filter(sex == "female") %>% 
-  group_by(sp_name) %>% 
-  summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
-            p.value = cor.test(ctmax, collection_temp)$p.value,
-            ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
-            ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
-  mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
-  mutate(duration = 0,
-         parameter = "coll_temp")
-
-corr_vals = corr_vals %>%  
-  mutate(duration = as.numeric(duration)) %>% 
-  bind_rows(coll_corr)
-```
-
-``` r
-corr_vals %>% 
-  mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
-                                              "mean", "med", "var",
-                                              "mean_min", "mean_max", "mean_range"))) %>% 
-  ggplot(aes(x = duration, y = correlation, colour = sp_name)) + 
-  facet_wrap(.~parameter) + 
-  geom_hline(yintercept = 0) + 
-  geom_point(size = 0.9) + 
-  geom_line(linewidth = 1.5) + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Duration (days)",
-       y = "Correlation", 
-       colour = "Species") + 
-  theme_matt_facets()
-```
-
-<img src="../Figures/markdown/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
-
-Shown here are the top three factors for each species.
-
-``` r
-# 
-# corr_vals = full_data %>%
-#   filter(sp_name %in% num_colls$sp_name) %>% 
-#   filter(sex == "female") %>% 
-#   mutate(collection_date = as.Date(collection_date)) %>% 
-#   full_join(temp_predictors, join_by(collection_date == date)) %>% 
-#   pivot_longer(cols = c(collection_temp, mean_temp:tail(names(.), 1)),
-#                values_to = "value", 
-#                names_to = "predictor") %>%  
-#   group_by(sp_name, predictor) %>% 
-#   summarise(correlation = cor.test(ctmax, value)$estimate,
-#             p.value = cor.test(ctmax, value)$p.value,
-#             ci_low = cor.test(ctmax, value)$conf.int[1],
-#             ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
-#   mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig."))
-
-corr_vals %>%  
-  filter(sig == "Sig.") %>% 
-  drop_na(correlation) %>% 
-  group_by(sp_name) %>%
-  arrange(desc(correlation)) %>% 
-  slice_head(n = 3) %>% 
-  select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, "P-Value" = p.value) %>% 
-  knitr::kable(align = "c")
-```
-
-|           Species           | Predictor | Duration | Correlation |  P-Value  |
-|:---------------------------:|:---------:|:--------:|:-----------:|:---------:|
-|     Epischura lacustris     |    max    |    20    |  0.8926416  | 0.0000000 |
-|     Epischura lacustris     |    max    |    19    |  0.8906963  | 0.0000000 |
-|     Epischura lacustris     |    max    |    21    |  0.8874924  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    6     |  0.7864036  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    8     |  0.7862573  | 0.0000000 |
-|   Leptodiaptomus minutus    |    max    |    7     |  0.7862429  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    23    |  0.3035589  | 0.0000000 |
-|   Leptodiaptomus sicilis    |    var    |    21    |  0.3031145  | 0.0000000 |
-|   Leptodiaptomus sicilis    |   range   |    24    |  0.3019967  | 0.0000000 |
-|    Limnocalanus macrurus    |    max    |    7     |  0.5521216  | 0.0001239 |
-|    Limnocalanus macrurus    |    max    |    8     |  0.5520367  | 0.0001242 |
-|    Limnocalanus macrurus    | mean_min  |    6     |  0.5512902  | 0.0001274 |
-|    Senecella calanoides     |    var    |    7     |  0.4342229  | 0.0492015 |
-| Skistodiaptomus oregonensis |    max    |    2     |  0.8002749  | 0.0000000 |
-| Skistodiaptomus oregonensis | mean_max  |    2     |  0.7952135  | 0.0000000 |
-| Skistodiaptomus oregonensis |    max    |    1     |  0.7948644  | 0.0000000 |
-
-Phenotypic variation (like acclimation of thermal limits) is a
-physiological process. depending on the mechanistic underpinnings
-(changes in HSP expression, etc.), the amount of time it takes for an
-individual to acclimate may vary based on body size (larger species,
-more cells, more time required to acclimate). Shown here is the duration
-of the environmental acclimation window the copepods appear to be
-responding to.
-
-``` r
-mean_sizes = full_data %>% 
-  filter(sex == "female") %>% 
-  group_by(sp_name) %>%  
-  summarise(mean_size = mean(size, na.rm = T))
-
-corr_vals %>% 
-  group_by(sp_name) %>% 
-  filter(correlation == max(correlation)) %>%  
-  inner_join(mean_sizes, by = "sp_name") %>% 
-  select(sp_name, duration, mean_size) %>%  
-  ggplot(aes(x = mean_size, y = duration)) + 
-  geom_point(aes(colour = sp_name), 
-             size = 4) + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Mean Female Size (mm)",
-       y = "Acclimation Duration",
-       colour = "Species") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-```
-
-<img src="../Figures/markdown/acc-duration-plot-1.png" style="display: block; margin: auto;" />
-
 ## Trait Variation
-
-``` r
-# ctmax_plot = full_data %>%
-#   mutate( #sp_name = str_replace(sp_name, pattern = " ",
-#     #                              replacement = "\n"),
-#     sp_name = fct_reorder(sp_name, ctmax, mean)) %>%
-#   ggplot(aes(y = sp_name, x = ctmax)) +
-#   geom_point(aes(colour= sp_name_sub),
-#              position = position_dodge(width = 0.3),
-#              size = 4) +
-#   scale_colour_manual(values = species_cols) +
-#   xlab(NULL) +
-#   labs(y = "",
-#        x = "CTmax (°C)",
-#        colour = "Group") +
-#   theme_matt() +
-#   theme(legend.position = "none")
-# 
-# size_plot = full_data %>%
-#   mutate(sp_name = fct_reorder(sp_name, ctmax, mean)) %>%
-#   ggplot(aes(y = sp_name, x = size)) +
-#   geom_point(aes(colour= sp_name_sub),
-#              position = position_dodge(width = 0.3),
-#              size = 4) +
-#   scale_colour_manual(values = species_cols) +
-#   labs(x = "Prosome Length (mm)",
-#        y = "",
-#        colour = "Group") +
-#   guides(color = guide_legend(ncol = 1)) +
-#   theme_matt(base_size = ) +
-#   theme(legend.position = "right",
-#         axis.text.y = element_blank(),
-#         plot.margin = margin(0, 0, 0, 0,"cm"))
-# 
-# trait_plot = ctmax_plot + size_plot
-# trait_plot
-```
 
 Shown below are the clutch size distributions for the three diaptomiid
 species, which produce egg sacs that allow for easy quantification of
@@ -986,9 +472,10 @@ thermal limits, but *Epischura* and *L. minutus* approached their upper
 thermal limits during the warmest collections during the summer.
 
 ``` r
-ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
+ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) +   
+  geom_point(size = 3,
+             alpha = 0.3) + 
   geom_smooth(method = "lm", linewidth = 3) +
-  geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "CTmax (°C)",
        colour = "Species") + 
@@ -997,8 +484,9 @@ ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_n
   theme(legend.position = "right")
 
 size_temp = ggplot(filter(full_data, sex != "juvenile"), aes(x = collection_temp, y = size, colour = sp_name)) + 
+  geom_point(size = 3,
+             alpha = 0.3) + 
   geom_smooth(method = "lm", linewidth = 3) +
-  geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Length (mm)",
        colour = "Species")  + 
@@ -1007,8 +495,9 @@ size_temp = ggplot(filter(full_data, sex != "juvenile"), aes(x = collection_temp
   theme(legend.position = "right")
 
 wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name)) + 
+  geom_point(size = 3,
+             alpha = 0.3) + 
   geom_smooth(method = "lm", linewidth = 3) +
-  geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Warming Tolerance (°C)",
        colour = "Species")  + 
@@ -1017,8 +506,9 @@ wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = s
   theme(legend.position = "right")
 
 eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
+  geom_point(size = 3,
+             alpha = 0.3) + 
   geom_smooth(method = "lm", linewidth = 3) +
-  geom_point(size = 3) + 
   labs(x = "Collection Temperature (°C)", 
        y = "Fecundity (# Eggs)",
        colour = "Species")  + 
@@ -1033,9 +523,10 @@ ggarrange(ctmax_temp, size_temp, wt_temp, eggs_temp,
 <img src="../Figures/markdown/trait-coll-temp-plots-1.png" style="display: block; margin: auto;" />
 
 ``` r
-full_data %>% 
-  #filter(sex == "female") %>%  
-  group_by(sp_name) %>% filter(n() > 5) %>% filter(!str_detect(sp_name, pattern = "kindti")) %>% 
+sp_ctmax_temp = full_data %>% 
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  mutate(sp_name = as.factor(sp_name),
+         sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
   ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
   geom_point(size = 2, alpha = 0.8) + 
@@ -1047,7 +538,12 @@ full_data %>%
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+``` r
+ggarrange(sample_dates_plot, sp_ctmax_temp, nrow = 1, 
+          labels = "AUTO")
+```
+
+<img src="../Figures/markdown/sample-ctmax-summary-1.png" style="display: block; margin: auto;" />
 
 Temperature dependence is relatively weak in *L. sicilis*, especially at
 cooler temperatures. We will return to this feature later in the report,
@@ -1094,33 +590,16 @@ knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
 
 ``` r
 
-summary(morph.model)
-## 
-## Call:
-## lm(formula = ctmax ~ collection_temp * sp_name, data = morph_data)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -7.7412 -0.7651  0.1951  1.0570  4.0070 
-## 
-## Coefficients:
-##                              Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)                  26.79205    0.42736  62.693  < 2e-16 ***
-## collection_temp               0.29268    0.04897   5.976  5.6e-09 ***
-## sp_nameSmall                  1.64918    0.49850   3.308  0.00104 ** 
-## collection_temp:sp_nameSmall -0.15306    0.06666  -2.296  0.02225 *  
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 1.736 on 352 degrees of freedom
-## Multiple R-squared:  0.1139, Adjusted R-squared:  0.1064 
-## F-statistic: 15.09 on 3 and 352 DF,  p-value: 2.943e-09
+#summary(morph.model)
 
 morph.em = emmeans::emtrends(morph.model, "sp_name", var = "collection_temp")
-pairs(morph.em)
-##  contrast      estimate     SE  df t.ratio p.value
-##  Large - Small    0.153 0.0667 352   2.296  0.0222
+
+knitr::kable(pairs(morph.em))
 ```
+
+| contrast      |  estimate |        SE |  df |  t.ratio |   p.value |
+|:--------------|----------:|----------:|----:|---------:|----------:|
+| Large - Small | 0.1530629 | 0.0666562 | 352 | 2.296304 | 0.0222454 |
 
 Copepods spent several days in lab during experiments. Shown below are
 the CTmax residuals (taken from a model of CTmax against collection
@@ -1146,7 +625,7 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
 
 ``` r
 full.model = lme4::lmer(data = model_data,
-                        ctmax ~ sex + temp_cent + size_cent +
+                        ctmax ~ sex + temp_cent + size_cent + dev_eggs + lipids + pathogen + 
                           (1 + days_in_lab + temp_cent + size_cent|sp_name))
 
 car::Anova(full.model)
@@ -1154,9 +633,12 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       36.9544  2  9.451e-09 ***
-## temp_cent 22.5373  1  2.061e-06 ***
-## size_cent  1.2104  1     0.2713    
+## sex       28.8814  2  5.352e-07 ***
+## temp_cent 20.2785  1  6.695e-06 ***
+## size_cent  1.3630  1    0.24302    
+## dev_eggs   8.0129  3    0.04574 *  
+## lipids     8.2964  3    0.04027 *  
+## pathogen  41.4149  4  2.205e-08 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1369,7 +851,7 @@ trade-off between these traits.
 ``` r
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(x = ctmax, y = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
   labs(x = "CTmax Residuals", 
@@ -1480,7 +962,7 @@ ggplot(ind_dist, aes(dist, fill = comparison)) +
   theme_matt()
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
@@ -1500,7 +982,7 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
@@ -1519,7 +1001,7 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 
 ## Distribution Lag Non-Linear Model (DLNM approach)
 
@@ -1534,16 +1016,16 @@ dlnm_data = full_data %>%
 ```
 
 ``` r
-hourly_temps = raw_temps %>%  
-  mutate(hour = lubridate::hour(dateTime)) %>%  
-  group_by(date, hour) %>%  
-  summarise(mean_temp = mean(degC)) %>% 
-  ungroup() %>% 
-  complete(date, nesting(hour)) %>%  
-  mutate(timestep = ymd_hms(
-    paste(lubridate::as_date(date), 
-          paste0(hour, ":00:00"), sep = " ")),
-    observation = row_number()) 
+# hourly_temps = raw_temps %>%  
+#   mutate(hour = lubridate::hour(dateTime)) %>%  
+#   group_by(date, hour) %>%  
+#   summarise(mean_temp = mean(degC)) %>% 
+#   ungroup() %>% 
+#   complete(date, nesting(hour)) %>%  
+#   mutate(timestep = ymd_hms(
+#     paste(lubridate::as_date(date), 
+#           paste0(hour, ":00:00"), sep = " ")),
+#     observation = row_number()) 
 ```
 
 ``` r
