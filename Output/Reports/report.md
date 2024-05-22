@@ -45,7 +45,7 @@ Champlain (Burlington Fishing Pier). Plankton was collected from the top
 
 Collections began in late May 2023. Several gaps are present, but
 collections have continued at roughly weekly intervals since then.
-Copepods from 48 collections were used to make a total of 1292 thermal
+Copepods from 48 collections were used to make a total of 1302 thermal
 limit measurements. Over this time period, collection temperatures
 ranged from 2.5 to 26.5°C.
 
@@ -633,12 +633,12 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       28.8814  2  5.352e-07 ***
-## temp_cent 20.2785  1  6.695e-06 ***
-## size_cent  1.3630  1    0.24302    
-## dev_eggs   8.0129  3    0.04574 *  
-## lipids     8.2964  3    0.04027 *  
-## pathogen  41.4149  4  2.205e-08 ***
+## sex       30.8097  2  2.041e-07 ***
+## temp_cent 19.7103  1  9.012e-06 ***
+## size_cent  2.1556  1    0.14206    
+## dev_eggs   8.1851  3    0.04234 *  
+## lipids     8.4045  3    0.03835 *  
+## pathogen  41.6515  4  1.970e-08 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -694,13 +694,13 @@ knitr::kable(sex_sample_sizes, align = "c")
 
 |           Species           | Juvenile | Female | Male |
 |:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    32    |   45   |  19  |
-|   Leptodiaptomus minutus    |    12    |  272   |  38  |
+|     Epischura lacustris     |    36    |   45   |  19  |
+|   Leptodiaptomus minutus    |    12    |  273   |  38  |
 |   Leptodiaptomus sicilis    |    31    |  356   |  95  |
 |    Limnocalanus macrurus    |    4     |   43   |  39  |
 |  Osphranticum labronectum   |    0     |   1    |  0   |
 |    Senecella calanoides     |    13    |   21   |  8   |
-| Skistodiaptomus oregonensis |    14    |  219   |  28  |
+| Skistodiaptomus oregonensis |    14    |  224   |  28  |
 
 The female-male and female-juvenile comparisons show that there are
 generally no differences in thermal limits between these groups.
@@ -872,19 +872,19 @@ car::Anova(fitness.model)
 ## Anova Table (Type II tests)
 ## 
 ## Response: fecundity
-##                Sum Sq  Df  F value  Pr(>F)    
-## resids            0.0   1   0.0000 0.99821    
-## sp_name        8443.9   2 263.7980 < 2e-16 ***
-## resids:sp_name  132.7   2   4.1457 0.01661 *  
-## Residuals      5665.6 354                     
+##                Sum Sq  Df  F value Pr(>F)    
+## resids            0.0   1   0.0015 0.9686    
+## sp_name        8441.3   2 262.8378 <2e-16 ***
+## resids:sp_name  131.6   2   4.0976 0.0174 *  
+## Residuals      5732.7 357                    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.4089 0.270 354   -0.122    0.940
-##  Leptodiaptomus sicilis            0.0846 0.208 354   -0.324    0.493
-##  Skistodiaptomus oregonensis      -0.7693 0.319 354   -1.396   -0.143
+##  Leptodiaptomus minutus            0.3930 0.270 357   -0.138    0.924
+##  Leptodiaptomus sicilis            0.0846 0.208 357   -0.324    0.494
+##  Skistodiaptomus oregonensis      -0.7756 0.319 357   -1.403   -0.148
 ## 
 ## Confidence level used: 0.95
 ```
