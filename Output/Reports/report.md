@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-21
+2024-05-22
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -633,12 +633,12 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       30.8097  2  2.041e-07 ***
-## temp_cent 19.7103  1  9.012e-06 ***
-## size_cent  2.1556  1    0.14206    
-## dev_eggs   8.1851  3    0.04234 *  
-## lipids     8.4045  3    0.03835 *  
-## pathogen  41.6515  4  1.970e-08 ***
+## sex       30.6117  2  2.253e-07 ***
+## temp_cent 20.5958  1  5.672e-06 ***
+## size_cent  2.3026  1    0.12916    
+## dev_eggs   7.5808  2    0.02259 *  
+## lipids     3.3530  2    0.18703    
+## pathogen  41.0905  4  2.574e-08 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
