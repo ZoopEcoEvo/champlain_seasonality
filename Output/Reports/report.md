@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-05-22
+2024-06-06
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -129,6 +129,21 @@ ggplot() +
 ```
 
 <img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+lake_temps = ggplot() + 
+  geom_line(data = collection_conditions, 
+            aes(x = as.Date(date), y = mean_temp),
+            colour = "black", 
+            linewidth = 1) + 
+  labs(x = "Date", 
+       y = "Temperature (°C)", 
+       colour = "Species",
+       size = "Sample Size") + 
+  theme_matt() + 
+  theme(legend.position = "right")
+```
 
 Temperatures observed at the time of collection closely resembled the
 maximum daily temperature from the temperature sensor data. Maximum
@@ -503,7 +518,7 @@ wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = s
        colour = "Species")  + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
-  theme(legend.position = "right")
+  theme(legend.position = "none")
 
 eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
   geom_point(size = 3,
@@ -529,7 +544,7 @@ sp_ctmax_temp = full_data %>%
          sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
   ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
-  geom_point(size = 2, alpha = 0.8) + 
+  geom_point(size = 2, alpha = 0.2) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   labs(x = "Collection Temp. (°C)", 
        y = "CTmax (°C)") + 
@@ -633,12 +648,12 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       29.9326  2  3.164e-07 ***
-## temp_cent 20.6553  1  5.498e-06 ***
-## size_cent  1.9223  1     0.1656    
-## dev_eggs   7.6246  2     0.0221 *  
-## lipids     3.3415  2     0.1881    
-## pathogen  41.4778  4  2.140e-08 ***
+## sex       29.9380  2  3.155e-07 ***
+## temp_cent 20.6287  1  5.575e-06 ***
+## size_cent  1.9779  1     0.1596    
+## dev_eggs   7.6244  2     0.0221 *  
+## lipids     3.3397  2     0.1883    
+## pathogen  41.4799  4  2.138e-08 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -661,6 +676,37 @@ ggplot(model_coefs, aes(x = intercept, y = temp_cent)) +
 ```
 
 <img src="../Figures/markdown/ARR-limits-plot-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+
+arr_combined = synth_arr %>%
+  filter(measure == "upper" & mean_lim > 20) %>% 
+  select("group" = genus, arr, mean_lim) %>% 
+  mutate("dataset" = "synthesis") %>% 
+  bind_rows(
+    select(model_coefs, "group" = species, 'arr' = temp_cent, 'mean_lim' = intercept)
+  ) %>% 
+  mutate(dataset = if_else(is.na(dataset), "new data", "synthesis"))
+
+
+ggplot(arr_combined, aes(x = mean_lim, y = arr)) + 
+  geom_smooth(method = "lm", se = F, 
+              linewidth = 2, colour = "grey30") + 
+  geom_point(data = filter(arr_combined, dataset != "new data"), 
+             size = 4, colour = "grey") + 
+  geom_point(data = filter(arr_combined, dataset == "new data"),
+             aes(colour = group), 
+             size = 4) + 
+scale_colour_manual(values = species_cols) + 
+  labs(x = "Thermal Limit", 
+       y = "ARR", 
+       colour = "Species") +
+  theme_matt() + 
+  theme(legend.position = "none")
+```
+
+<img src="../Figures/markdown/ARR-limits-plot-2.png" style="display: block; margin: auto;" />
 
 The term “acclimation response ratio” is often used to describe the
 effect of temperature on thermal limits. The ARR is calculated as the
@@ -851,43 +897,18 @@ trade-off between these traits.
 ``` r
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = resids, y = fecundity_resids, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
   labs(x = "CTmax Residuals", 
-       y = "Fecundity (# Eggs)") + 
+       y = "Fecundity Residuals",
+       colour = "Species") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
 ```
 
 <img src="../Figures/markdown/ctmax-fecundity-1.png" style="display: block; margin: auto;" />
-
-``` r
-
-fitness.model = lm(data = ctmax_resids, 
-                   fecundity ~ resids * sp_name)
-
-car::Anova(fitness.model)
-## Anova Table (Type II tests)
-## 
-## Response: fecundity
-##                Sum Sq  Df  F value  Pr(>F)    
-## resids            0.2   1   0.0115 0.91469    
-## sp_name        8751.0   2 262.5469 < 2e-16 ***
-## resids:sp_name  106.8   2   3.2048 0.04172 *  
-## Residuals      6033.0 362                     
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-emmeans::emtrends(fitness.model,  var = "resids","sp_name")
-##  sp_name                     resids.trend    SE  df lower.CL upper.CL
-##  Leptodiaptomus minutus            0.3930 0.275 362   -0.148   0.9337
-##  Leptodiaptomus sicilis            0.0846 0.212 362   -0.332   0.5012
-##  Skistodiaptomus oregonensis      -0.6629 0.323 362   -1.298  -0.0282
-## 
-## Confidence level used: 0.95
-```
 
 ## Other patterns in variation
 

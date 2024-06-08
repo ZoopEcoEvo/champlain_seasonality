@@ -206,6 +206,18 @@ ggplot() +
        size = "Sample Size") + 
   theme_matt() + 
   theme(legend.position = "right")
+
+lake_temps = ggplot() + 
+  geom_line(data = collection_conditions, 
+            aes(x = as.Date(date), y = mean_temp),
+            colour = "black", 
+            linewidth = 1) + 
+  labs(x = "Date", 
+       y = "Temperature (°C)", 
+       colour = "Species",
+       size = "Sample Size") + 
+  theme_matt() + 
+  theme(legend.position = "right")
 ```
 
 Temperatures observed at the time of collection closely resembled the maximum daily temperature from the temperature sensor data. Maximum temperature was used as a proxy instead of mean temperature as collections were usually made during afternoons or early evenings, just following the warmest part of the day. 
@@ -223,29 +235,6 @@ collection_conditions %>%
        y = "Collection Temp. (°C)") + 
   theme_matt()
 ```
-
-```{r round-summary-1, fig.width=11, fig.height=11, include = F}
-round_summary = full_data %>% 
-  group_by(collection_date, collection_temp) %>% 
-  summarise(mean_ctmax = mean(ctmax))
-
-ggplot(data = round_summary) + 
-  geom_hline(yintercept = 40) + 
-  geom_point(aes(x = as_date(collection_date), y = mean_ctmax),
-             colour = "tomato3",
-             size = 5) +
-  geom_bar(aes(x = as_date(collection_date), y = mean_ctmax),
-           stat = "identity",
-           fill = "white", 
-           colour = "grey30") +
-  geom_bar(aes(x = as_date(collection_date), y = collection_temp),
-           stat = "identity",
-           fill = "darkgoldenrod1") + 
-  ylim(-3, 40) + 
-  coord_polar(start = 0) + 
-  theme_void()
-```
-
 
 ```{r round-summary-2, fig.width=11, fig.height=11, include = F}
 ggplot() + 
@@ -973,7 +962,7 @@ wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = s
        colour = "Species")  + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
-  theme(legend.position = "right")
+  theme(legend.position = "none")
 
 eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
   geom_point(size = 3,
@@ -997,7 +986,7 @@ sp_ctmax_temp = full_data %>%
          sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
   ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
-  geom_point(size = 2, alpha = 0.8) + 
+  geom_point(size = 2, alpha = 0.2) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   labs(x = "Collection Temp. (°C)", 
        y = "CTmax (°C)") + 
@@ -1073,8 +1062,13 @@ model_data = full_data %>%
 
 ctmax_temp.model = lm(data = model_data, ctmax ~ temp_cent * sp_name)
 size_temp.model = lm(data = model_data, size ~ temp_cent * sp_name)
+fecund_temp.model = lm(data = drop_na(model_data, fecundity), fecundity ~ temp_cent * sp_name)
 
-ctmax_resids = cbind(model_data, "resids" = ctmax_temp.model$residuals, "size_resids" = size_temp.model$residuals)
+fecundity_resids = cbind(drop_na(model_data, fecundity), "fecundity_resids" = fecund_temp.model$residuals) %>% 
+  select(collection_date, exp_date, replicate, species, tube, fecundity_resids)
+
+ctmax_resids = cbind(model_data, "resids" = ctmax_temp.model$residuals, "size_resids" = size_temp.model$residuals) %>% 
+  left_join(fecundity_resids)
 
 ```
 
@@ -1116,6 +1110,33 @@ ggplot(model_coefs, aes(x = intercept, y = temp_cent)) +
        y = "ARR") +
   theme_matt() + 
   theme(legend.position = "right")
+
+
+arr_combined = synth_arr %>%
+  filter(measure == "upper" & mean_lim > 20) %>% 
+  select("group" = genus, arr, mean_lim) %>% 
+  mutate("dataset" = "synthesis") %>% 
+  bind_rows(
+    select(model_coefs, "group" = species, 'arr' = temp_cent, 'mean_lim' = intercept)
+  ) %>% 
+  mutate(dataset = if_else(is.na(dataset), "new data", "synthesis"))
+
+
+ggplot(arr_combined, aes(x = mean_lim, y = arr)) + 
+  geom_smooth(method = "lm", se = F, 
+              linewidth = 2, colour = "grey30") + 
+  geom_point(data = filter(arr_combined, dataset != "new data"), 
+             size = 4, colour = "grey") + 
+  geom_point(data = filter(arr_combined, dataset == "new data"),
+             aes(colour = group), 
+             size = 4) + 
+scale_colour_manual(values = species_cols) + 
+  labs(x = "Thermal Limit", 
+       y = "ARR", 
+       colour = "Species") +
+  theme_matt() + 
+  theme(legend.position = "none")
+
 ```
 
 The term "acclimation response ratio" is often used to describe the effect of temperature on thermal limits. The ARR is calculated as the change in thermal limits per degree change in acclimation temperature. For our data, we will estimate ARR as the slope of CTmax against collection temperature. These slopes were taken from a regression of CTmax against collection temperature and body size. Two different model types were used, a simple linear regression and a mixed effects model. The estimated ARR values were generally highly similar between the model types used.
@@ -1348,21 +1369,15 @@ Individuals may also allocate energy to different fitness related traits, priori
 ```{r, ctmax-fecundity, fig.width=10, fig.height=7}
 ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
+  ggplot(aes(x = resids, y = fecundity_resids, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
   labs(x = "CTmax Residuals", 
-       y = "Fecundity (# Eggs)") + 
+       y = "Fecundity Residuals",
+       colour = "Species") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
-
-fitness.model = lm(data = ctmax_resids, 
-                   fecundity ~ resids * sp_name)
-
-car::Anova(fitness.model)
-
-emmeans::emtrends(fitness.model,  var = "resids","sp_name")
 ```
 
 ## Other patterns in variation 

@@ -49,6 +49,9 @@ temp_data = read.csv(file = "Output/Data/champlain_temps.csv") %>%
 hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
   mutate(date = as_date(date))
 
+synth_arr = read.csv(file = "Raw_data/genus_w_arr.csv") %>% 
+  select(-X)
+
 sic_dnabin = adegenet::fasta2DNAbin(file = "Output/Sequences/Sanger_contigs_alignment.fa")
 
 if(make_report == T){
