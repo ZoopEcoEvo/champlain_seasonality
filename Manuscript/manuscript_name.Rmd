@@ -7,22 +7,34 @@ output:
     citation_package: natbib
   word_document: 
     reference_docx: doc_template.docx
-title: "TITLE"
+title: "Seasonal acclimation of copepod community thermal limits"
 author:
-  - name: Author 1
-    affiliation: Place 1
+  - name: Matthew Sasaki
+    affiliation: University of Vermont
     location: 
-  - name: Author 2
-    affiliation: Place 2
+  - name: Aly Rodgers
+    affiliation: University of Vermont
     location: 
-  - name: Author 3
-    affiliation: Place 3
+  - name: Chanchal Saratkar
+    affiliation: University of Vermont
+    location: 
+  - name: Jamie Cull-Host
+    affiliation: University of Vermont
+    location: 
+  - name: Sydney Sharp
+    affiliation: University of Vermont
+    location: 
+  - name: Yuuki Real
+    affiliation: University of Vermont
+    location: 
+  - name: Melissa Pespeni
+    affiliation: University of Vermont
     location: 
 abstract: "ABSTRACT HERE."
 keywords: "keyword1, keyword2, keyword3"
-contact: "**Correspondance**: ___" 
+contact: "**Correspondance**: matthew.sasaki@uvm.edu" 
 current: "This preprint is current as of `r format(Sys.time(), '%B %d, %Y')`"
-repo: "**Code**: ___"
+repo: "**Code**: https://github.com/ZoopEcoEvo/champlain_seasonality"
 bibliography: references.bib
 biblio-style: bib-style
 geometry: margin=1in
@@ -48,6 +60,18 @@ knitr::opts_chunk$set(fig.align = "center")
 
 # Results
 
+Main figure (CTmax vs. date)
+
+Ridge plot of collection frequencies + CTmax vs. Collection Temperature
+
+Fecundity plot
+
+Warming tolerance
+
+Plasticity-tolerance trade-off plot
+
+DLNM plot for diaptomids
+
 ```{r, figure, echo = F}
 #| fig.cap = "CAPTION HERE."
 
@@ -63,13 +87,20 @@ knitr::kable(x = 1, #Replace 1 with whatever object you want included as a table
 
 # Discussion
 
+Acclimation affects natural populations over seasonal timescales
+
+Effects are shaped by trade-off with limits (as observed over other spatial / temporal / biological scales). Combined with patterns in warming tolerance, this suggests stronger effects on summer communities than winter communities (which may respond more via changes in phenology).
+
 \newpage
 
 ```{=tex}
 \beginsupplement
 ```
-
 # Supplementary Material
+
+Size plots
+
+Frequency of pathogens / egg development
 
 ```{r supp-fig-1, echo = F}
 #| fig.cap = "CAPTION HERE."

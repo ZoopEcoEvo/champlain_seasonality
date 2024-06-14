@@ -1130,7 +1130,7 @@ ggplot(arr_combined, aes(x = mean_lim, y = arr)) +
   geom_point(data = filter(arr_combined, dataset == "new data"),
              aes(colour = group), 
              size = 4) + 
-scale_colour_manual(values = species_cols) + 
+  scale_colour_manual(values = species_cols) + 
   labs(x = "Thermal Limit", 
        y = "ARR", 
        colour = "Species") +
@@ -1475,29 +1475,141 @@ full_data %>%
 ```
 
 ## Distribution Lag Non-Linear Model (DLNM approach) 
-```{r}
+
+Distributed lag models examine a response variable, measured at multiple time points, as a function of the lagged occurrence of some predictor variable (response y at time t as a function of preditor x(t-lag). This method utilizes a bi-dimensional dose-lag-response function, which essentially examines not only the dose effect, but the effect of the timing of the dose. 
+
+```{r compiling-datasets}
+
+lag_temps = temp_data %>% 
+  group_by(date) %>% 
+  summarize("mean_temp" = mean(temp), 
+            "max_temp" = max(temp))
+
 dlnm_data = full_data %>%  
   filter(sex == "female") %>% 
-  select(collection_date, days_in_lab, collection_temp, replicate, sp_name, size, fecundity, ctmax) %>% 
-  group_by(collection_date, collection_temp, sp_name) %>%  
+  filter(sp_name %in% c(
+    # "Leptodiaptomus sicilis",
+    # "Leptodiaptomus minutus",
+    "Skistodiaptomus oregonensis"
+  )) %>% 
+  select(collection_date, sp_name, ctmax) %>% 
+  group_by(collection_date, sp_name) %>%  
   summarise(mean_ctmax = mean(ctmax, na.rm = T),
-            mean_size = mean(size, na.rm = T),
             sample = n())
 ```
 
-```{r}
-# hourly_temps = raw_temps %>%  
-#   mutate(hour = lubridate::hour(dateTime)) %>%  
-#   group_by(date, hour) %>%  
-#   summarise(mean_temp = mean(degC)) %>% 
-#   ungroup() %>% 
-#   complete(date, nesting(hour)) %>%  
-#   mutate(timestep = ymd_hms(
-#     paste(lubridate::as_date(date), 
-#           paste0(hour, ":00:00"), sep = " ")),
-#     observation = row_number()) 
+```{r general-relationship} 
+dlnm_data %>% 
+  left_join(lag_temps, by = join_by("collection_date" == "date")) %>% 
+  ggplot(aes(x = mean_temp, y = mean_ctmax)) + 
+  facet_wrap(.~sp_name) + 
+  geom_smooth(method = "gam") + 
+  geom_point() + 
+  theme_matt_facets()
+```
+
+```{r temp-standardization}
 
 ```
+
+```{r}
+# We need to estimate a matrix of exposure histories for each observation. This contains the series of exposures at each lag (l) for each of the n observations, constrained between l0 (minimum lag) and L (max lag). 
+
+dates = dlnm_data$collection_date # For each of these dates, make a vector of the past 30 days (including the day of collection). NOTE: Don't use 'unique' dates here since some collections had multiple species
+
+exp_hist = data.frame()
+
+for(d in dates){
+  
+  history = lag_temps %>% 
+    filter(date <= d & date > d - 61) %>% 
+    arrange(desc(date)) %>% 
+    mutate(lag = row_number() - 1) %>% 
+    select(lag, mean_temp)
+  
+  temp_vec = scale(history$mean_temp)[,1]
+  names(temp_vec) = history$lag
+  
+  exp_hist = bind_rows(exp_hist, temp_vec)
+  
+}
+
+# The cross-basis function from dlnm will use the class of the x parameter to determine what to do. In our case, we need to provide it with the matrix of exposure histories for reach observation (row) and lag (column). 
+
+cb_temps = crossbasis(exp_hist, lag = c(0,60), 
+                      argvar =list(fun="cr",df=3), 
+                      arglag=list(fun="cr",df=3,intercept=T))
+
+summary(cb_temps)
+
+penalized_mat <- cbPen(cb_temps)
+
+#fitting GAM
+lag.gam = gam(data = dlnm_data, 
+              mean_ctmax ~ cb_temps,
+              method = "GCV.Cp",
+              paraPen=list(cb_temps=penalized_mat))
+
+summary(lag.gam)
+AIC(lag.gam)
+
+#estimation of exposures effects
+pred_gam_Zs<-crosspred(cb_temps, lag.gam, 
+                       cumul=F, cen=0, ci.level = 0.95,
+                       at=seq(-4,4, 0.1))
+#default plots
+plot(pred_gam_Zs)
+plot(pred_gam_Zs, lag=0)
+plot(pred_gam_Zs, var = -2)
+
+# 
+# 
+# 
+# ##function to produce a ggplot with non-significant combinations of lag-exposure removed
+# #SEE JOURANL ARTICLE FOR THE DEFINITION HERE OF SIGNIFICAITIVE EFFECTS
+# 
+# #x: name of crosspred object (predictions from distributed lag linear (DLMs) and non-linear models (DLNMs))
+# #y: name of matrix object (exposure matrix)
+# 
+# plot_heat<-function(x,y){
+#   av <- require("ggplot2")
+#   if(av==F){plot("install and/or load GGplot")}else{
+#     
+#     m<-c(x[[7]])
+#     mh<-c(x[[12]])
+#     ml<-c(x[[11]])
+#     
+#     pred2d = data.frame(matfit=m,up=mh,low=ml)
+#     
+#     min_m = min(y,na.rm = TRUE)
+#     max_m = max(y,na.rm = TRUE)
+#     m_int = (max_m - min_m) / 60 #61 entries per lag
+#     
+#     pred2d$exp <- rep(seq(min_m, max_m, m_int), ncol(y)) 
+#     pred2d$lag <- rep(1:ncol(y),each=nrow(x[[7]]))
+#     pred2d$fit095 <- ifelse(pred2d$up>0 & pred2d$low>0 | pred2d$up<0 & pred2d$low<0, pred2d$matfit, NA)
+#     
+#     lg<- bquote(atop(CT[max]~ variation)) 
+#     
+#     ggplot(data=pred2d) +
+#       geom_tile(aes(x=lag, y=exp, fill=fit095)) + 
+#       scale_fill_viridis_c(option="magma")+
+#       theme_bw()+
+#       labs(x="lag", y="Exposure", fill=lg)+
+#       theme(axis.text = element_text(size = 13),axis.title = element_text(size=15),legend.text =element_text(size=12),legend.title = element_text(size=15),
+#             legend.position = 'top', legend.spacing.x = unit(1.0, 'cm'))
+#     
+#   }
+# }
+# 
+# 
+# 
+# 
+# ###2D heat map plot with filter of all non-significative combiantions of lag-exposure (run "heatplot_function" script)
+# plot_heat(pred_gam_Zs,exp_hist)
+
+```
+
 
 ```{r}
 if(predict_vuln == F){
