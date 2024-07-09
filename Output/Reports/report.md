@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-06-06
+2024-07-09
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -26,19 +26,20 @@ Champlain (Burlington Fishing Pier). Plankton was collected from the top
 # ChamplainInfo = readNWISsite(siteNumber)
 # parameterCd = "00010"
 # startDate = "2023-01-01"
-# endDate = ""
+# endDate = "2024-5-20"
 # #statCd = c("00001", "00002","00003", "00011") # 1 - max, 2 - min, 3 = mean
 # 
 # # Constructs the URL for the data wanted then downloads the data
-# url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd, 
+# url = constructNWISURL(siteNumbers = siteNumber, parameterCd = parameterCd,
 #                        startDate = startDate, endDate = endDate, service = "uv")
 # 
-# raw_temps = importWaterML1(url, asDateTime = T) %>% 
-#   mutate("date" = as.Date(dateTime)) %>% 
-#   select(dateTime, tz_cd, date, degC = X_00010_00000)
+# raw_temps = importWaterML1(url, asDateTime = T) %>%
+#   mutate("date" = as.Date(dateTime),
+#          "hour" = hour(dateTime)) %>%
+#   select(dateTime, tz_cd, date, hour, degC = X_00010_00000)
 # 
-# temp_data =  raw_temps %>% 
-#   select(date, "temp" = degC)
+# temp_data =  raw_temps %>%
+#   select(date, hour, "temp" = degC)
 # 
 # write.csv(temp_data, file = "./Output/Data/champlain_temps.csv", row.names = F)
 ```
@@ -648,12 +649,12 @@ car::Anova(full.model)
 ## 
 ## Response: ctmax
 ##             Chisq Df Pr(>Chisq)    
-## sex       29.9380  2  3.155e-07 ***
-## temp_cent 20.6287  1  5.575e-06 ***
-## size_cent  1.9779  1     0.1596    
-## dev_eggs   7.6244  2     0.0221 *  
-## lipids     3.3397  2     0.1883    
-## pathogen  41.4799  4  2.138e-08 ***
+## sex       29.9326  2  3.164e-07 ***
+## temp_cent 20.6553  1  5.498e-06 ***
+## size_cent  1.9223  1     0.1656    
+## dev_eggs   7.6246  2     0.0221 *  
+## lipids     3.3415  2     0.1881    
+## pathogen  41.4778  4  2.140e-08 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -698,7 +699,7 @@ ggplot(arr_combined, aes(x = mean_lim, y = arr)) +
   geom_point(data = filter(arr_combined, dataset == "new data"),
              aes(colour = group), 
              size = 4) + 
-scale_colour_manual(values = species_cols) + 
+  scale_colour_manual(values = species_cols) + 
   labs(x = "Thermal Limit", 
        y = "ARR", 
        colour = "Species") +
@@ -1026,28 +1027,148 @@ full_data %>%
 
 ## Distribution Lag Non-Linear Model (DLNM approach)
 
+Distributed lag models examine a response variable, measured at multiple
+time points, as a function of the lagged occurrence of some predictor
+variable (response y at time t as a function of preditor x(t-lag). This
+method utilizes a bi-dimensional dose-lag-response function, which
+essentially examines not only the dose effect, but the effect of the
+timing of the dose.
+
 ``` r
-dlnm_data = full_data %>%  
-  filter(sex == "female") %>% 
-  select(collection_date, days_in_lab, collection_temp, replicate, sp_name, size, fecundity, ctmax) %>% 
-  group_by(collection_date, collection_temp, sp_name) %>%  
-  summarise(mean_ctmax = mean(ctmax, na.rm = T),
-            mean_size = mean(size, na.rm = T),
-            sample = n())
+# 
+# lag_temps = temp_data %>%
+#   group_by(date, hour) %>%
+#   summarize("mean_temp" = mean(temp, na.rm = T)) %>%
+#   ungroup() %>%
+#   mutate(point_num = row_number())
+# 
+# uniq_days = length(unique(lag_temps$date))
+# 
+# g = gam(mean_temp ~ s(point_num, bs="cr", k=uniq_days + 10),
+#     method = "REML",
+#     data = lag_temps)
+# 
+# points = seq(1, nrow(lag_temps), length.out = length(lag_temps$hour))
+# 
+# df.res = df.residual(g)
+# 
+# pred_temps = predict(g, newdata = lag_temps, type = "response", se.fit = TRUE)
+# 
+# lag_temps = lag_temps %>%
+#   mutate(trend_T = pred_temps$fit,
+#          trend_se = pred_temps$se.fit,
+#          temp_diff = mean_temp - trend_T)
+# 
+# write.csv(lag_temps, file = "./Output/Data/lag_temps.csv", row.names = F)
 ```
 
 ``` r
-# hourly_temps = raw_temps %>%  
-#   mutate(hour = lubridate::hour(dateTime)) %>%  
-#   group_by(date, hour) %>%  
-#   summarise(mean_temp = mean(degC)) %>% 
-#   ungroup() %>% 
-#   complete(date, nesting(hour)) %>%  
-#   mutate(timestep = ymd_hms(
-#     paste(lubridate::as_date(date), 
-#           paste0(hour, ":00:00"), sep = " ")),
-#     observation = row_number()) 
+
+dlnm_data = full_data %>%  
+  filter(sex == "female") %>% 
+  filter(sp_name %in% c(
+    "Leptodiaptomus sicilis",
+    "Leptodiaptomus minutus",
+    "Skistodiaptomus oregonensis"
+  )) %>% 
+  select(collection_date, collection_temp, sp_name, ctmax) %>% 
+  group_by(collection_date, collection_temp, sp_name) %>%  
+  summarise(mean_ctmax = mean(ctmax, na.rm = T),
+            sample = n())
+
+temp_data %>% 
+  group_by(date) %>% 
+  summarise(mean_temp = mean(temp)) %>% 
+  right_join(dlnm_data, by = join_by("date" == "collection_date")) %>% 
+  ggplot(aes(x = mean_temp, y = mean_ctmax)) + 
+  facet_wrap(.~sp_name) + 
+  geom_smooth(method = "gam") + 
+  geom_point() + 
+  labs(x = "Mean Daily Temp. (°C)",
+       y = "Mean CTmax (°C)") + 
+theme_matt_facets() + 
+  theme(strip.text.x = element_text(size = 12))
 ```
+
+<img src="../Figures/markdown/general-relationship-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+sp_list = unique(dlnm_data$sp_name)
+
+for(lag_species in sp_list){
+  
+  dlnm_data_sp = dlnm_data %>% 
+    filter(sp_name == lag_species)
+  
+  # We need to estimate a matrix of exposure histories for each observation. This contains the series of exposures at each lag (l) for each of the n observations, constrained between l0 (minimum lag) and L (max lag). 
+
+dates = dlnm_data_sp$collection_date # For each of these dates, make a vector of the past 30 days (including the day of collection). NOTE: Don't use 'unique' dates here since some collections had multiple species
+
+exp_hist_z = data.frame()
+exp_hist_trend = data.frame()
+
+for(d in dates){
+  
+  history = lag_temps %>% 
+    filter(date <= d & date > d - 31) %>% 
+    arrange(desc(date), desc(hour)) %>% 
+    mutate(lag = row_number() - 1) %>% 
+    select(lag, mean_temp, temp_diff)
+  
+  z_vec = scale(history$mean_temp)[,1]
+  names(z_vec) = history$lag
+  
+  trend_vec = history$temp_diff
+  names(trend_vec) = history$lag
+
+  exp_hist_z = bind_rows(exp_hist_z, z_vec)
+  exp_hist_trend = bind_rows(exp_hist_trend, trend_vec)
+  
+}
+
+#print(max(exp_hist_trend, na.rm = T))
+
+# The cross-basis function from dlnm will use the class of the x parameter to determine what to do. In our case, we need to provide it with the matrix of exposure histories for reach observation (row) and lag (column). 
+
+cb_temps = crossbasis(exp_hist_trend, lag = c(0,dim(exp_hist_trend)[2]-1), 
+                      argvar =list(fun="cr",df=3), 
+                      arglag=list(fun="cr",df=3,intercept=T))
+
+#summary(cb_temps)
+
+penalized_mat <- cbPen(cb_temps)
+
+#fitting GAM
+lag.gam = gam(data = dlnm_data_sp, 
+              mean_ctmax ~ cb_temps + collection_temp, 
+              method = "GCV.Cp",
+              paraPen=list(cb_temps=penalized_mat))
+
+# summary(lag.gam)
+# AIC(lag.gam)
+
+#estimation of exposures effects
+
+#default plots
+pred_gam_Zs<-crosspred(cb_temps, lag.gam, 
+                       cumul=F, cen=0, ci.level = 0.95,
+                       at=seq(-4,4, 0.1))
+
+plot(pred_gam_Zs, "contour")
+
+plot(pred_gam_Zs, border = 2, cumul=F,
+      theta=110,phi=20,ltheta=-80)
+
+plot(pred_gam_Zs, "slices", 
+     var = c(3,-3), 
+     lag = c(1,336), 
+     col = 2)
+
+}
+```
+
+<img src="../Figures/markdown/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-2.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-3.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-4.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-5.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-6.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-7.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-8.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-9.png" style="display: block; margin: auto;" />
 
 ``` r
 if(predict_vuln == F){
