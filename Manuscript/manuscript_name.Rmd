@@ -62,21 +62,50 @@ knitr::opts_chunk$set(fig.align = "center")
 
 Main figure (CTmax vs. date)
 
+```{r, figure1, echo = F, out.width = "450px"}
+#| fig.cap = "CAPTION HERE."
+
+knitr::include_graphics("../Output/Figures/markdown/main-fig-ctmax-timeseries-1.png") #Use this when filling in figures from analysis 
+```
+
 Ridge plot of collection frequencies + CTmax vs. Collection Temperature
 
-Fecundity plot
+```{r, figure2, echo = F, out.width = "450px"}
+#| fig.cap = "CAPTION HERE."
 
-Warming tolerance
+knitr::include_graphics("../Output/Figures/markdown/main-fig-sp-summaries-1.png") #Use this when filling in figures from analysis 
+```
+
+Collection temp. regressions
+
+```{r, figure3, echo = F, out.width = "400px"}
+#| fig.cap = "CAPTION HERE."
+
+knitr::include_graphics("../Output/Figures/markdown/main-fig-trait-coll-temp-plots-1.png") #Use this when filling in figures from analysis 
+```
 
 Plasticity-tolerance trade-off plot
 
-DLNM plot for diaptomids
-
-```{r, figure, echo = F}
+```{r, figure4, echo = F, out.width = "300px"}
 #| fig.cap = "CAPTION HERE."
 
-plot(1)
-#knitr::include_graphics("../Output/Figures/_PATH_") #Use this when filling in figures from analysis 
+knitr::include_graphics("../Output/Figures/markdown/main-fig-ARR-synth-plot-1.png") #Use this when filling in figures from analysis 
+```
+
+CTmax and Size
+
+```{r, figure5, echo = F, out.width = "300px"}
+#| fig.cap = "CAPTION HERE."
+
+knitr::include_graphics("../Output/Figures/markdown/main-fig-mean-ctmax-mean-size-plot-1.png") #Use this when filling in figures from analysis 
+```
+
+Fecundity relationships (CTmax and size)
+
+```{r, figure6, echo = F, out.width = "400px"}
+#| fig.cap = "CAPTION HERE."
+
+knitr::include_graphics("../Output/Figures/markdown/main-fig-fecundity-plots-1.png") #Use this when filling in figures from analysis 
 ```
 
 ```{r, table, echo = F}

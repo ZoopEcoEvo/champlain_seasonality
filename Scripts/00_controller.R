@@ -18,7 +18,7 @@ process_all_data = F #Runs data analysis
 process_sequences = F #Analyzes the COI sequence data
 make_report = T #Runs project summary
 predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 
-knit_manuscript = F #Compiles manuscript draft
+knit_manuscript = T #Compiles manuscript draft
 
 ############################
 ### Read in the RAW data ###

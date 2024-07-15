@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-07-09
+2024-07-15
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -100,8 +100,11 @@ adult_summaries = full_data %>%
   arrange(desc(sample_size))
 
 
+tseries_data = full_data %>% 
+  mutate(sp_name = fct_reorder(sp_name, ctmax, .desc = T))
+
 ggplot() + 
-  geom_vline(data = unique(select(full_data, collection_date)), 
+  geom_vline(data = unique(select(tseries_data, collection_date)), 
              aes(xintercept = as.Date(collection_date)),
              colour = "grey90",
              linewidth = 1) + 
@@ -117,7 +120,7 @@ ggplot() +
   #               width = 5, linewidth = 1) +
   # geom_point(data = adult_summaries, 
   #            aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
-  geom_point(data = full_data, 
+  geom_point(data = tseries_data, 
              aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
              size = 2, position = position_jitter(width = 1, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
@@ -129,7 +132,7 @@ ggplot() +
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/ctmax-timeseries-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/main-fig-ctmax-timeseries-1.png" style="display: block; margin: auto;" />
 
 ``` r
 
@@ -166,7 +169,7 @@ collection_conditions %>%
   theme_matt()
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-temp-acc-1.png" style="display: block; margin: auto;" />
 
 Size also varied, but primarily between rather than within species.
 
@@ -202,7 +205,7 @@ ggplot() +
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/size-timeseries-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-size-timeseries-1.png" style="display: block; margin: auto;" />
 
 ``` r
 sample_dates_plot = full_data %>%  
@@ -267,7 +270,7 @@ adult_summaries %>%
         axis.ticks = element_line())
 ```
 
-<img src="../Figures/markdown/sp-props-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-sp-props-1.png" style="display: block; margin: auto;" />
 
 Throughout the season, the prevalence of various unidentified pathogens
 also varied, with very little infection observed during the Winter and
@@ -306,7 +309,7 @@ full_data %>%
         axis.ticks = element_line())
 ```
 
-<img src="../Figures/markdown/pathogen-props-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-pathogen-props-1.png" style="display: block; margin: auto;" />
 
 The transparent bodies of these copepods also allowed us to examine
 seasonal patterns in lipid reserves and in the production of eggs.
@@ -352,7 +355,7 @@ full_data %>%
         axis.ticks = element_line())
 ```
 
-<img src="../Figures/markdown/deveggs-props-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-deveggs-props-1.png" style="display: block; margin: auto;" />
 
 The presence of lipids varied across species, with only *L. minutus*,
 *L. sicilis*, and *Limnocalanus* regularly possessing lipid stores.
@@ -394,7 +397,7 @@ full_data %>%
         axis.ticks = element_line())
 ```
 
-<img src="../Figures/markdown/lipids-props-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-lipids-props-1.png" style="display: block; margin: auto;" />
 
 ## Temperature Variability
 
@@ -464,7 +467,7 @@ full_data %>%
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/fecundity-histogram-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-fecundity-histogram-1.png" style="display: block; margin: auto;" />
 
 One of the main aims of this project is to examine the patterns and
 processes driving variation in upper thermal limits across these species
@@ -532,11 +535,11 @@ eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = s
   theme_matt() + 
   theme(legend.position = "right")
 
-ggarrange(ctmax_temp, size_temp, wt_temp, eggs_temp, 
+ggarrange(wt_temp, eggs_temp, 
           common.legend = T, legend = "right")
 ```
 
-<img src="../Figures/markdown/trait-coll-temp-plots-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/main-fig-trait-coll-temp-plots-1.png" style="display: block; margin: auto;" />
 
 ``` r
 sp_ctmax_temp = full_data %>% 
@@ -559,7 +562,7 @@ ggarrange(sample_dates_plot, sp_ctmax_temp, nrow = 1,
           labels = "AUTO")
 ```
 
-<img src="../Figures/markdown/sample-ctmax-summary-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/main-fig-sp-summaries-1.png" style="display: block; margin: auto;" />
 
 Temperature dependence is relatively weak in *L. sicilis*, especially at
 cooler temperatures. We will return to this feature later in the report,
@@ -586,7 +589,7 @@ ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) +
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-lsic-morphs-1.png" style="display: block; margin: auto;" />
 
 ``` r
 
@@ -637,24 +640,20 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/ctmax-time-in-lab-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-ctmax-time-in-lab-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full.model = lme4::lmer(data = model_data,
-                        ctmax ~ sex + temp_cent + size_cent + dev_eggs + lipids + pathogen + 
-                          (1 + days_in_lab + temp_cent + size_cent|sp_name))
+                        ctmax ~ sex + temp_cent + 
+                          (1 + days_in_lab + temp_cent|sp_name))
 
 car::Anova(full.model)
 ## Analysis of Deviance Table (Type II Wald chisquare tests)
 ## 
 ## Response: ctmax
-##             Chisq Df Pr(>Chisq)    
-## sex       29.9326  2  3.164e-07 ***
-## temp_cent 20.6553  1  5.498e-06 ***
-## size_cent  1.9223  1     0.1656    
-## dev_eggs   7.6246  2     0.0221 *  
-## lipids     3.3415  2     0.1881    
-## pathogen  41.4778  4  2.140e-08 ***
+##            Chisq Df Pr(>Chisq)    
+## sex       50.305  2  1.193e-11 ***
+## temp_cent 26.662  1  2.423e-07 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -663,7 +662,7 @@ fixed = fixef(full.model)
 model_coefs = coefficients(full.model)$`sp_name` %>%  
   rownames_to_column(var = "species") %>% 
   separate(species, into = c("species"), sep = ":") %>% 
-  select(species, "intercept" = "(Intercept)", temp_cent, size_cent, days_in_lab)
+  select(species, "intercept" = "(Intercept)", temp_cent, days_in_lab)
 
 ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
   geom_smooth(method = "lm", colour = "black") +
@@ -676,11 +675,9 @@ ggplot(model_coefs, aes(x = intercept, y = temp_cent)) +
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/ARR-limits-plot-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/misc-ARR-limits-plot-1.png" style="display: block; margin: auto;" />
 
 ``` r
-
-
 arr_combined = synth_arr %>%
   filter(measure == "upper" & mean_lim > 20) %>% 
   select("group" = genus, arr, mean_lim) %>% 
@@ -688,7 +685,8 @@ arr_combined = synth_arr %>%
   bind_rows(
     select(model_coefs, "group" = species, 'arr' = temp_cent, 'mean_lim' = intercept)
   ) %>% 
-  mutate(dataset = if_else(is.na(dataset), "new data", "synthesis"))
+  mutate(dataset = if_else(is.na(dataset), "new data", "synthesis"),
+         group = fct_reorder(group, arr, .desc = T))
 
 
 ggplot(arr_combined, aes(x = mean_lim, y = arr)) + 
@@ -704,10 +702,10 @@ ggplot(arr_combined, aes(x = mean_lim, y = arr)) +
        y = "ARR", 
        colour = "Species") +
   theme_matt() + 
-  theme(legend.position = "none")
+  theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/ARR-limits-plot-2.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/main-fig-ARR-synth-plot-1.png" style="display: block; margin: auto;" />
 
 The term “acclimation response ratio” is often used to describe the
 effect of temperature on thermal limits. The ARR is calculated as the
@@ -770,7 +768,7 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-<img src="../Figures/markdown/ctmax-sex-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-ctmax-sex-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ctmax_resids %>% 
@@ -790,7 +788,7 @@ ctmax_resids %>%
         panel.grid = element_blank())
 ```
 
-<img src="../Figures/markdown/ctmax-stage-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-ctmax-stage-1.png" style="display: block; margin: auto;" />
 
 ### Trait Correlations and Trade-offs
 
@@ -807,13 +805,12 @@ increasing size.
 full_data %>% 
   #filter(sex == "female") %>%  
   ggplot( aes(x = size, y = ctmax, colour = sp_name)) + 
+    geom_point(size = 2, alpha = 0.3) + 
   geom_smooth(data = full_data, 
               aes(x = size, y = ctmax),
               method = "lm", 
               colour ="black", 
               linewidth = 2.5) + 
-  geom_point(size = 2, alpha = 0.3) + 
-  geom_smooth(method = "lm", se = F, linewidth = 2) + 
   labs(x = "Length (mm)", 
        y = "CTmax (°C)",
        colour = "Species") + 
@@ -822,7 +819,7 @@ full_data %>%
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/ctmax-size-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/misc-ctmax-size-1.png" style="display: block; margin: auto;" />
 
 Shown here is the relationship for each species individually.
 
@@ -842,7 +839,7 @@ full_data %>%
   theme(legend.position = "none")
 ```
 
-<img src="../Figures/markdown/ind-sp-ctmax-size-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/misc-ind-sp-ctmax-size-1.png" style="display: block; margin: auto;" />
 
 Shown below is the relationship between mean size and mean thermal
 limits for females of each species. We see that larger species within
@@ -866,13 +863,13 @@ full_data %>%
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/mean-ctmax-mean-size-plot-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/main-fig-mean-ctmax-mean-size-plot-1.png" style="display: block; margin: auto;" />
 
 Shown here is the relationship between fecundity and size, showing the
 classic pattern of increasing egg production with increasing size.
 
 ``` r
-ctmax_resids %>%  
+size_fecund_plot = ctmax_resids %>%  
   drop_na(fecundity) %>% 
   ggplot(aes(x = size, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
@@ -885,8 +882,6 @@ ctmax_resids %>%
   theme(legend.position = "right")
 ```
 
-<img src="../Figures/markdown/fecundity-size-1.png" style="display: block; margin: auto;" />
-
 Individuals may also allocate energy to different fitness related
 traits, prioritizing reproductive output over environmental tolerance,
 for example. Shown below is the relationship between CTmax residuals
@@ -896,7 +891,7 @@ are not decreasing thermal limits, suggesting that there is no energetic
 trade-off between these traits.
 
 ``` r
-ctmax_resids %>%  
+ctmax_fecund_plot = ctmax_resids %>%  
   drop_na(fecundity) %>% 
   ggplot(aes(x = resids, y = fecundity_resids, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
@@ -907,9 +902,11 @@ ctmax_resids %>%
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "right")
+
+ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, legend = "right")
 ```
 
-<img src="../Figures/markdown/ctmax-fecundity-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/main-fig-fecundity-plots-1.png" style="display: block; margin: auto;" />
 
 ## Other patterns in variation
 
@@ -984,7 +981,7 @@ ggplot(ind_dist, aes(dist, fill = comparison)) +
   theme_matt()
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-lsic-gendiff-1.png" style="display: block; margin: auto;" />
 
 ``` r
 full_data %>%  
@@ -1004,26 +1001,7 @@ full_data %>%
         axis.text.y = element_text(size = 12))
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
-
-``` r
-full_data %>%  
-  filter(sp_name == "Leptodiaptomus minutus") %>% 
-  filter(sex != "juvenile") %>% 
-  ggplot(aes(y = factor(collection_date), x = size, fill = collection_temp)) + 
-  facet_wrap(sex~.) + 
-  geom_density_ridges(bandwidth = 0.04) + 
-  geom_vline(xintercept = 0.69) + 
-  labs(x = "Size (mm)",
-       y = "Date", 
-       fill = "Coll. Temp. (°C)") + 
-  coord_cartesian(xlim = c(0.5,0.9)) + 
-  theme_matt() + 
-  theme(legend.position = "right",
-        axis.text.y = element_text(size = 12))
-```
-
-<img src="../Figures/markdown/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-lsic-morph-size-1.png" style="display: block; margin: auto;" />
 
 ## Distribution Lag Non-Linear Model (DLNM approach)
 
@@ -1035,7 +1013,8 @@ essentially examines not only the dose effect, but the effect of the
 timing of the dose.
 
 ``` r
-# 
+# Run this code, save the product, and then just read in the temp lag data object. Takes too long to run each time this document is knit. 
+
 # lag_temps = temp_data %>%
 #   group_by(date, hour) %>%
 #   summarize("mean_temp" = mean(temp, na.rm = T)) %>%
@@ -1078,13 +1057,14 @@ dlnm_data = full_data %>%
 
 temp_data %>% 
   group_by(date) %>% 
-  summarise(mean_temp = mean(temp)) %>% 
+  summarise(mean_temp = mean(temp),
+            max_temp = max(temp, na.rm = T)) %>% 
   right_join(dlnm_data, by = join_by("date" == "collection_date")) %>% 
-  ggplot(aes(x = mean_temp, y = mean_ctmax)) + 
+  ggplot(aes(x = max_temp, y = mean_ctmax)) + 
   facet_wrap(.~sp_name) + 
   geom_smooth(method = "gam") + 
   geom_point() + 
-  labs(x = "Mean Daily Temp. (°C)",
+  labs(x = "Max Daily Temp. (°C)",
        y = "Mean CTmax (°C)") + 
 theme_matt_facets() + 
   theme(strip.text.x = element_text(size = 12))
@@ -1111,7 +1091,7 @@ exp_hist_trend = data.frame()
 for(d in dates){
   
   history = lag_temps %>% 
-    filter(date <= d & date > d - 31) %>% 
+    filter(date <= d & date > d - 10) %>% 
     arrange(desc(date), desc(hour)) %>% 
     mutate(lag = row_number() - 1) %>% 
     select(lag, mean_temp, temp_diff)
@@ -1156,19 +1136,19 @@ pred_gam_Zs<-crosspred(cb_temps, lag.gam,
                        at=seq(-4,4, 0.1))
 
 plot(pred_gam_Zs, "contour")
+# 
+# plot(pred_gam_Zs, border = 2, cumul=F,
+#       theta=110,phi=20,ltheta=-80)
 
-plot(pred_gam_Zs, border = 2, cumul=F,
-      theta=110,phi=20,ltheta=-80)
-
-plot(pred_gam_Zs, "slices", 
-     var = c(3,-3), 
-     lag = c(1,336), 
+plot(pred_gam_Zs, "slices",
+     var = c(3,-3),
+     lag = c(1,200),
      col = 2)
 
 }
 ```
 
-<img src="../Figures/markdown/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-2.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-3.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-4.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-5.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-6.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-7.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-8.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/unnamed-chunk-11-9.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-dlnm-plot-1.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-2.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-3.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-4.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-5.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-6.png" style="display: block; margin: auto;" />
 
 ``` r
 if(predict_vuln == F){
