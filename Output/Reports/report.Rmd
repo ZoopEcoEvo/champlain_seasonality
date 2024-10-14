@@ -1286,7 +1286,7 @@ A relationship between size and upper thermal limits has been suggested in a wid
 full_data %>% 
   #filter(sex == "female") %>%  
   ggplot( aes(x = size, y = ctmax, colour = sp_name)) + 
-    geom_point(size = 2, alpha = 0.3) + 
+  geom_point(size = 2, alpha = 0.3) + 
   geom_smooth(data = full_data, 
               aes(x = size, y = ctmax),
               method = "lm", 
@@ -1385,6 +1385,41 @@ ctmax_fecund_plot = ctmax_resids %>%
 
 ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, legend = "right")
 ```
+
+Previous studies have shown that the magnitude of the size-fecundity correlation may be environmentally-dependent. 
+
+```{r}
+corr_data = full_data %>% 
+  drop_na(fecundity) %>% 
+  filter(sp_name %in% c("Leptodiaptomus sicilis",
+                        "Leptodiaptomus minutus", 
+                        "Skistodiaptomus oregonensis")) %>%  
+  group_by(collection_date, collection_temp, sp_name) %>% 
+  summarise(size_fec_corr = cor(size, fecundity),
+            n = n(),
+            mean_fecundity = mean(fecundity)) %>% 
+  filter(n >= 3) %>% 
+  ungroup() %>%  
+  group_by(sp_name) %>% 
+  mutate(temp_cent = scale(collection_temp, scale = F))
+
+ggplot(corr_data, aes(x = temp_cent, y = size_fec_corr, colour = sp_name)) + 
+  facet_wrap(sp_name~., nrow = 3) + 
+  geom_hline(yintercept = 0) +
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", linewidth = 2) + 
+  scale_color_manual(values = species_cols) + 
+  labs(x = "Temperature (centered)", 
+       y = "Correlation Coefficient") + 
+  coord_cartesian(ylim = c(-1, 1)) +
+  theme_matt_facets() + 
+  theme(legend.position = "none")
+
+# ggplot(corr_data, aes(x = size_fec_corr)) + 
+#     facet_wrap(sp_name~., nrow = 3) + 
+#   geom_histogram(binwidth = 0.2) 
+```
+
 
 ## Other patterns in variation 
 
@@ -1540,7 +1575,7 @@ temp_data %>%
   geom_point() + 
   labs(x = "Max Daily Temp. (°C)",
        y = "Mean CTmax (°C)") + 
-theme_matt_facets() + 
+  theme_matt_facets() + 
   theme(strip.text.x = element_text(size = 12))
 ```
 
@@ -1554,69 +1589,69 @@ for(lag_species in sp_list){
     filter(sp_name == lag_species)
   
   # We need to estimate a matrix of exposure histories for each observation. This contains the series of exposures at each lag (l) for each of the n observations, constrained between l0 (minimum lag) and L (max lag). 
-
-dates = dlnm_data_sp$collection_date # For each of these dates, make a vector of the past 30 days (including the day of collection). NOTE: Don't use 'unique' dates here since some collections had multiple species
-
-exp_hist_z = data.frame()
-exp_hist_trend = data.frame()
-
-for(d in dates){
   
-  history = lag_temps %>% 
-    filter(date <= d & date > d - 10) %>% 
-    arrange(desc(date), desc(hour)) %>% 
-    mutate(lag = row_number() - 1) %>% 
-    select(lag, mean_temp, temp_diff)
+  dates = dlnm_data_sp$collection_date # For each of these dates, make a vector of the past 30 days (including the day of collection). NOTE: Don't use 'unique' dates here since some collections had multiple species
   
-  z_vec = scale(history$mean_temp)[,1]
-  names(z_vec) = history$lag
+  exp_hist_z = data.frame()
+  exp_hist_trend = data.frame()
   
-  trend_vec = history$temp_diff
-  names(trend_vec) = history$lag
-
-  exp_hist_z = bind_rows(exp_hist_z, z_vec)
-  exp_hist_trend = bind_rows(exp_hist_trend, trend_vec)
+  for(d in dates){
+    
+    history = lag_temps %>% 
+      filter(date <= d & date > d - 10) %>% 
+      arrange(desc(date), desc(hour)) %>% 
+      mutate(lag = row_number() - 1) %>% 
+      select(lag, mean_temp, temp_diff)
+    
+    z_vec = scale(history$mean_temp)[,1]
+    names(z_vec) = history$lag
+    
+    trend_vec = history$temp_diff
+    names(trend_vec) = history$lag
+    
+    exp_hist_z = bind_rows(exp_hist_z, z_vec)
+    exp_hist_trend = bind_rows(exp_hist_trend, trend_vec)
+    
+  }
   
-}
-
-#print(max(exp_hist_trend, na.rm = T))
-
-# The cross-basis function from dlnm will use the class of the x parameter to determine what to do. In our case, we need to provide it with the matrix of exposure histories for reach observation (row) and lag (column). 
-
-cb_temps = crossbasis(exp_hist_trend, lag = c(0,dim(exp_hist_trend)[2]-1), 
-                      argvar =list(fun="cr",df=3), 
-                      arglag=list(fun="cr",df=3,intercept=T))
-
-#summary(cb_temps)
-
-penalized_mat <- cbPen(cb_temps)
-
-#fitting GAM
-lag.gam = gam(data = dlnm_data_sp, 
-              mean_ctmax ~ cb_temps + collection_temp, 
-              method = "GCV.Cp",
-              paraPen=list(cb_temps=penalized_mat))
-
-# summary(lag.gam)
-# AIC(lag.gam)
-
-#estimation of exposures effects
-
-#default plots
-pred_gam_Zs<-crosspred(cb_temps, lag.gam, 
-                       cumul=F, cen=0, ci.level = 0.95,
-                       at=seq(-4,4, 0.1))
-
-plot(pred_gam_Zs, "contour")
-# 
-# plot(pred_gam_Zs, border = 2, cumul=F,
-#       theta=110,phi=20,ltheta=-80)
-
-plot(pred_gam_Zs, "slices",
-     var = c(3,-3),
-     lag = c(1,200),
-     col = 2)
-
+  #print(max(exp_hist_trend, na.rm = T))
+  
+  # The cross-basis function from dlnm will use the class of the x parameter to determine what to do. In our case, we need to provide it with the matrix of exposure histories for reach observation (row) and lag (column). 
+  
+  cb_temps = crossbasis(exp_hist_trend, lag = c(0,dim(exp_hist_trend)[2]-1), 
+                        argvar =list(fun="cr",df=3), 
+                        arglag=list(fun="cr",df=3,intercept=T))
+  
+  #summary(cb_temps)
+  
+  penalized_mat <- cbPen(cb_temps)
+  
+  #fitting GAM
+  lag.gam = gam(data = dlnm_data_sp, 
+                mean_ctmax ~ cb_temps + collection_temp, 
+                method = "GCV.Cp",
+                paraPen=list(cb_temps=penalized_mat))
+  
+  # summary(lag.gam)
+  # AIC(lag.gam)
+  
+  #estimation of exposures effects
+  
+  #default plots
+  pred_gam_Zs<-crosspred(cb_temps, lag.gam, 
+                         cumul=F, cen=0, ci.level = 0.95,
+                         at=seq(-4,4, 0.1))
+  
+  plot(pred_gam_Zs, "contour")
+  # 
+  # plot(pred_gam_Zs, border = 2, cumul=F,
+  #       theta=110,phi=20,ltheta=-80)
+  
+  plot(pred_gam_Zs, "slices",
+       var = c(3,-3),
+       lag = c(1,200),
+       col = 2)
+  
 }
 
 

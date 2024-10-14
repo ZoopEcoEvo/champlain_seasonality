@@ -57,6 +57,15 @@ synth_arr = read.csv(file = "Raw_data/genus_w_arr.csv") %>%
 
 sic_dnabin = adegenet::fasta2DNAbin(file = "Output/Sequences/Sanger_contigs_alignment.fa")
 
+data_summary = full_data %>% 
+  group_by(collection_date, sp_name, species, sex) %>%  
+  summarise(mean_ctmax = mean(ctmax, na.rm = T),
+            ctmax_se = sd(ctmax) / sqrt(n())) %>% 
+  filter(sex == "female") %>% 
+  arrange(collection_date, sp_name)
+
+#write.csv(data_summary, file = "Output/Data/data_summary.csv", row.names = F)
+
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
          #output_file = "report", #Name your file here if you want it to have a different name; leave off the .html, .md, etc. - it will add the correct one automatically
