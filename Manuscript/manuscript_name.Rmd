@@ -60,6 +60,26 @@ knitr::opts_chunk$set(fig.align = "center")
 
 # Results
 
+Main figures: 
+1. CTmax and lake temperature time series
+2. Occurrence ridge plot and CTmax vs. temp. figure with size histogram? 
+3. Warming tolerance vs. collection temp.
+4. Fecundity vs. collection temperature with marginal density plots
+5. ARR in the context of other measurements
+6. Fecundity vs. body size and CTmax
+
+
+
+Supp Figure: 
+1. Measured temperature vs. max temp from the env. logger
+2. Pathogen prevalence
+3. Days in lab 
+4. Sex/Stage differences 
+5. Average CTmax vs. Average size for species/sex/stage groups
+6. Size-fecundity correlation coefficients vs. temperature
+7. L. sicilis size ridge plots
+
+
 Main figure (CTmax vs. date)
 
 ```{r, figure1, echo = F, out.width = "450px"}

@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2024-07-15
+2024-11-22
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -226,14 +226,14 @@ sample_dates_plot = full_data %>%
                       point_shape = 21,
                       point_size = 1,
                       point_colour = "grey30",
-                      point_alpha = 0.6,
-                      alpha = 0.9,
+                      point_alpha = 0.8,
+                      alpha = 0.8,
                       position = position_points_jitter(
                         height = 0.1, width = 0)) + 
   scale_fill_manual(values = species_cols) + 
   scale_x_date(date_breaks = "3 months",
                date_labels = "%b") + 
-  coord_cartesian(xlim = lubridate::as_date(c("2023-04-25", "2024-06-01"))) + 
+  coord_cartesian(xlim = lubridate::as_date(c("2023-06-08", "2024-05-08"))) + 
   labs(x = "Day of Year", 
        y = "Species") + 
   theme_matt() + 
@@ -246,31 +246,6 @@ The samples captured the broad seasonal changes in calanoid copepod
 community composition in the lake. We note, however, that rare species
 (e.g. *Senecella* and *Limnocalanus*) were often preferentially sampled,
 so are over-represented in the data set.
-
-``` r
-adult_summaries %>% 
-  ungroup() %>% 
-  mutate(collection_num = as.numeric(factor(collection_date))) %>% 
-  group_by(collection_date) %>%  
-  arrange(collection_date) %>% 
-  select(sp_name, collection_date, collection_num, sample_size) %>% 
-  mutate(sample_size = replace_na(sample_size, 0)) %>% 
-  mutate(total = sum(sample_size),
-         percentage = sample_size / total,
-         collection_date = lubridate::as_date(collection_date)) %>% 
-  ggplot(aes(x = collection_date, y = percentage, fill = sp_name)) + 
-  geom_area() + 
-  scale_fill_manual(values = species_cols) + 
-  scale_y_continuous(breaks = c(0,1)) + 
-  labs(x = "Collection Date", 
-       y = "Proportion", 
-       fill = "Species") + 
-  theme_minimal(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.ticks = element_line())
-```
-
-<img src="../Figures/markdown/supp-fig-sp-props-1.png" style="display: block; margin: auto;" />
 
 Throughout the season, the prevalence of various unidentified pathogens
 also varied, with very little infection observed during the Winter and
@@ -476,55 +451,70 @@ of copepods.
 ### Variation with temperature
 
 We expect one of the primary drivers of copepod thermal limits to be
-temperature. The correlation analysis has shown that the copepods are
-generally (although not always) responding to the recent thermal
-environment. Shown below are thermal limits, body size, and fecundity
-values plotted against the temperature at the time of collection. Also
-shown is warming tolerance, calculated as the difference between upper
-thermal limit and the collection temperature.
-
-We generally see an increase in thermal limits with increasing
-collection temperature, a slight decrease in body size, and variable
-relationships between temperature and fecundity. All species maintained
-some degree of buffer between environmental temperatures and upper
-thermal limits, but *Epischura* and *L. minutus* approached their upper
-thermal limits during the warmest collections during the summer.
+temperature, as individuals acclimate to seasonal changes. Shown below
+are the seasonal patterns of when copepods were included in CTmax
+measurements (a proxy for the season of occurrence), and thermal limits
+for each species plotted against the temperature at the time of
+collection. We generally see an increase in thermal limits with
+increasing collection temperature.
 
 ``` r
-ctmax_temp = ggplot(full_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) +   
-  geom_point(size = 3,
-             alpha = 0.3) + 
-  geom_smooth(method = "lm", linewidth = 3) +
-  labs(x = "Collection Temperature (°C)", 
-       y = "CTmax (°C)",
-       colour = "Species") + 
+sp_ctmax_temp = full_data %>% 
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  mutate(sp_name = as.factor(sp_name),
+         sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
+  ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
+  geom_smooth(method = "lm", se = F, linewidth = 1.5, colour = "grey30") + 
+  geom_point(size = 2, alpha = 0.4) + 
+  labs(x = "Collection Temp. (°C)", 
+       y = "CTmax (°C)") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
-  theme(legend.position = "right")
+  theme(legend.position = "none")
+```
 
-size_temp = ggplot(filter(full_data, sex != "juvenile"), aes(x = collection_temp, y = size, colour = sp_name)) + 
-  geom_point(size = 3,
-             alpha = 0.3) + 
-  geom_smooth(method = "lm", linewidth = 3) +
-  labs(x = "Collection Temperature (°C)", 
-       y = "Length (mm)",
-       colour = "Species")  + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt() + 
-  theme(legend.position = "right")
+``` r
+ggarrange(sample_dates_plot, sp_ctmax_temp, nrow = 1, 
+          labels = "AUTO")
+```
 
-wt_temp = ggplot(full_data, aes(x = collection_temp, y = warming_tol, colour = sp_name)) + 
+<img src="../Figures/markdown/main-fig-sp-summaries-1.png" style="display: block; margin: auto;" />
+
+The interaction between seasonal changes in temperature and the
+acclimation of thermal limits likely affects vulnerability of each
+species to warming. Shown below are warming tolerance values for each
+species, calculated as the difference between individual CTmax and the
+temperature at the time of collection. All species maintained some
+degree of buffer between environmental temperatures and upper thermal
+limits, but *L. minutus* appears to approach its upper thermal limit
+during the warmest collections during the summer.
+
+Also shown below is the relationship between fecundity (the number of
+eggs contained in a clutch) for the three diaptomid species. For the two
+Leptodiaptomus species, there is no relationship between clutch size and
+temperature, while there appears to be a general increase in clutch size
+with temperature in the Skistodiaptomus species.
+
+``` r
+
+wt_temp = full_data %>% 
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  ggplot(aes(x = collection_temp, y = warming_tol, colour = sp_name)) + 
   geom_point(size = 3,
              alpha = 0.3) + 
   geom_smooth(method = "lm", linewidth = 3) +
   labs(x = "Collection Temperature (°C)", 
        y = "Warming Tolerance (°C)",
        colour = "Species")  + 
+  ylim(0,30) + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
   theme(legend.position = "none")
 
-eggs_temp = ggplot(full_data, aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
+eggs_temp = full_data %>% 
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  ggplot(aes(x = collection_temp, y = fecundity, colour = sp_name)) + 
   geom_point(size = 3,
              alpha = 0.3) + 
   geom_smooth(method = "lm", linewidth = 3) +
@@ -540,85 +530,6 @@ ggarrange(wt_temp, eggs_temp,
 ```
 
 <img src="../Figures/markdown/main-fig-trait-coll-temp-plots-1.png" style="display: block; margin: auto;" />
-
-``` r
-sp_ctmax_temp = full_data %>% 
-  filter(sp_name != "Osphranticum labronectum") %>% 
-  mutate(sp_name = as.factor(sp_name),
-         sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
-  ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
-  facet_wrap(sp_name~.) + 
-  geom_point(size = 2, alpha = 0.2) + 
-  geom_smooth(method = "lm", se = F, linewidth = 2) + 
-  labs(x = "Collection Temp. (°C)", 
-       y = "CTmax (°C)") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt() + 
-  theme(legend.position = "none")
-```
-
-``` r
-ggarrange(sample_dates_plot, sp_ctmax_temp, nrow = 1, 
-          labels = "AUTO")
-```
-
-<img src="../Figures/markdown/main-fig-sp-summaries-1.png" style="display: block; margin: auto;" />
-
-Temperature dependence is relatively weak in *L. sicilis*, especially at
-cooler temperatures. We will return to this feature later in the report,
-but for now we will note that there are two size morphs in this species,
-which appear to respond differently to decreases in temperature. There
-are significant differences between the morphs and how temperature
-affects CTmax.
-
-``` r
-morph_data = full_data %>% 
-  filter(sex == "female" & species == "leptodiaptomus_sicilis") %>%  mutate(sp_name = case_when(
-    sp_name == "Leptodiaptomus sicilis" & size >= 0.89 ~ "Large",
-    sp_name == "Leptodiaptomus sicilis" & size < 0.89 ~ "Small",
-    .default = sp_name
-  ))
-
-
-ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
-  geom_point(size = 2, alpha = 0.8) + 
-  geom_smooth(method = "lm", se = T, linewidth = 2) + 
-  labs(x = "Collection Temp. (°C)", 
-       y = "CTmax (°C)") + 
-  theme_matt() + 
-  theme(legend.position = "none")
-```
-
-<img src="../Figures/markdown/supp-fig-lsic-morphs-1.png" style="display: block; margin: auto;" />
-
-``` r
-
-morph.model = lm(data = morph_data, 
-                 ctmax ~ collection_temp * sp_name)
-
-knitr::kable(car::Anova(morph.model, type = "III", test = "F"))
-```
-
-|                         |      Sum Sq |  Df |     F value |   Pr(\>F) |
-|:------------------------|------------:|----:|------------:|----------:|
-| (Intercept)             | 11838.75134 |   1 | 3930.374601 | 0.0000000 |
-| collection_temp         |   107.57172 |   1 |   35.712986 | 0.0000000 |
-| sp_name                 |    32.96638 |   1 |   10.944584 | 0.0010357 |
-| collection_temp:sp_name |    15.88294 |   1 |    5.273014 | 0.0222454 |
-| Residuals               |  1060.26547 | 352 |          NA |        NA |
-
-``` r
-
-#summary(morph.model)
-
-morph.em = emmeans::emtrends(morph.model, "sp_name", var = "collection_temp")
-
-knitr::kable(pairs(morph.em))
-```
-
-| contrast      |  estimate |        SE |  df |  t.ratio |   p.value |
-|:--------------|----------:|----------:|----:|---------:|----------:|
-| Large - Small | 0.1530629 | 0.0666562 | 352 | 2.296304 | 0.0222454 |
 
 Copepods spent several days in lab during experiments. Shown below are
 the CTmax residuals (taken from a model of CTmax against collection
@@ -721,8 +632,8 @@ types used.
 
 Previous sections have generally lumped juvenile, female, and male
 individuals together. There may be important stage- or sex-specific
-differences in CTmax though. For several species, we have measurements
-for individuals in different stages or of different sexes.
+differences in CTmax though. For all species but Osphranticum, we have
+measurements for individuals in different stages and of different sexes.
 
 ``` r
 sex_sample_sizes = ctmax_resids %>%  
@@ -737,58 +648,34 @@ sex_sample_sizes = ctmax_resids %>%
 knitr::kable(sex_sample_sizes, align = "c")
 ```
 
-|           Species           | Juvenile | Female | Male |
-|:---------------------------:|:--------:|:------:|:----:|
-|     Epischura lacustris     |    37    |   45   |  20  |
-|   Leptodiaptomus minutus    |    12    |  273   |  38  |
-|   Leptodiaptomus sicilis    |    31    |  356   |  95  |
-|    Limnocalanus macrurus    |    4     |   43   |  39  |
-|  Osphranticum labronectum   |    0     |   1    |  0   |
-|    Senecella calanoides     |    13    |   21   |  8   |
-| Skistodiaptomus oregonensis |    15    |  231   |  28  |
+|         Species          | Juvenile | Female | Male |
+|:------------------------:|:--------:|:------:|:----:|
+|   Epischura lacustris    |    37    |   45   |  20  |
+|  Leptodiaptomus minutus  |    12    |  273   |  38  |
+|  Leptodiaptomus sicilis  |    31    |  356   |  95  |
+|  Limnocalanus macrurus   |    4     |   43   |  39  |
+| Osphranticum labronectum |    0     |   1    |  0   |
+|   Senecella calanoides   |    13    |   21   |  8   |
+|    Skistodiaptomus sp    |    15    |  231   |  28  |
 
-The female-male and female-juvenile comparisons show that there are
-generally no differences in thermal limits between these groups.
+Across group comparisons show that there are generally no differences in
+thermal limits, with the exception of Senecella males, which may have
+lower thermal limits (although sample sizes are very small in this
+group).
 
 ``` r
 ctmax_resids %>% 
-  filter(sp_name %in% filter(sex_sample_sizes, Male > 0, Female > 0)$Species & 
-           sex != "juvenile") %>% 
-  ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
-  facet_wrap(sp_name~., ncol = 2) + 
-  geom_smooth(method = "lm", se = F, linewidth = 1) + 
-  geom_point(size = 3,
-             alpha = 0.5,
-             position = position_jitter(height = 0, width = 0.05)) +  
-  labs(x = "Sex", 
-       y = "CTmax Residuals") + 
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  ggplot(aes(x = sex, y = resids, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
+  geom_jitter(width = 0.1, alpha = 0.5) + 
+  geom_boxplot(width = 0.4, fill = NA, colour = "black", 
+               linewidth = 1, outlier.colour = NA) + 
   scale_colour_manual(values = species_cols) + 
-  theme_bw(base_size = 18) + 
-  theme(legend.position = "none", 
-        panel.grid = element_blank())
+  theme_matt_facets()
 ```
 
 <img src="../Figures/markdown/supp-fig-ctmax-sex-1.png" style="display: block; margin: auto;" />
-
-``` r
-ctmax_resids %>% 
-  filter(sp_name %in% filter(sex_sample_sizes, Juvenile > 0 & Female > 0)$Species & 
-           sex != "male") %>% 
-  ggplot(aes(x = sex, y = resids, colour = sp_name, group = sp_name)) + 
-  facet_wrap(sp_name~., ncol = 2) + 
-  geom_smooth(method = "lm", se = F, linewidth = 1) + 
-  geom_point(size = 3,
-             alpha = 0.5,
-             position = position_jitter(height = 0, width = 0.05)) +  
-  labs(x = "Sex", 
-       y = "CTmax (°C)") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_bw(base_size = 18) + 
-  theme(legend.position = "none", 
-        panel.grid = element_blank())
-```
-
-<img src="../Figures/markdown/supp-fig-ctmax-stage-1.png" style="display: block; margin: auto;" />
 
 ### Trait Correlations and Trade-offs
 
@@ -801,11 +688,10 @@ entire assemblage, there is a strong decrease in thermal limits with
 increasing size.
 
 ``` r
-
 full_data %>% 
   #filter(sex == "female") %>%  
   ggplot( aes(x = size, y = ctmax, colour = sp_name)) + 
-    geom_point(size = 2, alpha = 0.3) + 
+  geom_point(size = 2, alpha = 0.3) + 
   geom_smooth(data = full_data, 
               aes(x = size, y = ctmax),
               method = "lm", 
@@ -908,80 +794,61 @@ ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, lege
 
 <img src="../Figures/markdown/main-fig-fecundity-plots-1.png" style="display: block; margin: auto;" />
 
+Previous studies have shown that the magnitude of the size-fecundity
+correlation may be environmentally-dependent. This is not visible is the
+data from these collections.
+
+``` r
+corr_data = full_data %>% 
+  drop_na(fecundity) %>% 
+  filter(sp_name %in% c("Leptodiaptomus sicilis",
+                        "Leptodiaptomus minutus", 
+                        "Skistodiaptomus sp")) %>%  
+  group_by(collection_date, collection_temp, sp_name) %>% 
+  summarise(size_fec_corr = cor(size, fecundity),
+            n = n(),
+            mean_fecundity = mean(fecundity)) %>% 
+  filter(n >= 3) %>% 
+  ungroup() %>%  
+  group_by(sp_name) %>% 
+  mutate(temp_cent = scale(collection_temp, scale = F))
+
+ggplot(corr_data, aes(x = temp_cent, y = size_fec_corr, colour = sp_name)) + 
+  facet_wrap(sp_name~., nrow = 3) + 
+  geom_hline(yintercept = 0) +
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", linewidth = 2) + 
+  scale_color_manual(values = species_cols) + 
+  labs(x = "Temperature (centered)", 
+       y = "Correlation Coefficient") + 
+  coord_cartesian(ylim = c(-1, 1)) +
+  theme_matt_facets() + 
+  theme(legend.position = "none")
+```
+
+<img src="../Figures/markdown/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+# ggplot(corr_data, aes(x = size_fec_corr)) + 
+#     facet_wrap(sp_name~., nrow = 3) + 
+#   geom_histogram(binwidth = 0.2) 
+```
+
 ## Other patterns in variation
 
 *Leptodiaptomus sicilis* is the most abundant species during the winter.
 There was a large shift in the size of mature females towards the end of
 December. These large and small individuals are the same species
-(confirmed via COI sequencing), suggesting this shift may reflect a
-transition from one generation to another and that, unlike in many other
-lakes, there are two generations of *L. sicilis* per year in Lake
-Champlain. This size difference may be caused by differences in the
-developmental environments. For example, individuals developing in
-January grow up at very low temperatures, and therefore may reach larger
-sizes. These individuals oversummer in deep waters, then re-emerge in
-October and produce a new generation. Water temperatures are still
-fairly high through November, which results in a generation of smaller
-individuals, which mature in time to produce a new generation in
-January.
-
-Shown below is the distribution of pairwise distances between COI
-sequences of large and small morphs. Distances in both within- and
-across-morph comparisons are small.
-
-``` r
-ind_dist = ape::dist.dna(sic_dnabin, model = "raw") %>% as.matrix %>% 
-  as_tibble() %>%
-  mutate("ind1" = colnames(.)) %>% 
-  pivot_longer(-ind1, names_to = "ind2", values_to = "dist") %>%
-  mutate(ind1 = factor(ind1),
-         ind2 = factor(ind2)) %>% 
-  filter(!(ind1 == "sore1" | ind2 == "sore1")) %>% 
-  mutate(
-    ind1 = case_when(
-      ind1 == "S1" ~ "small1",
-      ind1 == "S3" ~ "small3",
-      ind1 == "lsic3" ~ "small4",
-      ind1 == "lsic5" ~ "small6",
-      ind1 == "lsic9" ~ "small8",
-      ind1 == "lsic10" ~ "small9",
-      ind1 == "lsic11" ~ "small10",
-      ind1 == "L1" ~ "large1",
-      ind1 == "L2" ~ "large2",
-      ind1 == "L3" ~ "large3",
-      ind1 == "lsic1" ~ "large4",
-      ind1 == "lsic2" ~ "large5",
-      ind1 == "lsic7" ~ "large6",
-      ind1 == "lsic8" ~ "large7"),
-    ind2 = case_when(
-      ind2 == "S1" ~ "small1",
-      ind2 == "S3" ~ "small3",
-      ind2 == "lsic3" ~ "small4",
-      ind2 == "lsic5" ~ "small6",
-      ind2 == "lsic9" ~ "small8",
-      ind2 == "lsic10" ~ "small9",
-      ind2 == "lsic11" ~ "small10",
-      ind2 == "L1" ~ "large1",
-      ind2 == "L2" ~ "large2",
-      ind2 == "L3" ~ "large3",
-      ind2 == "lsic1" ~ "large4",
-      ind2 == "lsic2" ~ "large5",
-      ind2 == "lsic7" ~ "large6",
-      ind2 == "lsic8" ~ "large7"),
-    'comparison' = case_when(
-      str_detect(ind1, pattern = "large") & str_detect(ind2, pattern = "large") ~ "within",
-      str_detect(ind1, pattern = "small") & str_detect(ind2, pattern = "small") ~ "within", 
-      str_detect(ind1, pattern = "large") & str_detect(ind2, pattern = "small") ~ "across",
-      str_detect(ind1, pattern = "small") & str_detect(ind2, pattern = "large") ~ "across"
-    )) 
-
-ggplot(ind_dist, aes(dist, fill = comparison)) +
-  geom_histogram(binwidth = 0.005) + 
-  labs(x = "Distance") + 
-  theme_matt()
-```
-
-<img src="../Figures/markdown/supp-fig-lsic-gendiff-1.png" style="display: block; margin: auto;" />
+(confirmed via COI sequencing), suggesting this shift may instead
+reflect a transition from one generation to another. This size
+difference may be caused by differences in the developmental
+environments. For example, individuals developing in January grow up at
+very low temperatures, and therefore may reach larger sizes. These
+individuals over-summer in deep waters, then re-emerge in October and
+produce a new generation. Water temperatures are still fairly high
+through November, which results in a generation of smaller individuals.
+These individuals mature in time to produce a new generation in January.
 
 ``` r
 full_data %>%  
@@ -1002,6 +869,9 @@ full_data %>%
 ```
 
 <img src="../Figures/markdown/supp-fig-lsic-morph-size-1.png" style="display: block; margin: auto;" />
+
+A similar, but less distinct pattern can be observed in L. minutus
+individuals as well.
 
 ## Distribution Lag Non-Linear Model (DLNM approach)
 
@@ -1048,7 +918,7 @@ dlnm_data = full_data %>%
   filter(sp_name %in% c(
     "Leptodiaptomus sicilis",
     "Leptodiaptomus minutus",
-    "Skistodiaptomus oregonensis"
+    "Skistodiaptomus sp"
   )) %>% 
   select(collection_date, collection_temp, sp_name, ctmax) %>% 
   group_by(collection_date, collection_temp, sp_name) %>%  
@@ -1066,7 +936,7 @@ temp_data %>%
   geom_point() + 
   labs(x = "Max Daily Temp. (°C)",
        y = "Mean CTmax (°C)") + 
-theme_matt_facets() + 
+  theme_matt_facets() + 
   theme(strip.text.x = element_text(size = 12))
 ```
 
@@ -1082,69 +952,69 @@ for(lag_species in sp_list){
     filter(sp_name == lag_species)
   
   # We need to estimate a matrix of exposure histories for each observation. This contains the series of exposures at each lag (l) for each of the n observations, constrained between l0 (minimum lag) and L (max lag). 
-
-dates = dlnm_data_sp$collection_date # For each of these dates, make a vector of the past 30 days (including the day of collection). NOTE: Don't use 'unique' dates here since some collections had multiple species
-
-exp_hist_z = data.frame()
-exp_hist_trend = data.frame()
-
-for(d in dates){
   
-  history = lag_temps %>% 
-    filter(date <= d & date > d - 10) %>% 
-    arrange(desc(date), desc(hour)) %>% 
-    mutate(lag = row_number() - 1) %>% 
-    select(lag, mean_temp, temp_diff)
+  dates = dlnm_data_sp$collection_date # For each of these dates, make a vector of the past 30 days (including the day of collection). NOTE: Don't use 'unique' dates here since some collections had multiple species
   
-  z_vec = scale(history$mean_temp)[,1]
-  names(z_vec) = history$lag
+  exp_hist_z = data.frame()
+  exp_hist_trend = data.frame()
   
-  trend_vec = history$temp_diff
-  names(trend_vec) = history$lag
-
-  exp_hist_z = bind_rows(exp_hist_z, z_vec)
-  exp_hist_trend = bind_rows(exp_hist_trend, trend_vec)
+  for(d in dates){
+    
+    history = lag_temps %>% 
+      filter(date <= d & date > d - 10) %>% 
+      arrange(desc(date), desc(hour)) %>% 
+      mutate(lag = row_number() - 1) %>% 
+      select(lag, mean_temp, temp_diff)
+    
+    z_vec = scale(history$mean_temp)[,1]
+    names(z_vec) = history$lag
+    
+    trend_vec = history$temp_diff
+    names(trend_vec) = history$lag
+    
+    exp_hist_z = bind_rows(exp_hist_z, z_vec)
+    exp_hist_trend = bind_rows(exp_hist_trend, trend_vec)
+    
+  }
   
-}
-
-#print(max(exp_hist_trend, na.rm = T))
-
-# The cross-basis function from dlnm will use the class of the x parameter to determine what to do. In our case, we need to provide it with the matrix of exposure histories for reach observation (row) and lag (column). 
-
-cb_temps = crossbasis(exp_hist_trend, lag = c(0,dim(exp_hist_trend)[2]-1), 
-                      argvar =list(fun="cr",df=3), 
-                      arglag=list(fun="cr",df=3,intercept=T))
-
-#summary(cb_temps)
-
-penalized_mat <- cbPen(cb_temps)
-
-#fitting GAM
-lag.gam = gam(data = dlnm_data_sp, 
-              mean_ctmax ~ cb_temps + collection_temp, 
-              method = "GCV.Cp",
-              paraPen=list(cb_temps=penalized_mat))
-
-# summary(lag.gam)
-# AIC(lag.gam)
-
-#estimation of exposures effects
-
-#default plots
-pred_gam_Zs<-crosspred(cb_temps, lag.gam, 
-                       cumul=F, cen=0, ci.level = 0.95,
-                       at=seq(-4,4, 0.1))
-
-plot(pred_gam_Zs, "contour")
-# 
-# plot(pred_gam_Zs, border = 2, cumul=F,
-#       theta=110,phi=20,ltheta=-80)
-
-plot(pred_gam_Zs, "slices",
-     var = c(3,-3),
-     lag = c(1,200),
-     col = 2)
-
+  #print(max(exp_hist_trend, na.rm = T))
+  
+  # The cross-basis function from dlnm will use the class of the x parameter to determine what to do. In our case, we need to provide it with the matrix of exposure histories for reach observation (row) and lag (column). 
+  
+  cb_temps = crossbasis(exp_hist_trend, lag = c(0,dim(exp_hist_trend)[2]-1), 
+                        argvar =list(fun="cr",df=3), 
+                        arglag=list(fun="cr",df=3,intercept=T))
+  
+  #summary(cb_temps)
+  
+  penalized_mat <- cbPen(cb_temps)
+  
+  #fitting GAM
+  lag.gam = gam(data = dlnm_data_sp, 
+                mean_ctmax ~ cb_temps + collection_temp, 
+                method = "GCV.Cp",
+                paraPen=list(cb_temps=penalized_mat))
+  
+  # summary(lag.gam)
+  # AIC(lag.gam)
+  
+  #estimation of exposures effects
+  
+  #default plots
+  pred_gam_Zs<-crosspred(cb_temps, lag.gam, 
+                         cumul=F, cen=0, ci.level = 0.95,
+                         at=seq(-4,4, 0.1))
+  
+  plot(pred_gam_Zs, "contour")
+  # 
+  # plot(pred_gam_Zs, border = 2, cumul=F,
+  #       theta=110,phi=20,ltheta=-80)
+  
+  plot(pred_gam_Zs, "slices",
+       var = c(3,-3),
+       lag = c(1,200),
+       col = 2)
+  
 }
 ```
 

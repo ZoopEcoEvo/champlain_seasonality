@@ -18,7 +18,7 @@ process_all_data = F #Runs data analysis
 process_sequences = F #Analyzes the COI sequence data
 make_report = T #Runs project summary
 predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 
-knit_manuscript = T #Compiles manuscript draft
+knit_manuscript = F #Compiles manuscript draft
 
 ############################
 ### Read in the RAW data ###
@@ -33,7 +33,8 @@ source(file = "Scripts/02_ab1_to_fasta.R")
 
 full_data = read.csv(file = "Output/Data/full_data.csv") %>%  
   drop_na(ctmax) %>% 
-  mutate("sp_name_sub" = str_replace_all(species, pattern = "_", replacement = " "),
+  mutate(species = str_replace(species, pattern = "skistodiaptomus_oregonensis", replacement = "skistodiaptomus_sp"),
+    "sp_name_sub" = str_replace_all(species, pattern = "_", replacement = " "),
          sp_name_sub = str_to_sentence(sp_name_sub), 
          "sp_name" = word(sp_name_sub, start = 1, end = 2),
          "sex" = case_when( # creates a new column called "sex" that is filled with different values when...
