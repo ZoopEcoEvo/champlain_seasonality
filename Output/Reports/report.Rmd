@@ -778,9 +778,9 @@ ggarrange(one_week_temp_circle, four_week_temp_circle,
           common.legend = T, legend = "bottom")
 ```
 
-```{r, include = F}
-#The thermal environment over any period of time may drive patterns in thermal acclimation. To explore the potential effects of different acclimation windows, we examined the correlation between thermal limits and different representations of the thermal environment for different periods of time. Shown below are the correlation coefficients for these relationships. Each facet shows the relationship for a different dimension of the thermal environment. Correlation coefficients are plotted for different durations, for species that were collected more than five times. Only data for mature female copepods was included. 
+Organisms are unlikely to acclimate instantaneously to changes in temperature. To explore the potential temporal window these copepods are responding to, we examined the correlation between thermal limits and summaries of the thermal environment over different periods of time. For each species (inclusive of all sexes and stages), we examined the correlation between CTmax and one of nine representations of the thermal environment calculated for periods of time from 1 to 60 days before collection. These parameters include the overall maximum, minimum, median, and mean temperature for the period of time, the temperature range and variance during this time, and the mean daily temperature maximum, minimum, and range. We also examined the correlation between CTmax and the temperature recorded at the time of collection. 
 
+```{r, include = F}
 #We can see that, in general, copepods are responding to proximate cues from the thermal environment, with correlations generally dropping off substantially as acclimation window duration increases. An exception is *Epischura lacustris*, which appears to be responding to maximum temperatures experienced over a 20 day time period. 
 
 ### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
@@ -794,17 +794,18 @@ num_colls = full_data %>%
 
 corr_vals = data.frame()
 
-dur_vals = c(1:30)
+dur_vals = c(1:50)
 for(i in dur_vals){
   
   duration_temps = get_predictors(daily_values = daily_temp_data, 
-                                  raw_temp = temp_data, 
+                                  raw_temp = select(temp_data, -hour), 
                                   n_days = i) %>% 
     filter(date %in% as_date(unique(full_data$collection_date)))
   
   corr_data = full_data %>%
+    select(sp_name, collection_date, collection_temp, sex, ctmax) %>% 
     filter(sp_name %in% num_colls$sp_name) %>% 
-    filter(sex == "female") %>% 
+    #filter(sex == "female") %>% 
     mutate(collection_date = as.Date(collection_date)) %>% 
     inner_join(duration_temps, join_by(collection_date == date)) %>% 
     pivot_longer(cols = c(collection_temp, contains("day_")),
@@ -842,7 +843,9 @@ corr_vals = corr_vals %>%
 
 ```
 
-```{r fig.width=10, fig.height=6, include = F}
+Shown below are the correlation coefficients for these relationships. Each facet shows the relationship for a different parameter, plotted against the duration of the time period before collection. 
+
+```{r fig.width=14, fig.height=8, include = T}
 corr_vals %>% 
   mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
                                               "mean", "med", "var",
@@ -859,24 +862,9 @@ corr_vals %>%
   theme_matt_facets()
 ```
 
+This table contains the top three factors for each species (based on correlation coefficient).
+
 ```{r predictor-correlations, include = F}
-# Shown here are the top three factors for each species. 
-
-# corr_vals = full_data %>%
-#   filter(sp_name %in% num_colls$sp_name) %>% 
-#   filter(sex == "female") %>% 
-#   mutate(collection_date = as.Date(collection_date)) %>% 
-#   full_join(temp_predictors, join_by(collection_date == date)) %>% 
-#   pivot_longer(cols = c(collection_temp, mean_temp:tail(names(.), 1)),
-#                values_to = "value", 
-#                names_to = "predictor") %>%  
-#   group_by(sp_name, predictor) %>% 
-#   summarise(correlation = cor.test(ctmax, value)$estimate,
-#             p.value = cor.test(ctmax, value)$p.value,
-#             ci_low = cor.test(ctmax, value)$conf.int[1],
-#             ci_high = cor.test(ctmax, value)$conf.int[2]) %>% 
-#   mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig."))
-
 corr_vals %>%  
   filter(sig == "Sig.") %>% 
   drop_na(correlation) %>% 
@@ -886,6 +874,29 @@ corr_vals %>%
   select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, "P-Value" = p.value) %>% 
   knitr::kable(align = "c")
 ```
+
+Shown here is a graphical summary of the duration of the best predictors for each species. Note that for the two Leptodiaptomids, collection temperature had the largest correlation coefficient so duration is zero. This representation highlights that there is variation across the community not only in the potential driver (e.g. minimum vs. maximum temperatures) but also in the duration of time. This variation is not grouped by season (the winter and summer communities both have representative species apparently responding to short and long durations). 
+
+```{r main-fig-acc-durations, fig.width=8, fig.height=8}
+corr_vals %>%  
+  filter(sig == "Sig.") %>% 
+  drop_na(correlation) %>% 
+  group_by(sp_name) %>%
+  arrange(desc(correlation)) %>% 
+  slice_head(n = 1) %>% 
+  ungroup() %>% 
+  mutate("num" = row_number(), 
+         sp_name = fct_reorder(sp_name, duration, .fun = mean, .desc = T)) %>% 
+  arrange(sp_name) %>% 
+  select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, num) %>% 
+  ggplot(aes(x = Species, y = Duration, fill = Predictor, group = num)) + 
+  geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.6),
+           colour = "black") + 
+  scale_fill_manual(values = c("coll_temp" = "black", "max" = "white", "min" = "grey")) + 
+  theme_matt() + 
+  theme(axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+```
+
 
 ```{r acc-duration-plot, fig.width=7, fig.height=4, include = F}
 # Phenotypic variation (like acclimation of thermal limits) is a physiological process. depending on the mechanistic underpinnings (changes in HSP expression, etc.), the amount of time it takes for an individual to acclimate may vary based on body size (larger species, more cells, more time required to acclimate). Shown here is the duration of the environmental acclimation window the copepods appear to be responding to.  
@@ -1064,28 +1075,34 @@ ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = 
 ```
 
 ```{r misc-ARR-limits-plot, fig.width=8, fig.height=6}
-full.model = lme4::lmer(data = model_data,
-                        ctmax ~ sex + temp_cent + 
-                          (1 + days_in_lab + temp_cent|sp_name))
+minimal.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
+                        ctmax ~ sp_name + sex + temp_cent +
+                          (1|days_in_lab))
 
-car::Anova(full.model)
+full.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
+                        ctmax ~ sp_name*sex*temp_cent +
+                          (1|days_in_lab))
 
-fixed = fixef(full.model)
+drop1(full.model, scope=~.)
 
-model_coefs = coefficients(full.model)$`sp_name` %>%  
-  rownames_to_column(var = "species") %>% 
-  separate(species, into = c("species"), sep = ":") %>% 
-  select(species, "intercept" = "(Intercept)", temp_cent, days_in_lab)
+reduced.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
+                        ctmax ~ sp_name + sex + temp_cent +
+                          sp_name:temp_cent + sex:temp_cent +
+                          sp_name:sex:temp_cent +
+                          (1|days_in_lab))
 
-ggplot(model_coefs, aes(x = intercept, y = temp_cent)) + 
-  geom_smooth(method = "lm", colour = "black") +
-  geom_point(aes(colour = species),
-             size = 6) + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Species Intercept", 
-       y = "ARR") +
-  theme_matt() + 
-  theme(legend.position = "right")
+performance::test_performance(minimal.model, reduced.model, full.model)
+performance::check_model(reduced.model)
+
+car::Anova(reduced.model, type = "III", test = "F")
+
+sp_ctmax = emmeans::emmeans(reduced.model, specs = "sp_name") %>% 
+  data.frame() %>% 
+  select(sp_name, "species_ctmax" = emmean)
+
+model_coefs = emmeans::emtrends(reduced.model, var = "temp_cent", specs = "sp_name") %>% 
+  data.frame() %>% 
+  inner_join(sp_ctmax) 
 ```
 
 
@@ -1095,7 +1112,7 @@ arr_combined = synth_arr %>%
   select("group" = genus, arr, mean_lim) %>% 
   mutate("dataset" = "synthesis") %>% 
   bind_rows(
-    select(model_coefs, "group" = species, 'arr' = temp_cent, 'mean_lim' = intercept)
+    select(model_coefs, "group" = sp_name, 'arr' = temp_cent.trend, 'mean_lim' = species_ctmax)
   ) %>% 
   mutate(dataset = if_else(is.na(dataset), "new data", "synthesis"),
          group = fct_reorder(group, arr, .desc = T))
@@ -1118,58 +1135,6 @@ ggplot(arr_combined, aes(x = mean_lim, y = arr)) +
 
 ```
 
-The term "acclimation response ratio" is often used to describe the effect of temperature on thermal limits. The ARR is calculated as the change in thermal limits per degree change in acclimation temperature. For our data, we will estimate ARR as the slope of CTmax against collection temperature. These slopes were taken from a regression of CTmax against collection temperature and body size. Two different model types were used, a simple linear regression and a mixed effects model. The estimated ARR values were generally highly similar between the model types used.
-
-```{r supp-fig-arr-comp-plot, fig.width=8, fig.height=10, include = F}
-coef_model_data = full_data %>% 
-  group_by(sp_name, sex) %>% 
-  filter(n() > 3 & !str_detect(sp_name, pattern = "kindti")) 
-
-coef_n = full_data %>% 
-  group_by(sp_name, sex) %>% 
-  filter(n() > 5) %>% 
-  summarise(sample_n = n(), 
-            mean_ctmax = mean(ctmax))
-
-ARR_vals = coef_model_data %>% 
-  do(broom::tidy(lm(ctmax ~ collection_temp + size, data = .))) %>% 
-  filter(term == "collection_temp") %>% 
-  select(sp_name, sex, "ARR" = estimate, std.error) %>% 
-  arrange(ARR) %>% 
-  inner_join(coef_n, by = c("sp_name", "sex"))
-
-ARR_vals %>% 
-  select("Species" = sp_name, 
-         "Group" = sex, 
-         "N" = sample_n,
-         ARR, 
-         "Error" = std.error) %>% 
-  knitr::kable()
-
-mle_coefs = coefficients(full.model)$`sp_name` %>% 
-  mutate("group" = rownames(.)) %>% 
-  select(group, "intercept" = "(Intercept)", "ARR" = temp_cent) %>% 
-  remove_rownames()
-
-mle_ARR = mle_coefs %>%  
-  select(sp_name = group, ARR) %>% 
-  mutate("model" = "mixed effects")  %>% 
-  inner_join(coef_n, by = c("sp_name"))
-
-ARR_comp = bind_rows(mle_ARR, 
-                     mutate(ARR_vals, "model" = "linear"))
-
-ARR_comp %>% 
-  ggplot(aes(x = model, y = ARR, group = sp_name)) + 
-  facet_grid(sp_name~sex) +
-  geom_point(size = 3) + 
-  geom_line(linewidth = 1.5) + 
-  scale_y_continuous(breaks = c(0, 0.5, 1)) + 
-  theme_matt_facets() + 
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
-
-```
-
 ### Sex and stage variation in thermal limits 
 Previous sections have generally lumped juvenile, female, and male individuals together. There may be important stage- or sex-specific differences in CTmax though. For all species but Osphranticum, we have measurements for individuals in different stages and of different sexes. 
 
@@ -1186,7 +1151,7 @@ sex_sample_sizes = ctmax_resids %>%
 knitr::kable(sex_sample_sizes, align = "c")
 ```
 
-Across group comparisons show that there are generally no differences in thermal limits, with the exception of Senecella males, which may have lower thermal limits (although sample sizes are very small in this group).
+Across group comparisons show that there are generally no differences in thermal limits (represented here as the residuals from a CTmax ~ collection_temp x species linear regression), with the exception of Senecella males, which may have lower thermal limits (although sample sizes are very small in this group).
 
 ```{r supp-fig-ctmax-sex, fig.width=15, fig.height=8}
 ctmax_resids %>% 
@@ -1336,7 +1301,7 @@ ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, lege
 
 Previous studies have shown that the magnitude of the size-fecundity correlation may be environmentally-dependent. This is not visible is the data from these collections. 
 
-```{r}
+```{r supp-fig-fec-size-corr-vs-temp, fig.width = 4, fig.height=10}
 corr_data = full_data %>% 
   drop_na(fecundity) %>% 
   filter(sp_name %in% c("Leptodiaptomus sicilis",
@@ -1363,9 +1328,9 @@ ggplot(corr_data, aes(x = temp_cent, y = size_fec_corr, colour = sp_name)) +
   theme_matt_facets() + 
   theme(legend.position = "none")
 
-# ggplot(corr_data, aes(x = size_fec_corr)) + 
-#     facet_wrap(sp_name~., nrow = 3) + 
-#   geom_histogram(binwidth = 0.2) 
+ggplot(corr_data, aes(x = size_fec_corr)) +
+    facet_wrap(sp_name~., nrow = 3) +
+  geom_histogram(binwidth = 0.2)
 ```
 
 
@@ -1411,7 +1376,7 @@ full_data %>%
 
 ## Distribution Lag Non-Linear Model (DLNM approach) 
 
-Distributed lag models examine a response variable, measured at multiple time points, as a function of the lagged occurrence of some predictor variable (response y at time t as a function of preditor x(t-lag). This method utilizes a bi-dimensional dose-lag-response function, which essentially examines not only the dose effect, but the effect of the timing of the dose. 
+Distributed lag models examine a response variable, measured at multiple time points, as a function of the lagged occurrence of some predictor variable (response y at time t as a function of predictor x(t-lag). This method utilizes a bi-dimensional dose-lag-response function, which essentially examines not only the dose effect, but the effect of the timing of the dose. 
 
 
 ```{r compiling_temp_lags}
@@ -1522,7 +1487,7 @@ for(lag_species in sp_list){
   
   #fitting GAM
   lag.gam = gam(data = dlnm_data_sp, 
-                mean_ctmax ~ cb_temps + collection_temp, 
+                mean_ctmax ~ collection_temp + cb_temps, 
                 method = "GCV.Cp",
                 paraPen=list(cb_temps=penalized_mat))
   
@@ -1536,7 +1501,7 @@ for(lag_species in sp_list){
                          cumul=F, cen=0, ci.level = 0.95,
                          at=seq(-4,4, 0.1))
   
-  plot(pred_gam_Zs, "contour")
+  plot(pred_gam_Zs, "contour", main = lag_species)
   # 
   # plot(pred_gam_Zs, border = 2, cumul=F,
   #       theta=110,phi=20,ltheta=-80)
@@ -1547,7 +1512,6 @@ for(lag_species in sp_list){
        col = 2)
   
 }
-
 
 
 ```
