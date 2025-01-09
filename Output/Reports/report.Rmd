@@ -780,7 +780,7 @@ ggarrange(one_week_temp_circle, four_week_temp_circle,
 
 Organisms are unlikely to acclimate instantaneously to changes in temperature. To explore the potential temporal window these copepods are responding to, we examined the correlation between thermal limits and summaries of the thermal environment over different periods of time. For each species (inclusive of all sexes and stages), we examined the correlation between CTmax and one of nine representations of the thermal environment calculated for periods of time from 1 to 60 days before collection. These parameters include the overall maximum, minimum, median, and mean temperature for the period of time, the temperature range and variance during this time, and the mean daily temperature maximum, minimum, and range. We also examined the correlation between CTmax and the temperature recorded at the time of collection. 
 
-```{r, include = F}
+```{r estimating-predictor-correlations, include = F}
 #We can see that, in general, copepods are responding to proximate cues from the thermal environment, with correlations generally dropping off substantially as acclimation window duration increases. An exception is *Epischura lacustris*, which appears to be responding to maximum temperatures experienced over a 20 day time period. 
 
 ### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
@@ -845,7 +845,7 @@ corr_vals = corr_vals %>%
 
 Shown below are the correlation coefficients for these relationships. Each facet shows the relationship for a different parameter, plotted against the duration of the time period before collection. 
 
-```{r fig.width=14, fig.height=8, include = T}
+```{r supp-fig-correlation-durations, fig.width=14, fig.height=8, include = T}
 corr_vals %>% 
   mutate(parameter = fct_relevel(parameter, c("min", "max", "range",
                                               "mean", "med", "var",
@@ -898,7 +898,7 @@ corr_vals %>%
 ```
 
 
-```{r acc-duration-plot, fig.width=7, fig.height=4, include = F}
+```{r misc-acc-duration-plot, fig.width=7, fig.height=4, include = F}
 # Phenotypic variation (like acclimation of thermal limits) is a physiological process. depending on the mechanistic underpinnings (changes in HSP expression, etc.), the amount of time it takes for an individual to acclimate may vary based on body size (larger species, more cells, more time required to acclimate). Shown here is the duration of the environmental acclimation window the copepods appear to be responding to.  
 
 mean_sizes = full_data %>% 
@@ -1019,7 +1019,7 @@ ggplot(morph_data, aes(x = collection_temp, y = ctmax, colour = sp_name)) +
   theme(legend.position = "none")
 ```
 
-```{r ctmax-range-plot, include = F}
+```{r misc-ctmax-range-plot, include = F}
 full_data %>%  
   filter(sex == "female") %>% 
   group_by(sp_name, collection_date, collection_temp) %>%  
@@ -1042,42 +1042,46 @@ full_data %>%
 # adult_data = full_data %>% 
 #   filter(sex == "female")
 
+# 
+# ctmax_temp.model = lm(data = model_data, ctmax ~ temp_cent * sp_name)
+# size_temp.model = lm(data = model_data, size ~ temp_cent * sp_name)
+# fecund_temp.model = lm(data = drop_na(model_data, fecundity), fecundity ~ temp_cent * sp_name)
+# 
+# fecundity_resids = cbind(drop_na(model_data, fecundity), "fecundity_resids" = fecund_temp.model$residuals) %>% 
+#   select(collection_date, exp_date, replicate, species, tube, fecundity_resids)
+# 
+# ctmax_resids = cbind(model_data, "resids" = ctmax_temp.model$residuals, "size_resids" = size_temp.model$residuals) %>% 
+#   left_join(fecundity_resids)
+
+```
+
+```{r supp-fig-ctmax-time-in-lab, fig.width=15, fig.height=10}
+# Copepods spent several days in lab during experiments. Shown below are the CTmax residuals (taken from a model of CTmax against collection temperature) plotted against the time spent in lab before measurements were made. Individual regressions are shown for the residuals against days in lab for each collection. We can see clearly that thermal limits are fairly stable over time. 
+
+
+# ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = collection_date)) + 
+#   facet_wrap(sp_name~.) + 
+#   geom_point(size = 4, alpha = 0.5) + 
+#   geom_smooth(method = "lm", se = F, linewidth = 1) + 
+#   #scale_x_continuous(breaks = c(0:5)) + 
+#   labs(x = "Days in lab", 
+#        y = "CTmax Residuals") + 
+#   scale_colour_manual(values = species_cols) + 
+#   theme_matt_facets() + 
+#   theme(legend.position = "none")
+```
+
+```{r supp-fig-model-tests, fig.width=8, fig.height=6}
+
 model_data = full_data %>%  
   drop_na(size, ctmax) %>%  
+  filter(sp_name != "Osphranticum labronectum") %>% 
   mutate(temp_cent = scale(collection_temp, center = T, scale = F),
          size_cent = scale(size, center = T, scale = F))
 
-ctmax_temp.model = lm(data = model_data, ctmax ~ temp_cent * sp_name)
-size_temp.model = lm(data = model_data, size ~ temp_cent * sp_name)
-fecund_temp.model = lm(data = drop_na(model_data, fecundity), fecundity ~ temp_cent * sp_name)
-
-fecundity_resids = cbind(drop_na(model_data, fecundity), "fecundity_resids" = fecund_temp.model$residuals) %>% 
-  select(collection_date, exp_date, replicate, species, tube, fecundity_resids)
-
-ctmax_resids = cbind(model_data, "resids" = ctmax_temp.model$residuals, "size_resids" = size_temp.model$residuals) %>% 
-  left_join(fecundity_resids)
-
-```
-
-Copepods spent several days in lab during experiments. Shown below are the CTmax residuals (taken from a model of CTmax against collection temperature) plotted against the time spent in lab before measurements were made. Individual regressions are shown for the residuals against days in lab for each collection. We can see clearly that thermal limits are fairly stable over time. 
-
-```{r supp-fig-ctmax-time-in-lab, fig.width=15, fig.height=10}
-ggplot(ctmax_resids, aes(x = days_in_lab, y = resids, colour = sp_name, group = collection_date)) + 
-  facet_wrap(sp_name~.) + 
-  geom_point(size = 4, alpha = 0.5) + 
-  geom_smooth(method = "lm", se = F, linewidth = 1) + 
-  #scale_x_continuous(breaks = c(0:5)) + 
-  labs(x = "Days in lab", 
-       y = "CTmax Residuals") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt_facets() + 
-  theme(legend.position = "none")
-```
-
-```{r misc-ARR-limits-plot, fig.width=8, fig.height=6}
-minimal.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
-                        ctmax ~ sp_name + sex + temp_cent +
-                          (1|days_in_lab))
+minimal.model = lme4::lmer(data = model_data,
+                           ctmax ~ sp_name + sex + temp_cent +
+                             (1|days_in_lab))
 
 full.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
                         ctmax ~ sp_name*sex*temp_cent +
@@ -1086,10 +1090,10 @@ full.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labro
 drop1(full.model, scope=~.)
 
 reduced.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
-                        ctmax ~ sp_name + sex + temp_cent +
-                          sp_name:temp_cent + sex:temp_cent +
-                          sp_name:sex:temp_cent +
-                          (1|days_in_lab))
+                           ctmax ~ sp_name + sex + temp_cent +
+                             sp_name:temp_cent + sex:temp_cent +
+                             sp_name:sex:temp_cent +
+                             (1|days_in_lab))
 
 performance::test_performance(minimal.model, reduced.model, full.model)
 performance::check_model(reduced.model)
@@ -1103,8 +1107,10 @@ sp_ctmax = emmeans::emmeans(reduced.model, specs = "sp_name") %>%
 model_coefs = emmeans::emtrends(reduced.model, var = "temp_cent", specs = "sp_name") %>% 
   data.frame() %>% 
   inner_join(sp_ctmax) 
-```
 
+ctmax_resids = model_data %>% 
+  mutate(resids = residuals(reduced.model))
+```
 
 ```{r main-fig-ARR-synth-plot, fig.width=8, fig.height=6}
 arr_combined = synth_arr %>%
@@ -1154,15 +1160,15 @@ knitr::kable(sex_sample_sizes, align = "c")
 Across group comparisons show that there are generally no differences in thermal limits (represented here as the residuals from a CTmax ~ collection_temp x species linear regression), with the exception of Senecella males, which may have lower thermal limits (although sample sizes are very small in this group).
 
 ```{r supp-fig-ctmax-sex, fig.width=15, fig.height=8}
-ctmax_resids %>% 
-  filter(sp_name != "Osphranticum labronectum") %>% 
-  ggplot(aes(x = sex, y = resids, colour = sp_name)) + 
-  facet_wrap(sp_name~.) + 
-  geom_jitter(width = 0.1, alpha = 0.5) + 
-  geom_boxplot(width = 0.4, fill = NA, colour = "black", 
-               linewidth = 1, outlier.colour = NA) + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt_facets()
+# ctmax_resids %>% 
+#   filter(sp_name != "Osphranticum labronectum") %>% 
+#   ggplot(aes(x = sex, y = resids, colour = sp_name)) + 
+#   facet_wrap(sp_name~.) + 
+#   geom_jitter(width = 0.1, alpha = 0.5) + 
+#   geom_boxplot(width = 0.4, fill = NA, colour = "black", 
+#                linewidth = 1, outlier.colour = NA) + 
+#   scale_colour_manual(values = species_cols) + 
+#   theme_matt_facets()
 ```
 
 ```{r trait-variance-coll-temp, include = F}
@@ -1253,17 +1259,17 @@ full_data %>%
 ```
 
 ```{r ctmaxresids-size, fig.width=10, fig.height=7, include = F}
-ctmax_resids %>% 
-  #filter(sex == "female") %>% 
-  ggplot(aes(x = size_resids, y = resids, colour = sp_name)) + 
-  facet_wrap(sp_name~.) + 
-  geom_point(size = 2) + 
-  geom_smooth(method = "lm", se = F, linewidth = 2) + 
-  labs(x = "Length (mm)", 
-       y = "CTmax (°C)") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt() + 
-  theme(legend.position = "none")
+# ctmax_resids %>% 
+#   #filter(sex == "female") %>% 
+#   ggplot(aes(x = size, y = resids, colour = sp_name)) + 
+#   facet_wrap(sp_name~.) + 
+#   geom_point(size = 2) + 
+#   geom_smooth(method = "lm", se = F, linewidth = 2) + 
+#   labs(x = "Length (mm)", 
+#        y = "CTmax (°C)") + 
+#   scale_colour_manual(values = species_cols) + 
+#   theme_matt() + 
+#   theme(legend.position = "none")
 ```
 
 Shown here is the relationship between fecundity and size, showing the classic pattern of increasing egg production with increasing size. 
@@ -1286,11 +1292,11 @@ Individuals may also allocate energy to different fitness related traits, priori
 ```{r, main-fig-fecundity-plots, fig.width=8.5, fig.height=10}
 ctmax_fecund_plot = ctmax_resids %>%  
   drop_na(fecundity) %>% 
-  ggplot(aes(x = resids, y = fecundity_resids, colour = sp_name)) + 
+  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
   geom_smooth(method = "lm", se = F, linewidth = 2) + 
   geom_point(size = 2, alpha = 0.5) + 
-  labs(x = "CTmax Residuals", 
-       y = "Fecundity Residuals",
+  labs(x = "CTmax Residuals (°C)", 
+       y = "Fecundity (# Eggs)",
        colour = "Species") + 
   scale_colour_manual(values = species_cols) + 
   theme_matt() + 
@@ -1328,9 +1334,9 @@ ggplot(corr_data, aes(x = temp_cent, y = size_fec_corr, colour = sp_name)) +
   theme_matt_facets() + 
   theme(legend.position = "none")
 
-ggplot(corr_data, aes(x = size_fec_corr)) +
-    facet_wrap(sp_name~., nrow = 3) +
-  geom_histogram(binwidth = 0.2)
+# ggplot(corr_data, aes(x = size_fec_corr)) +
+#     facet_wrap(sp_name~., nrow = 3) +
+#   geom_histogram(binwidth = 0.2)
 ```
 
 
@@ -1338,7 +1344,7 @@ ggplot(corr_data, aes(x = size_fec_corr)) +
 
 *Leptodiaptomus sicilis* is the most abundant species during the winter. There was a large shift in the size of mature females towards the end of December. These large and small individuals are the same species (confirmed via COI sequencing), suggesting this shift may instead reflect a transition from one generation to another. This size difference may be caused by differences in the developmental environments. For example, individuals developing in January grow up at very low temperatures, and therefore may reach larger sizes. These individuals over-summer in deep waters, then re-emerge in October and produce a new generation. Water temperatures are still fairly high through November, which results in a generation of smaller individuals. These individuals mature in time to produce a new generation in January. 
 
-```{r supp-fig-lsic-morph-size}
+```{r supp-fig-lsic-morph-size, fig.width=9, fig.height=9}
 full_data %>%  
   filter(sp_name == "Leptodiaptomus sicilis") %>% 
   filter(sex != "juvenile") %>% 
@@ -1357,7 +1363,7 @@ full_data %>%
 ```
 
 A similar, but less distinct pattern can be observed in L. minutus individuals as well. 
-```{r include = F}
+```{r supp-fig-lmin-morph-size, fig.width=9, fig.height=9}
 full_data %>%  
   filter(sp_name == "Leptodiaptomus minutus") %>% 
   filter(sex != "juvenile") %>% 
@@ -1409,7 +1415,7 @@ Distributed lag models examine a response variable, measured at multiple time po
 
 ```
 
-```{r general-relationship} 
+```{r supp-fig-daily-max-ctmax, fig.width=9, fig.height=4} 
 
 dlnm_data = full_data %>%  
   filter(sex == "female") %>% 
@@ -1517,15 +1523,8 @@ for(lag_species in sp_list){
 ```
 
 
-```{r}
-if(predict_vuln == F){
-  knitr::knit_exit()
-}
-```
-
-
-## Predicting Vulnerability 
-Using the observed thermal limit data, we can produce a hindcast of thermal stress for Lake Champlain copepods. For these initial assays, we will define thermal stress as any time when maximum daily water temperature is within 2°C of copepod CTmax or higher. We will use three different scenarios: 1) the average CTmax for each species, 2) CTmax predicted using collection temperatures, and 3) for species that have sufficient data, CTmax predicted using whichever environmental factor is the strongest candidate for driving acclimation. In all cases, data is filtered to just thermal limits of adult females. 
+## Hindcasting vulnerability with different acclimation scenarios
+Using the observed thermal limit data, we can produce a hindcast of thermal stress for Lake Champlain copepods. For these initial assays, we will define thermal stress as any time when maximum daily water temperature is within 5°C of copepod CTmax or higher (i.e. warming tolerance is less than 5°C). We will use three different scenarios: 1) each species has a unique but fixed thermal limit (average measured CTmax), 2) species have unique thermal limits and are able to acclimate (constant ARR across all species used to predict CTmax based on average daily temperatures), and 3) species have unique thermal limits and species-specific acclimation (CTmax predicted using whichever environmental factor and duration is the strongest candidate for driving acclimation - from the correlation analysis). In all cases, data is filtered to just thermal limits of adult females. 
 
 ### Scenario 1
 ```{r}
@@ -1559,7 +1558,7 @@ knitr::kable(mean_ctmax)
 
 In the simplest scenario, species thermal limits are static through time, represented by the average CTmax of adult female copepods. In this scenario, only three of the seven observed species are exposed to thermal stress (temperatures within 5°C of CTmax). Temperatures approached the thermal limit of *Leptodiaptomus sicilis* on a handful of days. By contrast, *Senecella calanoides* and *Limnocalanus macrurus* were both exposed to substantial thermal stress throughout a large portion of the year, likely explaining why these species are absent from the community for the summer and fall periods. 
 
-```{r fig.width=10, fig.height=5}
+```{r supp-fig-hind1_scenario, fig.width=10, fig.height=5}
 hind1_data = hind_temp_data %>% 
   group_by(date) %>% 
   summarize("daily_max" = max(temp),
@@ -1601,7 +1600,7 @@ hind1_data %>%
 ### Scenario 2
 In the second scenario, thermal limits vary within and between species. A simple model is used to predict species thermal limits based on mean daily temperature (CTmax as a function of species and collection temperature, but without the interaction between these two factors). These predicted thermal limits are then compared against the maximum daily temperature to estimate thermal stress, as in Scenario 1. Including this simple form of acclimation in the model reduced the degree of thermal stress for each species, eliminating it entirely for *Leptodiaptomus sicilis*. Note that the magnitude of the predicted stress is  low enough that removing the 5°C buffer around the predicted thermal limits would actually limit predicted thermal stress to just a few days for *Senecella calanoides*. 
 
-```{r fig.height=5, fig.width=10}
+```{r supp-fig-hind2_scenario, fig.height=5, fig.width=10}
 hindcast_model1 = lm(data = filter(full_data, sex == "female"),
                      ctmax ~ collection_temp + sp_name)
 
@@ -1666,13 +1665,14 @@ preds_to_pull = hind_preds %>%
 
 for(i in 1:length(preds_to_pull$Species)){
   
-  if(preds_to_pull$Duration[i] == "prior"){ #The prior day temperature metrics should be used
-    duration = NA
+  duration = preds_to_pull$Duration[i]
+  
+  if(duration == 0){ #The prior day temperature metrics should be used
     
     predictors = hind_daily_temp_data %>% 
-      mutate(date = date + 1) 
+      mutate(date = date) 
     
-    parameter = preds_to_pull$Predictor[i]
+    parameter = "mean_temp" #using mean temperature as a proxy for collection temp
     
     model_data = full_data %>%
       filter(sp_name %in% preds_to_pull$Species[i]) %>% 
@@ -1697,22 +1697,12 @@ for(i in 1:length(preds_to_pull$Species)){
       
       hind3_data = bind_rows(hind3_data, sp_data)
     }else{
-      print("Too many columns selected")
+      print(c(unique(sp_data$species), "Too many columns selected"))
     }
     
-    
-  }else{
-    duration = as.numeric(preds_to_pull$Duration[i])
   }
   
-  if(preds_to_pull$Duration[i] != "prior" & is.na(duration)){ #Daily temperatures should be used, as in Scenario 2
-    sp_data = hind2_data %>% 
-      filter(species == preds_to_pull$Species[i])
-    
-    hind3_data = bind_rows(hind3_data, sp_data)
-  }
-  
-  if(is.numeric(duration)){
+  if(duration > 0){
     #Neither the prior day nor day of metrics should be used; use duration as n_days
     
     predictors = get_predictors(daily_values = hind_daily_temp_data, 
@@ -1725,7 +1715,7 @@ for(i in 1:length(preds_to_pull$Species)){
       filter(sp_name %in% preds_to_pull$Species[i]) %>% 
       filter(sex == "female") %>% 
       mutate(collection_date = as_date(collection_date)) %>% 
-      inner_join(predictors, join_by(collection_date == date)) %>%  
+      left_join(predictors, join_by(collection_date == date)) %>%  
       select(ctmax, contains(paste("day_", parameter, sep = "")))
     
     if(dim(model_data)[2] == 2){
@@ -1745,24 +1735,25 @@ for(i in 1:length(preds_to_pull$Species)){
       hind3_data = bind_rows(hind3_data, sp_data)
       
     }else{
-      print("Too many columns selected")
+      print(c(unique(sp_data$species), "Too many columns selected"))
     }
     
   }
 }
+
 
 hind3_data = hind3_data %>% 
   mutate("method" = "Variable_acclimation")
 ```
 
 This third approach did not affect the predicted patterns in *Limnocalanus* or *Senecella* (neither species has been observed in enough collections to estimate the effects of different environmental factors). Changing the acclimation approach did affect patterns in thermal limits in the other species though. The figure below shows how predicted warming tolerance varies over the year in the seven species, based on the three different prediction methods. In general, constant thermal limits (the 'no acclimation' method) resulted in larger warming tolerance during the winter and lower warming tolerance during the summer, although this effect was small in most species.     
-
-```{r fig.width=10, fig.height=10}
+```{r supp-fig-hind_cast_summary, fig.width=13, fig.height=10}
 synthesis = bind_rows(
   select(hind1_data, date, doy, daily_mean, daily_max, species, "pred_ctmax" = mean_ctmax, lim_diff, method),
   select(hind2_data, date, doy, daily_mean, daily_max,  species, pred_ctmax, lim_diff, method),
   select(hind3_data, date, doy, daily_mean, daily_max,  species, pred_ctmax, lim_diff, method)) %>% 
-  mutate(method = fct_relevel(method, "No_acclimation", "Constant_acclimation", "Variable_acclimation"))
+  mutate(method = fct_relevel(method, "No_acclimation", "Constant_acclimation", "Variable_acclimation")) %>% 
+  filter(!(species == "Osphranticum labronectum" & method == "Variable_acclimation"))
 
 climatology = synthesis %>% 
   group_by(species, doy, method) %>%  
@@ -1790,20 +1781,29 @@ ggplot(synthesis, aes(x = doy, y = lim_diff, colour = method)) +
   theme(strip.text.x.top = element_text(size = 10))
 ```
 
-```{r, include = F}
-yearly_summary = synthesis %>%  
+```{r supp-fig-acc_scenario_effects, fig.width=9, fig.height=7}
+wt_hindcast_summary = synthesis %>%  
   mutate("year" = year(date)) %>% 
   group_by(species, year, method) %>% 
   summarise("min_wt" = min(lim_diff),
             "max_wt" = max(lim_diff)) %>% 
   pivot_longer(cols = c(min_wt, max_wt), 
                names_to = "metric", 
-               values_to = "wt")
+               values_to = "wt") %>% 
+  group_by(species, method, metric) %>% 
+  summarise("mean_wt" = mean(wt))
 
-ggplot(yearly_summary, aes(x = method, y = wt, colour = metric)) + 
-  facet_wrap(.~species) + 
-  geom_point() + 
+wt_hindcast_summary %>% 
+  filter(metric == "min_wt") %>% 
+ggplot(aes(x = method, y = mean_wt, group = species, colour = species)) + 
+  #facet_wrap(.~metric, scales = "free_y") + 
+  geom_hline(yintercept = 0) + 
+  geom_hline(yintercept = 5) + 
+  geom_line(linewidth = 2) + 
+  geom_point(size = 3) + 
+  labs(x = "Scenario", 
+       y = "Mean Yearly Minimum WT (°C)") + 
+  scale_color_manual(values = species_cols) + 
   theme_matt_facets() + 
   theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
 ```
-
