@@ -50,13 +50,13 @@ temp_data = read.csv(file = "Output/Data/champlain_temps.csv") %>%
 lag_temps = read.csv(file = "Output/Data/lag_temps.csv") %>% 
   mutate(date = lubridate::as_date(date))
 
-hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
-  mutate(date = as_date(date))
+# hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
+#   mutate(date = as_date(date))
 
 synth_arr = read.csv(file = "Raw_data/genus_w_arr.csv") %>% 
   select(-X)
 
-sic_dnabin = adegenet::fasta2DNAbin(file = "Output/Sequences/Sanger_contigs_alignment.fa")
+# sic_dnabin = adegenet::fasta2DNAbin(file = "Output/Sequences/Sanger_contigs_alignment.fa")
 
 data_summary = full_data %>% 
   group_by(collection_date, sp_name, species, sex) %>%  
@@ -64,6 +64,15 @@ data_summary = full_data %>%
             ctmax_se = sd(ctmax) / sqrt(n())) %>% 
   filter(sex == "female") %>% 
   arrange(collection_date, sp_name)
+
+collection_summary = full_data %>% 
+  group_by(collection_date, collection_temp, sp_name) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(id_cols = c("collection_date", "collection_temp"), 
+              names_from = "sp_name", 
+              values_from = "n", 
+              values_fill = 0)
 
 #write.csv(data_summary, file = "Output/Data/data_summary.csv", row.names = F)
 

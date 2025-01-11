@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2025-01-09
+2025-01-11
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -479,7 +479,7 @@ representative species apparently responding to short and long
 durations).
 
 ``` r
-corr_vals %>%  
+duration_plot = corr_vals %>%  
   filter(sig == "Sig.") %>% 
   drop_na(correlation) %>% 
   group_by(sp_name) %>%
@@ -494,11 +494,39 @@ corr_vals %>%
   geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.6),
            colour = "black") + 
   scale_fill_manual(values = c("coll_temp" = "black", "max" = "white", "min" = "grey")) + 
+  labs(x = "", 
+       y = "Duration \n(days)") + 
   theme_matt() + 
-  theme(axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+  theme(axis.text.x = element_blank())
 ```
 
-<img src="../Figures/markdown/main-fig-acc-durations-1.png" style="display: block; margin: auto;" />
+``` r
+correlation_coef_plot = corr_vals %>%  
+  filter(sig == "Sig." | parameter == "coll_temp") %>% 
+  drop_na(correlation) %>% 
+  group_by(sp_name) %>%
+  filter(parameter == "coll_temp" | correlation == max(correlation)) %>% 
+  arrange(sp_name, parameter) %>% 
+  mutate("num" = row_number()) %>% 
+  select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, num) %>% 
+  mutate(Predictor = if_else(Predictor == "coll_temp", Predictor, "best")) %>% 
+  ungroup() %>% 
+  mutate(Species = fct_reorder(Species, Duration, .fun = max, .desc = T)) %>% 
+  ggplot(aes(x = Species, y = Correlation, fill = Predictor, group = num)) + 
+  geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.6),
+           colour = "black") + 
+  labs(y = "Correlation \nCoefficient",
+       fill = "Correlate") +
+  scale_fill_manual(values = c("coll_temp" = "black", "best" = "white")) + 
+  scale_y_continuous(breaks = c(0, 1), limits = c(0,1)) +
+  theme_matt() + 
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+
+ggarrange(duration_plot, correlation_coef_plot, nrow = 2, legend = "right", 
+          heights = c(0.4, 0.6))
+```
+
+<img src="../Figures/markdown/main-fig-acc-correlations-1.png" style="display: block; margin: auto;" />
 
 ## Trait Variation
 
@@ -639,66 +667,56 @@ full.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labro
                         ctmax ~ sp_name*sex*temp_cent +
                           (1|days_in_lab))
 
-drop1(full.model, scope=~.)
+drop1(full.model, test = "Chisq")
 ## Single term deletions
 ## 
 ## Model:
 ## ctmax ~ sp_name * sex * temp_cent + (1 | days_in_lab)
-##                       npar    AIC
-## <none>                     5280.1
-## sp_name                  0 5280.1
-## sex                      0 5280.1
-## temp_cent                0 5280.1
-## sp_name:sex             10 5271.0
-## sp_name:temp_cent        0 5280.1
-## sex:temp_cent            0 5280.1
-## sp_name:sex:temp_cent   10 5281.0
-
-reduced.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
-                           ctmax ~ sp_name + sex + temp_cent +
-                             sp_name:temp_cent + sex:temp_cent +
-                             sp_name:sex:temp_cent +
-                             (1|days_in_lab))
-
-performance::test_performance(minimal.model, reduced.model, full.model)
-## Name          |   Model |      BF | df | df_diff |   Chi2 |      p
-## ------------------------------------------------------------------
-## minimal.model | lmerMod |         | 11 |         |        |       
-## reduced.model | lmerMod |  > 1000 | 28 |   17.00 | 169.80 | < .001
-## full.model    | lmerMod | < 0.001 | 38 |   10.00 |  10.90 | 0.365 
-## Models were detected as nested (in terms of fixed parameters) and are compared in sequential order.
-performance::check_model(reduced.model)
-```
-
-<img src="../Figures/markdown/supp-fig-model-tests-1.png" style="display: block; margin: auto;" />
-
-``` r
-
-car::Anova(reduced.model, type = "III", test = "F")
-## Analysis of Deviance Table (Type III Wald F tests with Kenward-Roger df)
-## 
-## Response: ctmax
-##                               F Df  Df.res    Pr(>F)    
-## (Intercept)           5200.6616  1   17.49 < 2.2e-16 ***
-## sp_name                 86.8617  5 1277.20 < 2.2e-16 ***
-## sex                     32.6821  2 1280.05 1.435e-14 ***
-## temp_cent               67.3972  1 1275.90 5.380e-16 ***
-## sp_name:temp_cent       10.6290  5 1277.95 5.073e-10 ***
-## sex:temp_cent           15.0090  2 1276.10 3.607e-07 ***
-## sp_name:sex:temp_cent    6.8593 10 1276.41 1.661e-10 ***
+##                       npar    AIC    LRT Pr(Chi)  
+## <none>                     5280.1                 
+## sp_name:sex:temp_cent   10 5281.0 20.887  0.0219 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-sp_ctmax = emmeans::emmeans(reduced.model, specs = "sp_name") %>% 
+performance::test_performance(minimal.model, full.model)
+## Name          |   Model |    BF | df | df_diff |   Chi2 |      p
+## ----------------------------------------------------------------
+## minimal.model | lmerMod |       | 11 |         |        |       
+## full.model    | lmerMod | 0.001 | 38 |   27.00 | 180.70 | < .001
+## Models were detected as nested (in terms of fixed parameters) and are compared in sequential order.
+performance::check_model(full.model)
+```
+
+<img src="../Figures/markdown/supp-fig-model-performance-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+car::Anova(full.model, type = "III")
+## Analysis of Deviance Table (Type III Wald chisquare tests)
+## 
+## Response: ctmax
+##                          Chisq Df Pr(>Chisq)    
+## (Intercept)           4619.014  1  < 2.2e-16 ***
+## sp_name                344.724  5  < 2.2e-16 ***
+## sex                     51.233  2  7.495e-12 ***
+## temp_cent               53.731  1  2.299e-13 ***
+## sp_name:sex             10.611 10    0.38866    
+## sp_name:temp_cent       39.512  5  1.873e-07 ***
+## sex:temp_cent           31.961  2  1.147e-07 ***
+## sp_name:sex:temp_cent   20.616 10    0.02393 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+sp_ctmax = emmeans::emmeans(full.model, specs = "sp_name") %>% 
   data.frame() %>% 
   select(sp_name, "species_ctmax" = emmean)
 
-model_coefs = emmeans::emtrends(reduced.model, var = "temp_cent", specs = "sp_name") %>% 
+model_coefs = emmeans::emtrends(full.model, var = "temp_cent", specs = "sp_name") %>% 
   data.frame() %>% 
   inner_join(sp_ctmax) 
 
 ctmax_resids = model_data %>% 
-  mutate(resids = residuals(reduced.model))
+  mutate(resids = residuals(full.model))
 ```
 
 ``` r
@@ -739,7 +757,7 @@ differences in CTmax though. For all species but Osphranticum, we have
 measurements for individuals in different stages and of different sexes.
 
 ``` r
-sex_sample_sizes = ctmax_resids %>%  
+sex_sample_sizes = full_data %>%  
   group_by(sp_name, sex) %>%  
   summarise(num = n()) %>%  
   pivot_wider(id_cols = sp_name,
@@ -751,14 +769,15 @@ sex_sample_sizes = ctmax_resids %>%
 knitr::kable(sex_sample_sizes, align = "c")
 ```
 
-|        Species         | Juvenile | Female | Male |
-|:----------------------:|:--------:|:------:|:----:|
-|  Epischura lacustris   |    37    |   45   |  20  |
-| Leptodiaptomus minutus |    12    |  273   |  38  |
-| Leptodiaptomus sicilis |    31    |  356   |  95  |
-| Limnocalanus macrurus  |    4     |   43   |  39  |
-|  Senecella calanoides  |    13    |   21   |  8   |
-|   Skistodiaptomus sp   |    15    |  231   |  28  |
+|         Species          | Juvenile | Female | Male |
+|:------------------------:|:--------:|:------:|:----:|
+|   Epischura lacustris    |    37    |   45   |  20  |
+|  Leptodiaptomus minutus  |    12    |  273   |  39  |
+|  Leptodiaptomus sicilis  |    31    |  356   |  95  |
+|  Limnocalanus macrurus   |    4     |   43   |  39  |
+| Osphranticum labronectum |    0     |   1    |  0   |
+|   Senecella calanoides   |    13    |   21   |  8   |
+|    Skistodiaptomus sp    |    15    |  232   |  28  |
 
 Across group comparisons show that there are generally no differences in
 thermal limits (represented here as the residuals from a CTmax ~
@@ -777,6 +796,52 @@ sizes are very small in this group).
 #   scale_colour_manual(values = species_cols) + 
 #   theme_matt_facets()
 ```
+
+``` r
+model2_data = model_data %>% 
+  filter(sex == "female", 
+         pathogen != "uncertain", 
+         dev_eggs != "uncertain", 
+         lipids != "uncertain") %>% 
+  mutate(pathogens = fct_relevel(pathogen, "no", "spot", "cloudy", "other"))
+
+other_factor_model = lmer(data = model2_data, 
+                          ctmax~sp_name * collection_temp + dev_eggs + pathogen + lipids + (1|days_in_lab))
+
+drop1(other_factor_model, scope = ~., test = "Chisq")
+## Single term deletions
+## 
+## Model:
+## ctmax ~ sp_name * collection_temp + dev_eggs + pathogen + lipids + 
+##     (1 | days_in_lab)
+##                         npar    AIC     LRT   Pr(Chi)    
+## <none>                       3601.6                      
+## sp_name                    5 3804.2 212.619 < 2.2e-16 ***
+## collection_temp            0 3601.6   0.000              
+## dev_eggs                   1 3602.0   2.391    0.1220    
+## pathogen                   3 3629.4  33.832 2.149e-07 ***
+## lipids                     1 3600.0   0.416    0.5189    
+## sp_name:collection_temp    5 3635.7  44.139 2.171e-08 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+reduced_factors_model = lmer(data = model2_data, 
+                          ctmax~sp_name * collection_temp + pathogen + (1|days_in_lab))
+
+performance::check_model(reduced_factors_model)
+```
+
+<img src="../Figures/markdown/supp-fig-model2-performance-1.png" style="display: block; margin: auto;" />
+
+``` r
+emmeans::emmeans(reduced_factors_model, spec = "pathogen") %>% emmeans::contrast(method="trt.vs.ctrl",ref="no") %>% plot() + 
+  geom_vline(xintercept = 0) + 
+  labs(x = "Difference (°C)", 
+       y = "Comparison") + 
+    theme_matt()
+```
+
+<img src="../Figures/markdown/supp-fig-pathogen-effect-1.png" style="display: block; margin: auto;" />
 
 ### Trait Correlations and Trade-offs
 

@@ -588,7 +588,7 @@ get_predictors = function(daily_values, raw_temp, n_days){
 }
 ```
 
-```{r predictors-and-plots, fig.width=12, fig.height=5, include = F}
+```{r misc-predictors-and-plots, fig.width=12, fig.height=5, include = F}
 # ## Getting predictor variables for different periods
 # 
 # ### Short (three days)
@@ -739,7 +739,7 @@ ggarrange(daily_plot, week_plot, four_week_plot,
           common.legend = T, nrow = 1, legend = "bottom")
 ```
 
-```{r, include = F}
+```{r misc-corr-periods, include = F}
 #The different time periods examined by this climate data highlights that the relationship between minimum and maximum temperatures changes based on the window examined. For example, minimum and maximum temperatures experienced over weekly intervals are closely linked, whereas there is a distinct seasonal cycle in the relationship between minimum and maximum temperatures experienced over periods of four weeks. 
 
 one_week_doy_data = week_temps %>% 
@@ -877,8 +877,8 @@ corr_vals %>%
 
 Shown here is a graphical summary of the duration of the best predictors for each species. Note that for the two Leptodiaptomids, collection temperature had the largest correlation coefficient so duration is zero. This representation highlights that there is variation across the community not only in the potential driver (e.g. minimum vs. maximum temperatures) but also in the duration of time. This variation is not grouped by season (the winter and summer communities both have representative species apparently responding to short and long durations). 
 
-```{r main-fig-acc-durations, fig.width=8, fig.height=8}
-corr_vals %>%  
+```{r main-fig-acc-durations}
+duration_plot = corr_vals %>%  
   filter(sig == "Sig.") %>% 
   drop_na(correlation) %>% 
   group_by(sp_name) %>%
@@ -893,10 +893,37 @@ corr_vals %>%
   geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.6),
            colour = "black") + 
   scale_fill_manual(values = c("coll_temp" = "black", "max" = "white", "min" = "grey")) + 
+  labs(x = "", 
+       y = "Duration \n(days)") + 
   theme_matt() + 
-  theme(axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+  theme(axis.text.x = element_blank())
 ```
 
+```{r main-fig-acc-correlations, fig.width=8, fig.height=6}
+correlation_coef_plot = corr_vals %>%  
+  filter(sig == "Sig." | parameter == "coll_temp") %>% 
+  drop_na(correlation) %>% 
+  group_by(sp_name) %>%
+  filter(parameter == "coll_temp" | correlation == max(correlation)) %>% 
+  arrange(sp_name, parameter) %>% 
+  mutate("num" = row_number()) %>% 
+  select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, num) %>% 
+  mutate(Predictor = if_else(Predictor == "coll_temp", Predictor, "best")) %>% 
+  ungroup() %>% 
+  mutate(Species = fct_reorder(Species, Duration, .fun = max, .desc = T)) %>% 
+  ggplot(aes(x = Species, y = Correlation, fill = Predictor, group = num)) + 
+  geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.6),
+           colour = "black") + 
+  labs(y = "Correlation \nCoefficient",
+       fill = "Correlate") +
+  scale_fill_manual(values = c("coll_temp" = "black", "best" = "white")) + 
+  scale_y_continuous(breaks = c(0, 1), limits = c(0,1)) +
+  theme_matt() + 
+  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
+
+ggarrange(duration_plot, correlation_coef_plot, nrow = 2, legend = "right", 
+          heights = c(0.4, 0.6))
+```
 
 ```{r misc-acc-duration-plot, fig.width=7, fig.height=4, include = F}
 # Phenotypic variation (like acclimation of thermal limits) is a physiological process. depending on the mechanistic underpinnings (changes in HSP expression, etc.), the amount of time it takes for an individual to acclimate may vary based on body size (larger species, more cells, more time required to acclimate). Shown here is the duration of the environmental acclimation window the copepods appear to be responding to.  
@@ -1071,7 +1098,7 @@ full_data %>%
 #   theme(legend.position = "none")
 ```
 
-```{r supp-fig-model-tests, fig.width=8, fig.height=6}
+```{r supp-fig-model-performance, fig.width=9, fig.height=13}
 
 model_data = full_data %>%  
   drop_na(size, ctmax) %>%  
@@ -1087,29 +1114,23 @@ full.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labro
                         ctmax ~ sp_name*sex*temp_cent +
                           (1|days_in_lab))
 
-drop1(full.model, scope=~.)
+drop1(full.model, test = "Chisq")
 
-reduced.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
-                           ctmax ~ sp_name + sex + temp_cent +
-                             sp_name:temp_cent + sex:temp_cent +
-                             sp_name:sex:temp_cent +
-                             (1|days_in_lab))
+performance::test_performance(minimal.model, full.model)
+performance::check_model(full.model)
 
-performance::test_performance(minimal.model, reduced.model, full.model)
-performance::check_model(reduced.model)
+car::Anova(full.model, type = "III")
 
-car::Anova(reduced.model, type = "III", test = "F")
-
-sp_ctmax = emmeans::emmeans(reduced.model, specs = "sp_name") %>% 
+sp_ctmax = emmeans::emmeans(full.model, specs = "sp_name") %>% 
   data.frame() %>% 
   select(sp_name, "species_ctmax" = emmean)
 
-model_coefs = emmeans::emtrends(reduced.model, var = "temp_cent", specs = "sp_name") %>% 
+model_coefs = emmeans::emtrends(full.model, var = "temp_cent", specs = "sp_name") %>% 
   data.frame() %>% 
   inner_join(sp_ctmax) 
 
 ctmax_resids = model_data %>% 
-  mutate(resids = residuals(reduced.model))
+  mutate(resids = residuals(full.model))
 ```
 
 ```{r main-fig-ARR-synth-plot, fig.width=8, fig.height=6}
@@ -1145,7 +1166,7 @@ ggplot(arr_combined, aes(x = mean_lim, y = arr)) +
 Previous sections have generally lumped juvenile, female, and male individuals together. There may be important stage- or sex-specific differences in CTmax though. For all species but Osphranticum, we have measurements for individuals in different stages and of different sexes. 
 
 ```{r sex-stage-table}
-sex_sample_sizes = ctmax_resids %>%  
+sex_sample_sizes = full_data %>%  
   group_by(sp_name, sex) %>%  
   summarise(num = n()) %>%  
   pivot_wider(id_cols = sp_name,
@@ -1195,6 +1216,34 @@ Across group comparisons show that there are generally no differences in thermal
 #   theme_matt_facets() + 
 #   theme(legend.position = "none")
 ```
+
+```{r supp-fig-model2-performance, fig.width=9, fig.height=13}
+model2_data = model_data %>% 
+  filter(sex == "female", 
+         pathogen != "uncertain", 
+         dev_eggs != "uncertain", 
+         lipids != "uncertain") %>% 
+  mutate(pathogens = fct_relevel(pathogen, "no", "spot", "cloudy", "other"))
+
+other_factor_model = lmer(data = model2_data, 
+                          ctmax~sp_name * collection_temp + dev_eggs + pathogen + lipids + (1|days_in_lab))
+
+drop1(other_factor_model, scope = ~., test = "Chisq")
+
+reduced_factors_model = lmer(data = model2_data, 
+                          ctmax~sp_name * collection_temp + pathogen + (1|days_in_lab))
+
+performance::check_model(reduced_factors_model)
+```
+
+```{r supp-fig-pathogen-effect, fig.width=8, fig.height=5}
+emmeans::emmeans(reduced_factors_model, spec = "pathogen") %>% emmeans::contrast(method="trt.vs.ctrl",ref="no") %>% plot() + 
+  geom_vline(xintercept = 0) + 
+  labs(x = "Difference (°C)", 
+       y = "Comparison") + 
+    theme_matt()
+```
+
 
 
 ### Trait Correlations and Trade-offs
