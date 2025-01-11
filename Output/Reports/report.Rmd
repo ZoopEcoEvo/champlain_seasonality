@@ -135,7 +135,7 @@ Collections began in late May 2023. Several gaps are present, but collections ha
 
 There is substantial variation in thermal limits across the species collected. There is also some degree of variation within the species, with thermal limits increasing slightly during the summer.    
 
-```{r main-fig-ctmax-timeseries, fig.width=10, fig.height=5}
+```{r main-fig-ctmax-timeseries, fig.width=9, fig.height=5}
 ## Daily values for the period examined by dataset
 collection_conditions = temp_data %>%
   ungroup() %>% 
@@ -185,14 +185,14 @@ tseries_data = full_data %>%
   mutate(sp_name = fct_reorder(sp_name, ctmax, .desc = T))
 
 ggplot() + 
-  geom_vline(data = unique(select(tseries_data, collection_date)), 
-             aes(xintercept = as.Date(collection_date)),
-             colour = "grey90",
-             linewidth = 1) + 
+  # geom_vline(data = unique(select(tseries_data, collection_date)), 
+  #            aes(xintercept = as.Date(collection_date)),
+  #            colour = "grey90",
+  #            linewidth = 1) + 
   geom_line(data = collection_conditions, 
             aes(x = as.Date(date), y = mean_temp),
             colour = "black", 
-            linewidth = 2) + 
+            linewidth = 1) + 
   # geom_errorbar(data = species_summaries,
   #               aes(x = as.Date(collection_date),
   #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
@@ -203,14 +203,17 @@ ggplot() +
   #            aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
   geom_point(data = tseries_data, 
              aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
-             size = 2, position = position_jitter(width = 1, height = 0)) + 
+             size = 1.5, shape = 16, alpha = 0.7,
+             position = position_jitter(width = 0, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
   labs(x = "Date", 
        y = "Temperature (°C)", 
        colour = "Species",
        size = "Sample Size") + 
   theme_matt() + 
-  theme(legend.position = "right")
+  theme(legend.position = "right", 
+        axis.text.x = element_text(angle = 320, hjust = 0, vjust = 0.5))
 
 lake_temps = ggplot() + 
   geom_line(data = collection_conditions, 
@@ -899,7 +902,7 @@ duration_plot = corr_vals %>%
   theme(axis.text.x = element_blank())
 ```
 
-```{r main-fig-acc-correlations, fig.width=8, fig.height=6}
+```{r main-fig-acc-correlations, fig.width=6, fig.height=8}
 correlation_coef_plot = corr_vals %>%  
   filter(sig == "Sig." | parameter == "coll_temp") %>% 
   drop_na(correlation) %>% 
@@ -1571,6 +1574,16 @@ for(lag_species in sp_list){
 
 ```
 
+
+```{r}
+
+if(predict_vuln == F){
+
+  knitr::knit_exit()
+
+}
+
+```
 
 ## Hindcasting vulnerability with different acclimation scenarios
 Using the observed thermal limit data, we can produce a hindcast of thermal stress for Lake Champlain copepods. For these initial assays, we will define thermal stress as any time when maximum daily water temperature is within 5°C of copepod CTmax or higher (i.e. warming tolerance is less than 5°C). We will use three different scenarios: 1) each species has a unique but fixed thermal limit (average measured CTmax), 2) species have unique thermal limits and are able to acclimate (constant ARR across all species used to predict CTmax based on average daily temperatures), and 3) species have unique thermal limits and species-specific acclimation (CTmax predicted using whichever environmental factor and duration is the strongest candidate for driving acclimation - from the correlation analysis). In all cases, data is filtered to just thermal limits of adult females. 
