@@ -1134,6 +1134,8 @@ model_coefs = emmeans::emtrends(full.model, var = "temp_cent", specs = "sp_name"
 
 ctmax_resids = model_data %>% 
   mutate(resids = residuals(full.model))
+
+#write.csv(model_coefs, "Output/Data/ARR_data.csv")
 ```
 
 ```{r main-fig-ARR-synth-plot, fig.width=8, fig.height=6}

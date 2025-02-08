@@ -65,6 +65,9 @@ data_summary = full_data %>%
   filter(sex == "female") %>% 
   arrange(collection_date, sp_name)
 
+arr_data = read.csv("Output/Data/ARR_data.csv") %>% 
+  select(sp_name, "arr" = temp_cent.trend, species_ctmax)
+
 collection_summary = full_data %>% 
   group_by(collection_date, collection_temp, sp_name) %>% 
   summarise(n = n()) %>% 
