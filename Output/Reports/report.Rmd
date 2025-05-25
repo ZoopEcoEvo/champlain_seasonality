@@ -1113,7 +1113,7 @@ minimal.model = lme4::lmer(data = model_data,
                            ctmax ~ sp_name + sex + temp_cent +
                              (1|days_in_lab))
 
-full.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
+full.model = lme4::lmer(data = model_data,
                         ctmax ~ sp_name*sex*temp_cent +
                           (1|days_in_lab))
 
