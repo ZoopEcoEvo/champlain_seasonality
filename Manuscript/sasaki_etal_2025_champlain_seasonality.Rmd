@@ -55,29 +55,25 @@ knitr::opts_chunk$set(fig.align = "center")
 # Introduction
 
 Predicting the effects of climate change on biodiversity is a pressing challenge. 
-Freshwater taxa may be particularly vulnerable to anthropogenic changes (REF). 
-Lakes and standing waters across many regions are rapidly warming (Woolway, Woolway, Kraemer papers).
-As temperatures increase, there have been widespread observation of shifts in community composition, population abundances, and range distributions across many groups (Khaliq et al. 2024). 
-Variation in thermal performance traits across taxa may underlie these changes (Roeder ant community paper; REFS). 
-Upper thermal limits in particualr are often used as proxies for thermal performance, and as a result, spatial patterns in thermal limits are often used to predict patterns in vulnerability to climate change (Pinksy paper). 
+Lakes and standing waters across many regions are rapidly warming (Woolway, Woolway, Kraemer papers), and freshwater taxa may be particularly vulnerable to anthropogenic changes (REF). 
+As temperatures increase, there have been widespread observations of shifts in community composition, population abundances, and range distributions across many groups (Khaliq et al. 2024). 
+Diverse physiological and ecological mechanisms may underlie these changes, but variation in thermal performance traits (and upper thermal limits in particular) across taxa has recieved particular attention (Roeder ant community paper; REFS). 
+As a result, spatial patterns in thermal limits are often used to predict patterns in vulnerability to climate change (Pinksy paper). 
 
 Many of these studies assume, however, that thermal limits are invariant within species. 
 A growing body of literature shows this is clearly not the case. 
-Local adaptation (Sasaki et al. NCC), seasonal acclimation (Hahn and Brennan, Bujan, Oliviere papers paper), and other processes can produce substantial intraspecific variation in thermal limits that is important to consider for robust predictions about the effects of climate change on biodiversity. 
-EXPAND. 
+Local adaptation (Sasaki et al. NCC) and acclimation (REF), for example, can produce substantial intraspecific variation in thermal limits over various spatial scales that is important to consider for robust predictions about the effects of climate change on biodiversity.
+Seasonal variation in temperature also drives acclimation responses across a range of taxa (Huey and Buckley paper; Bujan, Oliviere papers paper). 
+Importantly, both adaptation and plasticity can play important roles in shaping how populations of short-lived taxa cope with seasonally varying temperatures (Hahn and Brennan; Sasaki paper, Ueno paper on Drosophila). 
+This temporal variation in thermal limits can mediate vulnerability to both acute and long-term warming events (e.g. heatwaves and climate warming, respectively), and may play a role in shaping the response of communities to climate change (Dowd and Denny paper?).  
 
-Multi-generational common garden experiments highlight that both genetic variation and phenotypic plasticity play important roles in shaping how populations cope with seasonally varying temperatures (Hahn and Brennan; Sasaki paper, Ueno paper on Drosophila). 
-Driven by both genetic and plastic mechanisms, seasonal variation in thermal limits might mediate vulnerability to both acute and long-term warming events (e.g. heatwaves and climate warming, respectively). 
-While highly controlled laboratory experiments provide crucial mechanistic insight into observed variation in thermal limits, assessments under more realistic conditions are also needed. 
-The idealized, stable conditions typically used in laboratory environments may mask the effects of other factors that could influence thermal limits in natural populations (e.g. food limitation, behavioral thermoregulation, photoperiod, humidity, etc.). 
+While highly controlled laboratory experiments provide crucial mechanistic insight into seasonal variation in thermal limits, assessments under more realistic conditions are also needed. 
+The idealized, stable conditions typically used in laboratory environments may, for example, mask the effects of other factors like food limitation, behavioral thermoregulation, photoperiod, humidity, etc. influence thermal limits in natural populations (REF). 
 Laboratory estimates of the effects of plasticity are also be subject to a number of potential methodological artifacts (Rohr et al. 2018). 
 Given the important (but uncertain) role plasticity may play in mediating vulnerability to warming (Seebacher et al. 2015; Morley et al. 2019; Gunderson & Stillman 2015), we need to complement laboratory studies with a better understanding of thermal limits and the effects of plasticity under realistic environmental conditions. 
 This is particularly important for grounding predictions about how interactions between plasticity and adaptation may shape population responses in a changing climate (Diamond and Martin 2016). 
 
-INTRODUCE 'ACCLIMATION' HERE. 
-Populations are naturally exposed to a variable environment, which can be leveraged to capture the effects of acclimation under realistic conditions. 
-Seasonal variation in temperature is particularly prominent in many locations, and may drive acclimation responses across a range of taxa (Huey and Buckley paper). 
-While describing seasonal variation within a single species can provide useful insights, it is the relative acclimation capacity across community members that can best help us understand how climate change may alter ecological dynamics. 
+Further, while describing seasonal variation within a single species can provide useful insights, the relative acclimation capacity across community members is important to understand in order to predict how climate change may alter ecological dynamics. 
 Despite this, very few studies have examined in situ, seasonal patterns in thermal limits across community members, limiting our ability to compare the effects of acclimation. 
 Those that have (REFS) suggest SUMMARIZE RESULTS HERE. 
 This variation, in both thermal limits and acclimation capacity, will likely play a major role in determining 'winners and losers' in a changing climate (Somero paper, Roeder paper).   
@@ -86,20 +82,21 @@ There is also a general need for a better understanding of the biological proces
 Among previous studies examining seasonal change in thermal limits across community members, only Houghton et al. examined patterns across the full annual temperature cycle. 
 This has led to a limited understanding of how variation in physiological thermal limits affects ecological patterns like seasonal changes in community composition. 
 
-Copepods are a useful model system for studying variation in thermal limits; Widespread, diverse, and abundant throughout the year. 
-This group is also ecologically important in their own right; Key ecological roles as grazers and prey, Bioindicators in freshwater systems. 
+Copepods are a useful model system for studying variation in thermal limits and acclimation capacity.
+Planktonic copepods are widespread, diverse, and abundant throughout the year in most freshwater systems. 
+This group is also ecologically important, as grazers of phytoplankton and microzooplankton and prey for early life stages of many fish species. 
+While historically thermal limits and acclimation capacity in freshwater copepods have been largely overlooked (Sasaki & Dam, JPR), recent studies have XXXXXXX (Symons lab paper; Lukasz' paper).
 
-Here we examine seasonal patterns in upper thermal limits of the calanoid copepod community in Lake Champlain, a large North American temperate lake, with substantial seasonal variation in temperature (REF).
-Sampling at approximately weekly intervals, our study examines patterns across the entire annual temperature cycle. 
-We test the hypotheses that: 1) Species differences in thermal limits will reflect variation in the season of occurrence (winter active species will have lower thermal limits than summer active species); and 2) Within species, thermal limits will increase with increasing water temperature reflecting acclimation to the changing conditions.   
+Here we examine seasonal patterns in upper thermal limits of the entire calanoid copepod community in Lake Champlain, a large, highly seasonal lake in temperate North America. 
+Sampling at approximately weekly intervals, our study examines patterns across the entire annual temperature cycle to examine how thermal limits vary across species and whether these differences may contribute to seasonal changes in copepod community composition. We also use this high resolution data set to quantify species-specific acclimation capacities under natural conditions.  
 
 # Methods
 ### Field Collections and Environmental Data
-Plankton were collected within the top 3 meters of Lake Champlain (coordinates) with horizontal and vertical tows of a 500 um mesh plankton net. 
+Plankton were collected within the top 3 meters of Lake Champlain (coordinates) with a combination of horizontal and vertical tows of a 500 um mesh plankton net. 
 These collections were not intended for quantitative measurement of abundance, so the precise volume of water filtered was not tracked. 
 Surface water temperature was measured at the time of collection using a handheld thermometer. 
-Plankton were transferred to an insulated flask and immediately transported to the laboratory, where the sample was divided among several 500 mL beakers and placed in a benchtop incubator (manufacturer) set to the temperature recorded at the time of collection. 
-The USGS maintains a continuous temperature record at a nearby site (<500 m CHECK THIS), which we accessed to obtain records from the entire collection period for this project (`r paste(range(collection_summary$collection_date), collapse = " to ")`).
+Plankton were transferred to an insulated flask and immediately transported to the laboratory at the University of Vermont, where the sample was divided among several 500 mL beakers and placed in a benchtop incubator (manufacturer) set to the temperature recorded at the time of collection. 
+The USGS maintains a continuous temperature record at a nearby site (<500 m CHECK THIS), which allowed us to examine more fine-scale patterns across the entire collection period for this project (`r paste(range(collection_summary$collection_date), collapse = " to ")`).
 Temperatures recorded at the time of collection closely matched the maximum daily temperatures from the continuous temperature record (Supp. Fig. 1). 
 
 
@@ -111,49 +108,55 @@ The water bath contains thirteen 50 mL flat-bottom glass vials, each with 10 mL 
 Small temperature sensors connected to an Arduino logger were placed into three of these vials. 
 Temperature was recorded every five seconds during the experimental assays. 
 To begin each CTmax assay, the water in the reservoir was adjusted to match the collection temperature using either the heating elements or by adding ice. 
-When the water bath was holding steady at the collection temperature, calanoid copepods were sorted from the bulk plankton tow contents and placed individually in the remaining vials. 
-Assays typically measured thermal limits for 10 individuals at a time. 
+When the water bath was holding steady at the collection temperature, calanoid copepods were sorted from the bulk plankton tow contents and placed individually in the remaining ten vials. 
 After all vials were filled, copepods were given a 15 minute resting period, then the heating element was turned on to initiate the temperature ramp.
 Individuals that were not active after this resting period were excluded from the assay. 
 The rate of temperature increase was 0.3°C per minute at the beginning of the assay, and gradually decreased to ~0.1°C per minute. 
 Individuals were monitored continuously during the ramp until normal movement ceased and the individual no longer responded to gentle stimulus (slight water movement generated by turning the vials). 
 The time at that point was recorded and the vial removed from the water bath. 
-The continuous temperature record was used to determine CTmax from the recorded time. 
+The continuous temperature record recorded by the Arduino lggers was used to determine CTmax from the recorded time. 
 After all individuals had reached their CTmax, the copepods were transferred to the lid of a 96 well plate and examined using a stereoscope (Olympus SZX7). 
 Individuals were identified to the species level (REF), and categorized as either male, female, or juvenile. 
 For females bearing egg sacs, clutch size was also recorded. 
 Finally, each individual was photographed along with a scale micrometer for body size measurements. 
 Body size was measured using ImageJ (REF) as prosome length. 
-After the entire data set was collected, these images were also used to identify other potential traits of interest (the presence of developing eggs, the presence of lipid droplets, and visually apparent internal parasites or pathogens). 
+After the entire data set was collected, these images were also used to identify three other potential traits of interest (the presence of developing eggs, the presence of lipid droplets, and visually apparent internal parasites or pathogens). 
+There were several diverse pathogen classes observed in the copepods. 
+We grouped these phenotypes into three classes, a 'spot' phenotype, a 'cloudy' phenotype, and an 'other' group that contained the remaining individuals. 
+Identification of the pathogenic species / physiological processes underlying the infection was not possible with our photo-based approach, but this analysis provides preliminary evidence of which pathogen classes may impact these copepod populations. 
 These additional traits were scored by a single individual (MCS) to ensure consistency across the entire set of samples. 
 
 ### Data Analysis
 All analyses were conducted with R version XXXX (REF). 
-We used a linear mixed effects model to examine the influence of species, collection temperature, and individual sex on CTmax. Since CTmax assays were often performed over the course of several days after collection, we included the number of days in the lab as a random effect. 
+We used a linear mixed effects model to examine the influence of species, collection temperature, and individual sex on CTmax. All interactions were included in this model. Temperature was centered before analysis. Since CTmax assays were often performed over the course of several days after collection, we included the number of days in the lab as a random effect. 
 
 This primary model was used to estimate acclimation response ratios (ARR) for each species (the species-specific slope of CTmax against collection temperature). 
 The estimates of ARR obtained here were compared against a collection of estimates from a previous data synthesis on copepod thermal limits (JPR piece). 
-For the three diaptomid species (Skistodiaptomus, Leptodiaptomus minutus, and L. sicilis) the residuals from this model were regressed against clutch size to examine potential fitness costs associated with increased thermal limits. Tt was not possible to examine fecundity for the remaining four species, which release their eggs directly into the water column. 
+For the three diaptomid species (Skistodiaptomus, Leptodiaptomus minutus, and L. sicilis) the residuals from this model were regressed against clutch size to examine potential fitness costs associated with increased thermal limits. It was not possible to examine fecundity for the remaining four species, which release their eggs directly into the water column. 
 
-A secondary model for just females examined the effect of species, collection temperature, the presence of developing eggs, the presence of lipid droplets, and the presence of potential pathogens. 
+A secondary model for just females examined the effect on CTmax of species and collection temperature (with their interaction), along with the presence of developing eggs, the presence of lipid droplets, and the presence of potential pathogens. 
 
-We also used two approaches to examine potential drivers of acclimation. 
-First, we examined the correlation between CTmax and a number of predictors (the mean, median, minimum, and maximum temperature; the mean daily minimum, maximum, and range; and the temperature range and variance) calculated for periods of time ranging from 1-60 days before collection. 
+We used two approaches to examine the potential environmental drivers of acclimation. 
+First, we examined the correlation between CTmax and a number of predictors (the overall mean, median, minimum, and maximum temperature; the mean daily minimum, maximum, and range; and the temperature range and variance) calculated for periods of time ranging from 1-60 days before collection. 
 This analysis is largely speculative, so we identified the top predictor-duration combination for each species based on the maximum correlation coefficient. 
-For two species, Leptodiaptomus minutus and L. sicilis, that appear to acclimate rapidly to changes in temperature (i.e. the temperature measured at the time of collection was the best predictor), we also used a distributed lag non-linear model to examine potential timescales of this rapid response (Redana paper). 
+For two species, *Leptodiaptomus minutus* and *L. sicilis*, that appear to acclimate rapidly to changes in temperature (i.e. the temperature measured at the time of collection was the best predictor), we also used a distributed lag non-linear model to examine potential timescales of this rapid response (Redana paper). 
 This approach examined how the magnitude and timing of fluctuations in temperature over the 200 hours prior to collection, based on the USGS continuous temperature record, affected organismal thermal limits. 
 
 # Results
 ## Community composition
 Our weekly sampling method yielded complete coverage of the calanoid community. Over the course of the year, we identified the six species of calanoid copepods commonly observed in Lake Champlain (REF) - *Skistodiaptomus sp.*, *Leptodiaptomus minutus*, *L. sicilis*, *Epischura lacustris*, *Senecella calanoides*, and *Limnocalanus macrurus*. 
 We also collected a single individual of *Osphranticum labronectum* in early October 2023 - to our knowledge, this is the first observation of this species in Lake Champlain. 
-There is some uncertainty regarding the *Skistodiaptomus* species we collected. In Lake Champlain, this has historically been identified as *Skistodiaptomus oregonensis*. A small number of individuals we collected in Summer 2024 were, however, identified as *S. pallidus* via genetic barcoding (Cytochrome oxidase I) as part of a separate project. As we did not preserve material from earlier assays, and it is not possible to differentiate these species in the images taken, we will refer to *Skistodiaptomus sp.* throughout this study. We acknowledge that the data reported is likely for a combination of the two species. A targeted study could resolve whether this represents a species replacement in the community or whether these congeners coexist (or occupy different seasonal niches).
+There is some uncertainty regarding the *Skistodiaptomus* species we collected. 
+In Lake Champlain, this has historically been identified as *Skistodiaptomus oregonensis* (REF). 
+A small number of individuals we collected in Summer 2024 were, however, identified as *S. pallidus* via genetic barcoding (Cytochrome oxidase I) as part of a separate project. 
+As we did not preserve material from earlier assays, and it is not possible to differentiate these species in the images taken, we will refer to *Skistodiaptomus sp.* throughout this study. 
+We acknowledge that the data reported is likely for a combination of the two species. 
+As *S. pallidus* does occur in nearby water bodies (10.1093/plankt/fbab061), a targeted study should resolve whether these congeners coexist or occupy different seasonal niches in Lake Chaplain, or if a species replacement has occurred.
 
 ## Seasonality, Phenology, and Thermal limits
 Surface temperature ranged from `r min(collection_summary$collection_temp)`°C to `r max(collection_summary$collection_temp)`°C during the sampling period, which included `r length(unique(collection_summary$collection_date))` unique collection events (Fig. 1). 
 We measured a total of `r dim(full_data)[1]` individual thermal limits during this period.
-The number of thermal limits varied across species, ranging from a minimum of 42 for *Senecella calanoides* (not including the single *Osphranticum* individual) to a maximum of 482 for *Leptodiaptomus sicilis* (Table 1).
-
+The number of thermal limits varied across species, ranging from a minimum of 42 for *Senecella calanoides* (not including the single *Osphranticum* individual) to a maximum of 482 for *Leptodiaptomus sicilis* (Table 1). While our sampling approach precludes quantitative estimates of abundance, the number of CTmax measurements made for each species does reflect their relative abundance in the samples. 
 
 ```{r, table1, echo = F}
 full_data %>% group_by(sp_name) %>% count() %>% arrange(n) %>% select("Species" = sp_name, "CTmax Measurements" = n) %>% 
@@ -170,9 +173,10 @@ knitr::include_graphics("../Output/Figures/markdown/main-fig-ctmax-timeseries-1.
 
 The calanoid copepod community could be divided into a Summer-Fall group (*E. lacustris*, *Skistodiaptomus sp.*, and *L. minutus*) and a Winter-Spring group (*S. calanoides*, *Limnocalanus macrurus*, and *L. sicilis*) (Fig. 2a).
 The Summer-Fall group is characterized by smaller body size and higher thermal limits, while the Winter-Spring group included species with both small and large body sizes, but lower thermal limits (Fig. 3). 
-*O. labronectum* had a relatively high upper thermal limit (`r round(filter(full_data, sp_name == "Osphranticum labronectum")$ctmax, 1)`°C), and groups with the Summer-Fall group. 
+For one of the winter species, *L. sicilis*, we detected the presence of two distinct size morphs (Supp. Fig. X), which may indicate the transition between different generations in the population (REF). 
+*O. labronectum* had a relatively high upper thermal limit (`r round(filter(full_data, sp_name == "Osphranticum labronectum")$ctmax, 1)`°C), and groups with the Summer-Fall assemblage. 
 With only a single observation, however, this affinity is tentative. 
-Across all species, CTmax increased with increasing collection temperatures (Fig. 2b). 
+Across all species, CTmax increased with increasing collection temperatures (discussed more in the followin section; Fig. 2b). 
 Despite this, warming tolerance (the difference between CTmax and collection temperature) decreased with increasing collection temperatures for all species, suggesting increasing vulnerability at higher temperatures (Fig. 4a).    
 
 ```{r, figure2, echo = F, out.width = "450px"}
@@ -203,9 +207,15 @@ knitr::include_graphics("../Output/Figures/markdown/main-fig-trait-coll-temp-plo
 knitr::include_graphics("../Output/Figures/markdown/main-fig-fecundity-plots-1.png") #Use this when filling in figures from analysis 
 ```
 
+The second model examined the effect of developing eggs, lipid reserves, and visible pathogens on female CTmax. 
+Model selection indicated no change in model fit when the presence of developing eggs and the presence of lipid droplets were removed as factors. 
+Analysis of just the model including species, collection temperature, the presence of visible pathogens, and the interaction between species and collection temperature indicated a significant effect of pathogen presence on female CTmax. 
+Estimated marginal means for the three different pathogen classes indicates variability in the effect on CTmax (Supp. Fig. XXX). 
+There was no change in CTmax in individuals exhibiting the 'spot' phenotype whereas copepods exhibiting phenotypes in the other two classes exhibited a decrease in CTmax of ~2°C, although the effect of the 'other' pathogen class had a large estimated standard error. 
+
 ## Acclimation Responses, Drivers, and Timescales
-While all species exhibited a positive acclimation response (CTmax increased with increases in collection temperature), the species ARR estimates (change in CTmax per degree change in collection temperature) varied in magnitude from `r paste(round(min(arr_data$arr), 2), "to", round(max(arr_data$arr), 2))` (*L. sicilis* and *S. calanoides*, respectively). 
-The magnitude of the ARR estimates tended to decrease with increasing average thermal limits, in line with other estimates from copepods (Fig. 6). 
+While all species exhibited a positive acclimation response (CTmax increased with increases in collection temperature), species-specific ARR estimates (change in CTmax per degree change in collection temperature) varied in magnitude from `r paste(round(min(arr_data$arr), 2), "to", round(max(arr_data$arr), 2))` (*L. sicilis* and *S. calanoides*, respectively). 
+The magnitude of the ARR estimates tended to decrease with increasing average thermal limits, mirroring the pattern observed across other copepod taxa (Fig. 6). 
 Note, the estimates of ARR from Sasaki & Dam 2021 are based on a data synthesis approach, and 1) exclude a single polar genus with a large negative ARR, and 2) examine variation in thermal limits at the genus level. 
 Patterns were, however, qualitatively the same at the population, species, and genus level (Sasaki & Dam 2021).     
 
@@ -220,7 +230,14 @@ For three of the species (*Epischura lacustris*, *Senecella calanoides*, and *Sk
 Minimum temperature was most strongly correlated with CTmax for *Limnocalanus macrurus*. 
 The two *Leptodiaptomus* species had CTmax values that were most strongly correlated with collection temperature. 
 There was also substantial variation in the duration of time that best explained CTmax variation, ranging from an almost 30 day period in *Epischura lacustris* to <1 day in the two *Leptodiaptomus* species.
-We note, however, that for all species except *Senecella calanoides* the difference in correlation coefficients between the best predictor and collection temperature were negligible. 
+We note, however, that for all species except *Senecella calanoides* the difference in correlation coefficients between the best predictor and collection temperature were negligible (Fig. 7). 
+
+The two *Leptodiaptomus* species present in Lake Champlain both appear to adjust CTmax rapidly, with CTmax most closely correlated with temperature at the time of collection. 
+We used a distributed lag non-linear model to examine the potential timescales of this rapid acclimation. 
+For both species, these models indicated acclimation to short-term deviations (spikes or drops in temperature) occurring during the 200 hours leading up to collection, with the change in CTmax depending on both the magnitude of the deviation and the timing.
+Large deviations (+4°C or -4°C) during the two days leading up to collection increased or decreased CTmax by ~0.5°C. 
+The effect of these large deviations diminished as timing prior to collection increased. 
+The effect also decreased as the magnitude of deviation decreased - changes of +/- 1°C had only minor effects on CTmax even when the deviation occurred near the time of collection. 
 
 ```{r, figure7, echo = F, out.width = "300px"}
 #| fig.cap = "Predictor duration and correlation comparison"
@@ -230,8 +247,57 @@ knitr::include_graphics("../Output/Figures/markdown/main-fig-acc-correlations-1.
 
 # Discussion
 
-By capturing the full seasonal temperature cycle, we also maximize the gradient examined, providing a better understanding of how ecological patterns may scale across systems (Gradient and scale paper).
+Here we examined seasonal variation in the upper thermal limits of the community of calanoid copepods from Lake Champlain.
+Samples cover the entire annual temperature range, revealing substantial variation in thermal limits between the seasonal community assemblages. 
+High frequency sampling also enabled us to examine within-species variation, estimating the acclimation capacity of natural populations. 
+Taken together, we show that species most abundant in the winter have lower thermal limits than those present during the summer, and that acclimation has a significant effect on thermal limits across the entire community. 
+Based on measurements under natural conditions, our results reinforce that temporal variation in thermal limits can mediate population responses to warming, and that, at the community level, variation in both thermal limits and acclimation capacity are important factors to consider when assessing ecological vulnerability. 
 
+The fairly intensive sampling regime we employed had clear benefits, capturing data for all species of calanoid copepods previously reported in Lake Champlain, with additional observations of potentially newly introduced species. 
+One of these novel species, *Osphranticum labronectum*, is widely distributed throughout freshwater systems across North America, with a range extending from Central America into Canada (REF). 
+This broad distribution suggests this species is able to tolerate a wide range of conditions, although the degree of local adaptation is unknown. 
+The data point we've collected (for whatever a single measurement is worth), suggests a relatively high upper thermal limit, with a higher CTmax value than all but one other species in Lake Champlain. 
+As lakes in the temperate regions of North America continue to warm, this species may become increasingly abundant at higher latitudes. 
+SOMETHING ABOUT THE ECOLOGY OF O LABRONECTUM
+In addition to the observation of *O. labronectum*, we also found evidence for the presence of *Skistodiaptomus pallidus* in Lake Champlain. 
+*S. pallidus* is comprised of multiple divergent mitochondrial lineages (REF). 
+The lineage we observed is widespread in the Eastern US, and is known to be invasive in freshwater systems in New Zealand, Mexico, and Germany (REF). 
+The *Skistodiaptomus* individuals we examined consistently had the highest CTmax of the Lake Champlain copepods. 
+What proportion (if any) of the *Skistodiaptomus* individuals we examined belong to this species as opposed to the historically dominant *S. oregonensis* we are unable to determine. 
+However, high upper thermal limits may play a role in the success of invasive species (10.1093/conphys/cou045). 
+There are several notable invasive copepod species in other regions (e.g. *Arctodiaptomus dorsalis*, *Pseudodiaptomus marinus*, and *Sinodiaptomus sarsi*; REFS). 
+It would be interesting to compare upper thermal limits for those species with those of the copepod communities in their native and invaded ranges. 
+
+There have been large changes in the abundance of calanoid copepods in Lake Champlain over the past decades (10.1016/j.jglr.2011.08.006). 
+While this may be attributed to the introduction of fish like alewife (REF), a host of other biotic and abiotic factors have also changed over the past decades, including a dramatic decrease in ice cover during the winters (10.1029/2020JG006134), an increase in the frequency of harmful algal blooms (REF), and an increase in lake surface temperature (10.1016/j.jglr.2012.01.002; 10.5772/intechopen.1007276). 
+The response of the calanoid community to warming is unclear, but the patterns we observed here suggest that copepod populations are not directly temperature limited. 
+For example, while thermal limits of the Winter-Spring assemblage of copepods were substantially lower than those of the Summer-Fall assemblage, warming tolerance in the Winter-Spring assemblage (the difference between thermal limits and environmental temperatures) was always greater than 10°C, even during the transition between assemblages. 
+Other environmental factors (food abundance, light levels, predator abundance, etc.) or indirect effects of temperature (e.g. water column stratification and changes in phytoplankton community composition, shifts in competition with summer-dominant species) likely have a larger effect on seasonal succession and as mediators of phenological shifts in this system. 
+
+The disconnect between physiological thermal limits and the season of occurrence may also shape the potential of cold-water species to respond to warming. 
+Seasonal specialization affects the environmental conditions experienced by taxa, which in turn can shape physiological adaptation (von Schmalensee et al. 2023) 
+The modification of the experienced selective environment by behaviors like diel vertical migration (termed the 'Bogert Effect') strongly affects patterns in physiological evolution (REF). 
+The apparent avoidance of seasonal warming paired with the strong acclimation responses of the cold-water species in Lake Champlain may dampen physiological stress in the near future, but increases the long-term vulnerability of this group by inhibiting evolutionary adaptation (REF).
+Whether the Winter species (*S. calanoides* and *L. macrurus* in particular) alter their vertical migration behavior as surface temperatures warm remains to be seen, but it might be expected that seasonal occurrence is compressed as these species spend more time at depth to avoid even sub-lethal exposure to warm surface water. 
+Similarly, as winter water temperatures increase, historically summer-dominant species may expand their seasonal period of occurrence, altering levels of competition for food (in the case of grazers like the diaptomid species) or leading to increased food availability (for the more predatory species like *Limnocalanus* that will predate nauplii (REF)). 
+These interactions between ecological and evolutionary dynamics driven by changing seasonal patterns may have a strong effect on the community dynamics in the lake (REF). 
+SUMMARY HERE
+
+Changes in community composition with warming
+- Across-species variation in thermal limits is largest during the coldest periods of time; larger potential for ecological change driven by differential temperature effects, but also may reflect the reduced selection for upper thermal limits at this point 
+- Relatively high warming tolerance in the summer assemblage, but potential vulnerability of *Leptodiaptomus minutus* and *Epischura lacustris* to heatwaves during the warmest time period. 
+
+
+Acclimation and how it affects our inferences about effects of climate change 
+- Phenological shifts and niche conservatism
+- Thermophilization 
+
+
+Influence of variability on thermal limits and acclimation capacity
+- Non-linear distributed lag models provide testable hypotheses about the time scale of acclimation responses in the two *Leptodiaptomus* species, which can be compared against acclimation in other species. 
+
+
+Next steps - thermal tolerance landscapes; experimental tests of acclimation rates and capacities to determine how other environmental factors influence acclimation (difference between field and lab estimates)
 
 
 \newpage

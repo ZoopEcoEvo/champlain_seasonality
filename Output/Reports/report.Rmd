@@ -990,11 +990,6 @@ sp_ctmax_temp = full_data %>%
   theme(legend.position = "none")
 ```
 
-```{r main-fig-sp-summaries, fig.width=14, fig.height=5}
-ggarrange(sample_dates_plot, sp_ctmax_temp, nrow = 1, 
-          labels = "AUTO")
-```
-
 The interaction between seasonal changes in temperature and the acclimation of thermal limits likely affects vulnerability of each species to warming. Shown below are warming tolerance values for each species, calculated as the difference between individual CTmax and the temperature at the time of collection. All species maintained some degree of buffer between environmental temperatures and upper thermal limits, but *L. minutus* appears to approach its upper thermal limit during the warmest collections during the summer. 
 
 Also shown below is the relationship between fecundity (the number of eggs contained in a clutch) for the three diaptomid species. For the two Leptodiaptomus species, there is no relationship between clutch size and temperature, while there appears to be a general increase in clutch size with temperature in the Skistodiaptomus species. 
@@ -1239,6 +1234,8 @@ reduced_factors_model = lmer(data = model2_data,
                           ctmax~sp_name * collection_temp + pathogen + (1|days_in_lab))
 
 performance::check_model(reduced_factors_model)
+
+car::Anova(reduced_factors_model, type = "III")
 ```
 
 ```{r supp-fig-pathogen-effect, fig.width=8, fig.height=5}
