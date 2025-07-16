@@ -330,7 +330,7 @@ size_feature = full_data %>%
   theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
         legend.position = "none")
 
-ggarrange(ctmax_feature, size_feature, common.legend = T, legend = "none")
+ggarrange(ctmax_feature, size_feature, common.legend = T, labels = "AUTO", legend = "none")
 ```
 
 ```{r sp-occurences, fig.width=7, fig.height=5}
@@ -739,7 +739,7 @@ four_week_plot = four_week_temps %>%
 #         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
 # 
 ggarrange(daily_plot, week_plot, four_week_plot, 
-          common.legend = T, nrow = 1, legend = "bottom")
+          common.legend = T, nrow = 1, labels = "AUTO", legend = "bottom")
 ```
 
 ```{r misc-corr-periods, include = F}
@@ -778,7 +778,7 @@ four_week_temp_circle = ggplot(four_week_doy_data, aes(x = `twenty-eight_day_max
   theme_matt()
 
 ggarrange(one_week_temp_circle, four_week_temp_circle,
-          common.legend = T, legend = "bottom")
+          common.legend = T, labels = "AUTO", legend = "bottom")
 ```
 
 Organisms are unlikely to acclimate instantaneously to changes in temperature. To explore the potential temporal window these copepods are responding to, we examined the correlation between thermal limits and summaries of the thermal environment over different periods of time. For each species (inclusive of all sexes and stages), we examined the correlation between CTmax and one of nine representations of the thermal environment calculated for periods of time from 1 to 60 days before collection. These parameters include the overall maximum, minimum, median, and mean temperature for the period of time, the temperature range and variance during this time, and the mean daily temperature maximum, minimum, and range. We also examined the correlation between CTmax and the temperature recorded at the time of collection. 
@@ -924,7 +924,7 @@ correlation_coef_plot = corr_vals %>%
   theme_matt() + 
   theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
 
-ggarrange(duration_plot, correlation_coef_plot, nrow = 2, legend = "right", 
+ggarrange(duration_plot, correlation_coef_plot, nrow = 2, legend = "right", labels = "AUTO",
           heights = c(0.4, 0.6))
 ```
 
@@ -1024,7 +1024,7 @@ eggs_temp = full_data %>%
   theme(legend.position = "right")
 
 ggarrange(wt_temp, eggs_temp, 
-          common.legend = T, legend = "right")
+          common.legend = T, legend = "right", labels = "AUTO")
 ```
 
 ```{r supp-fig-lsic-morphs, include = F}
@@ -1133,7 +1133,7 @@ ctmax_resids = model_data %>%
 #write.csv(model_coefs, "Output/Data/ARR_data.csv")
 ```
 
-```{r main-fig-ARR-synth-plot, fig.width=8, fig.height=6}
+```{r main-fig-ARR-synth-plot, fig.width=10, fig.height=6}
 arr_combined = synth_arr %>%
   filter(measure == "upper" & mean_lim > 20) %>% 
   select("group" = genus, arr, mean_lim) %>% 
@@ -1353,7 +1353,7 @@ ctmax_fecund_plot = ctmax_resids %>%
   theme_matt() + 
   theme(legend.position = "right")
 
-ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, legend = "right")
+ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, labels = "AUTO", legend = "right")
 ```
 
 Previous studies have shown that the magnitude of the size-fecundity correlation may be environmentally-dependent. This is not visible is the data from these collections. 
@@ -1472,8 +1472,7 @@ dlnm_data = full_data %>%
   filter(sex == "female") %>% 
   filter(sp_name %in% c(
     "Leptodiaptomus sicilis",
-    "Leptodiaptomus minutus",
-    "Skistodiaptomus sp"
+    "Leptodiaptomus minutus"
   )) %>% 
   select(collection_date, collection_temp, sp_name, ctmax) %>% 
   group_by(collection_date, collection_temp, sp_name) %>%  
@@ -1558,16 +1557,20 @@ for(lag_species in sp_list){
                          cumul=F, cen=0, ci.level = 0.95,
                          at=seq(-4,4, 0.1))
   
-  plot(pred_gam_Zs, "contour", main = lag_species)
+  plot(pred_gam_Zs, "contour", main = lag_species, 
+              xlab = "Temperature Deviation (°C)", 
+              ylab = "Hours before collection")
+  
+  
   # 
   # plot(pred_gam_Zs, border = 2, cumul=F,
   #       theta=110,phi=20,ltheta=-80)
   
-  plot(pred_gam_Zs, "slices",
-       var = c(3,-3),
-       lag = c(1,200),
-       col = 2)
-  
+  # plot(pred_gam_Zs, "slices",
+  #      var = c(3,-3),
+  #      lag = c(1,200),
+  #      col = 2)
+  # 
 }
 
 

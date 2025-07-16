@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2025-01-11
+2025-07-16
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -520,7 +520,7 @@ correlation_coef_plot = corr_vals %>%
   theme_matt() + 
   theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
 
-ggarrange(duration_plot, correlation_coef_plot, nrow = 2, legend = "right", 
+ggarrange(duration_plot, correlation_coef_plot, nrow = 2, legend = "right", labels = "AUTO",
           heights = c(0.4, 0.6))
 ```
 
@@ -576,13 +576,6 @@ sp_ctmax_temp = full_data %>%
   theme(legend.position = "none")
 ```
 
-``` r
-ggarrange(sample_dates_plot, sp_ctmax_temp, nrow = 1, 
-          labels = "AUTO")
-```
-
-<img src="../Figures/markdown/main-fig-sp-summaries-1.png" style="display: block; margin: auto;" />
-
 The interaction between seasonal changes in temperature and the
 acclimation of thermal limits likely affects vulnerability of each
 species to warming. Shown below are warming tolerance values for each
@@ -628,7 +621,7 @@ eggs_temp = full_data %>%
   theme(legend.position = "right")
 
 ggarrange(wt_temp, eggs_temp, 
-          common.legend = T, legend = "right")
+          common.legend = T, legend = "right", labels = "AUTO")
 ```
 
 <img src="../Figures/markdown/main-fig-trait-coll-temp-plots-1.png" style="display: block; margin: auto;" />
@@ -661,7 +654,7 @@ minimal.model = lme4::lmer(data = model_data,
                            ctmax ~ sp_name + sex + temp_cent +
                              (1|days_in_lab))
 
-full.model = lme4::lmer(data = filter(model_data, sp_name != "Osphranticum labronectum"),
+full.model = lme4::lmer(data = model_data,
                         ctmax ~ sp_name*sex*temp_cent +
                           (1|days_in_lab))
 
@@ -715,6 +708,8 @@ model_coefs = emmeans::emtrends(full.model, var = "temp_cent", specs = "sp_name"
 
 ctmax_resids = model_data %>% 
   mutate(resids = residuals(full.model))
+
+#write.csv(model_coefs, "Output/Data/ARR_data.csv")
 ```
 
 ``` r
@@ -830,6 +825,22 @@ performance::check_model(reduced_factors_model)
 ```
 
 <img src="../Figures/markdown/supp-fig-model2-performance-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+car::Anova(reduced_factors_model, type = "III")
+## Analysis of Deviance Table (Type III Wald chisquare tests)
+## 
+## Response: ctmax
+##                           Chisq Df Pr(>Chisq)    
+## (Intercept)             570.328  1  < 2.2e-16 ***
+## sp_name                 234.027  5  < 2.2e-16 ***
+## collection_temp          72.589  1  < 2.2e-16 ***
+## pathogen                 35.282  3  1.062e-07 ***
+## sp_name:collection_temp  43.558  5  2.847e-08 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
 
 ``` r
 emmeans::emmeans(reduced_factors_model, spec = "pathogen") %>% emmeans::contrast(method="trt.vs.ctrl",ref="no") %>% plot() + 
@@ -953,7 +964,7 @@ ctmax_fecund_plot = ctmax_resids %>%
   theme_matt() + 
   theme(legend.position = "right")
 
-ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, legend = "right")
+ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, labels = "AUTO", legend = "right")
 ```
 
 <img src="../Figures/markdown/main-fig-fecundity-plots-1.png" style="display: block; margin: auto;" />
@@ -1100,8 +1111,7 @@ dlnm_data = full_data %>%
   filter(sex == "female") %>% 
   filter(sp_name %in% c(
     "Leptodiaptomus sicilis",
-    "Leptodiaptomus minutus",
-    "Skistodiaptomus sp"
+    "Leptodiaptomus minutus"
   )) %>% 
   select(collection_date, collection_temp, sp_name, ctmax) %>% 
   group_by(collection_date, collection_temp, sp_name) %>%  
@@ -1188,20 +1198,24 @@ for(lag_species in sp_list){
                          cumul=F, cen=0, ci.level = 0.95,
                          at=seq(-4,4, 0.1))
   
-  plot(pred_gam_Zs, "contour", main = lag_species)
+  plot(pred_gam_Zs, "contour", main = lag_species, 
+              xlab = "Temperature Deviation (°C)", 
+              ylab = "Hours before collection")
+  
+  
   # 
   # plot(pred_gam_Zs, border = 2, cumul=F,
   #       theta=110,phi=20,ltheta=-80)
   
-  plot(pred_gam_Zs, "slices",
-       var = c(3,-3),
-       lag = c(1,200),
-       col = 2)
-  
+  # plot(pred_gam_Zs, "slices",
+  #      var = c(3,-3),
+  #      lag = c(1,200),
+  #      col = 2)
+  # 
 }
 ```
 
-<img src="../Figures/markdown/supp-fig-dlnm-plot-1.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-2.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-3.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-4.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-5.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-6.png" style="display: block; margin: auto;" />
+<img src="../Figures/markdown/supp-fig-dlnm-plot-1.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-2.png" style="display: block; margin: auto;" />
 
 ``` r
 

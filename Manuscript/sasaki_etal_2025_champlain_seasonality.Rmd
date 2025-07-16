@@ -30,7 +30,7 @@ author:
   - name: Melissa Pespeni
     affiliation: University of Vermont
     location: 
-abstract: "Populations are exposed to temperature variation over different timescales. XYZ. Using a weekly physiological time series we examined seasonal variation in upper thermal limits for the entire community of calanoid copepods in Lake Champlain, a large and highly seasonal lake in North America. Thermal limits varied substantially between species, with winter-dominant species having lower thermal limits than summer-dominant species. Our high-resolution temporal data also revealed substantial but variable acclimation capacities across community members. Over the course of our collections, we also observed the presence of two novel species occurences in Lake Champlain, both of which were notable for their high upper thermal limits. Our results highlight the important role acclimation plays in how shaping populations responses to temperature variation under natural conditions."
+abstract: "Populations are exposed to temperature variation over different timescales. By shaping their relative vulnerability to warming, but acclimation capacity could shape both population and community responses to climate change. Variation in acclimation capacity across community members under natural conditions is rarely measured, however, leading to uncertainties about the role of acclimation. Using a weekly physiological time series we examined seasonal variation in upper thermal limits for the entire community of calanoid copepods in Lake Champlain, a large and highly seasonal lake in North America. Thermal limits varied substantially between species, with winter-dominant species having lower thermal limits than summer-dominant species. Our high-resolution temporal data also revealed substantial but variable acclimation capacities across community members. Over the course of our collections, we also observed the presence of two novel species occurences in Lake Champlain, both of which were notable for their high upper thermal limits. Our results highlight the important role acclimation plays in how shaping populations responses to temperature variation under natural conditions."
 keywords: "Seasonality, Acclimation, Thermal Limits, CTmax, Copepod, Community"
 contact: "**Correspondance**: Matthew_Sasaki@uml.edu" 
 current: "This preprint is current as of `r format(Sys.time(), '%B %d, %Y')`"
@@ -97,7 +97,7 @@ knitr::kable(digits = 3, align = "c",
 ```
 
 ```{r, figure1, echo = F, out.width = "450px"}
-#| fig.cap = "CTmax and surface temperature vs. date"
+#| fig.cap = "Seasonality in CTmax and lake surface temperature. Individual CTmax measurements are shown as points, with the different species shown in different colors. Lake surface temperature from a USGS continuous temperature sensor is shown with the solid line."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-ctmax-timeseries-1.png") 
 ```
@@ -105,13 +105,13 @@ knitr::include_graphics("../Output/Figures/markdown/main-fig-ctmax-timeseries-1.
 The calanoid copepod community could be divided into a Summer-Fall group (*E. lacustris*, *Skistodiaptomus sp.*, and *L. minutus*) and a Winter-Spring group (*S. calanoides*, *Limnocalanus macrurus*, and *L. sicilis*) (Fig. 2a). The Summer-Fall group is characterized by smaller body size and higher thermal limits, while the Winter-Spring group included species with both small and large body sizes, but lower thermal limits (Fig. 3). *O. labronectum* had a relatively high upper thermal limit (`r round(filter(full_data, sp_name == "Osphranticum labronectum")$ctmax, 1)`°C), and groups with the Summer-Fall assemblage. With only a single observation, however, this affinity is tentative. Across all species, CTmax increased with increasing collection temperatures (discussed more in the following section; Fig. 2b). Despite this, warming tolerance (the difference between CTmax and collection temperature) decreased with increasing collection temperatures for all species, suggesting increasing vulnerability at higher temperatures in both assemblages (Fig. 4a).
 
 ```{r, figure2, echo = F, out.width = "450px"}
-#| fig.cap = "Ridge plot of collection frequencies + CTmax vs. Collection Temperature"
+#| fig.cap = "The seasonal occurrence of the six major species of calanoid copepods in Lake Champlain are shown in Panel A as a ridge plot, visualizing the temporal distribution of CTmax measurements for each species. The relationship between CTmax and the surface temperature recorded at the time of collection is shown in Panel B. CTmax values for each species are shown separately, along with a linear regression describing the relationship between measured thermal limits and collection temperature."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-sp-summaries-1.png") #Use this when filling in figures from analysis 
 ```
 
 ```{r, figure3, echo = F, out.width = "300px"}
-#| fig.cap = "CTmax and Size"
+#| fig.cap = "CTmax tends to decrease with increasing size. Mean values for both CTmax and size (measured as prosome length) are shown here for male, female, and juvenile individuals from each species."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-mean-ctmax-mean-size-plot-1.png") #Use this when filling in figures from analysis 
 ```
@@ -119,13 +119,13 @@ knitr::include_graphics("../Output/Figures/markdown/main-fig-mean-ctmax-mean-siz
 Clutch size was not related to collection temperature in the two *Leptodiaptomus* species, but increased with collection temperature in the *Skistodiaptomus sp.* (Fig. 4b). Clutch sizes tended to increase with female body size in *Skistodiaptomus sp.* and *L. minutus*, but not in *L. sicilis* (Fig. 5a). There were no strong relationships between CTmax residuals and clutch size in any species, indicating that increases in thermal limits were not influenced by a trade-off with reproductive output (Fig. 5b).
 
 ```{r, figure4, echo = F, out.width = "400px"}
-#| fig.cap = "Collection temp. regressions"
+#| fig.cap = "Observed values for warming tolerance (Panel A) and egg clutch size (Panel B) plotted against collection temperature. Each point represents an individual measurement, with different species shown in different colors. A regression line is included for each species."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-trait-coll-temp-plots-1.png") #Use this when filling in figures from analysis 
 ```
 
 ```{r, figure5, echo = F, out.width = "200px"}
-#| fig.cap = "Fecundity relationships (CTmax and size)"
+#| fig.cap = "The relationships between fecundity (measured as clutch sizes) against collection temperature (Panel A) and thermal limit residuals (Panel B). CTmax residuals show variation in CTmax after controlling for the effect of collection temperature. Data is only shown for the three egg-sac bearing species in the data set."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-fecundity-plots-1.png") #Use this when filling in figures from analysis 
 ```
@@ -137,7 +137,7 @@ The second model examined the effect of developing eggs, lipid reserves, and vis
 While CTmax increased with increasing collection temperature for all species, species-specific ARR estimates (change in CTmax per degree change in collection temperature) varied in magnitude from `r paste(round(min(arr_data$arr), 2), "to", round(max(arr_data$arr), 2))` (*L. sicilis* and *S. calanoides*, respectively). The magnitude of the ARR estimates tended to decrease with increasing average thermal limits, mirroring the pattern observed across other copepod taxa (Fig. 6). Note, the estimates of ARR from @sasaki2021 are based on a data synthesis approach, and 1) exclude a single polar genus with a large negative ARR, and 2) examine variation in thermal limits at the genus level. Patterns were, however, qualitatively the same at the population, species, and genus level [@sasaki2021].
 
 ```{r, figure6, echo = F, out.width = "300px"}
-#| fig.cap = "Plasticity-tolerance trade-off plot"
+#| fig.cap = "The negative relationship between Acclimation Response Ratios and upper thermal limits. Values from Lake Champlain species measured in this study are shown in color, while values from a recent data synthesis study (Sasaki and Dam 2021) are shown in grey."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-ARR-synth-plot-1.png") #Use this when filling in figures from analysis 
 ```
@@ -147,7 +147,7 @@ The ARR estimates above are based on the relationship between collection tempera
 The two *Leptodiaptomus* species present in Lake Champlain both appear to adjust CTmax rapidly, with CTmax most closely correlated with temperature at the time of collection. We used a distributed lag non-linear model to examine the potential timescales of this rapid acclimation. For both species, these models indicated acclimation to short-term deviations (spikes or drops in temperature) occurring during the 200 hours leading up to collection, with the change in CTmax depending on both the magnitude of the deviation and the timing (Supp. Fig. 5). Large deviations (+4°C or -4°C) during the two days leading up to collection increased or decreased CTmax by \~0.5°C, respectively. The effect of these large deviations diminished as timing prior to collection increased. The effect also decreased as the magnitude of deviation decreased - changes of +/- 1°C had only minor effects on CTmax even when the deviation occurred near the time of collection.
 
 ```{r, figure7, echo = F, out.width = "300px"}
-#| fig.cap = "Predictor duration and correlation comparison"
+#| fig.cap = "Panel A - The duration of potential acclimation periods (days prior to collection) shown for each of the species. Bar fill color indicates the potential cue (collection temperature, maximum temperature during the acclimation period, or minimum temperature during the acclimation period). Panel B - The observed correlation coefficients between the best predictor (white bars) and the temperature measured at the time of collection (black bars)."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-acc-correlations-1.png") #Use this when filling in figures from analysis 
 ```
@@ -179,19 +179,33 @@ The effects of climate change on the distribution of biodiversity across the pla
 ```
 # Supplementary Material
 
-Supp. Fig. 1 - Match between collection temperature and continuous temperature data
+```{r supp-fig-1, echo = F, out.width="80%"}
+#| fig.cap = "Match between collection temperature and continuous temperature data."
 
-Supp. Fig. 2 - Pictures of the different pathogen phenotypes
-
-Supp. Fig. 3 - L. sicilis size distributions
-
-Supp. Fig. 4 - Pathogen effect sizes
-
-Supp. Fig. 5 - Non-linear distributed lag results
-
-```{r supp-fig-1, echo = F}
-#| fig.cap = "CAPTION HERE."
-
-plot(1)
-#knitr::include_graphics("../Output/Figures/_PATH_") #Use this when filling in figures from analysis 
+knitr::include_graphics("../Output/Figures/markdown/supp-fig-temp-acc-1.png") 
 ```
+
+```{r supp-fig-2, echo = F, fig.show="hold", out.width="75%"}
+#| fig.cap = "Pictures of the different pathogen phenotypes"
+
+knitr::include_graphics(c("../Output/Figures/markdown/pathogen_spot.jpeg", "../Output/Figures/markdown/pathogen_cloudy.jpeg"))
+```
+
+```{r supp-fig-3, echo = F, out.width="80%"}
+#| fig.cap = "L. sicilis size distributions"
+
+knitr::include_graphics("../Output/Figures/markdown/supp-fig-lsic-morph-size-1.png") 
+```
+
+```{r supp-fig-4, echo = F, out.width="75%"}
+#| fig.cap = "Pathogen effect sizes"
+
+knitr::include_graphics("../Output/Figures/markdown/supp-fig-pathogen-effect-1.png") 
+```
+
+```{r supp-fig-5, echo = F, fig.show="hold", out.width="75%"}
+#| fig.cap = "Non-linear distributed lag results"
+
+knitr::include_graphics(c("../Output/Figures/markdown/supp-fig-dlnm-plot-1.png", "../Output/Figures/markdown/supp-fig-dlnm-plot-2.png")) #Use this when filling in figures from analysis 
+```
+
