@@ -7,7 +7,7 @@ output:
     citation_package: natbib
   word_document: 
     reference_docx: doc_template.docx
-title: "A physiological time series of thermal limits reveals substantal acclimation capacities under natural conditions in the Lake Champlain calanoid copepod community"
+title: "A physiological time series of thermal limits reveals substantial acclimation capacities under natural conditions in the Lake Champlain calanoid copepod community"
 author:
   - name: Matthew Sasaki
     affiliation: University of Massachusetts Lowell
@@ -30,7 +30,7 @@ author:
   - name: Melissa Pespeni
     affiliation: University of Vermont
     location: 
-abstract: "Populations are exposed to temperature variation over different timescales. By shaping their relative vulnerability to warming, but acclimation capacity could shape both population and community responses to climate change. Variation in acclimation capacity across community members under natural conditions is rarely measured, however, leading to uncertainties about the role of acclimation. Using a weekly physiological time series we examined seasonal variation in upper thermal limits for the entire community of calanoid copepods in Lake Champlain, a large and highly seasonal lake in North America. Thermal limits varied substantially between species, with winter-dominant species having lower thermal limits than summer-dominant species. Our high-resolution temporal data also revealed substantial but variable acclimation capacities across community members. Over the course of our collections, we also observed the presence of two novel species occurences in Lake Champlain, both of which were notable for their high upper thermal limits. Our results highlight the important role acclimation plays in how shaping populations responses to temperature variation under natural conditions."
+abstract: "Populations are exposed to temperature variation over different timescales. By shaping their relative vulnerability to warming, but acclimation capacity could shape both population and community responses to climate change. Variation in acclimation capacity across community members under natural conditions is rarely measured, however, leading to uncertainties about the role of acclimation. Using a weekly physiological time series we examined seasonal variation in upper thermal limits for the entire community of calanoid copepods in Lake Champlain, a large and highly seasonal lake in North America. Thermal limits varied substantially between species, with winter-dominant species having lower thermal limits than summer-dominant species. Our high-resolution temporal data also revealed substantial but variable acclimation capacities across community members. Over the course of our collections, we also observed the presence of two novel species occurrences in Lake Champlain, both of which were notable for their high upper thermal limits. Our results highlight the important role acclimation plays in how shaping populations responses to temperature variation under natural conditions."
 keywords: "Seasonality, Acclimation, Thermal Limits, CTmax, Copepod, Community"
 contact: "**Correspondance**: Matthew_Sasaki@uml.edu" 
 current: "This preprint is current as of `r format(Sys.time(), '%B %d, %Y')`"
@@ -68,7 +68,7 @@ Planktonic copepods are a useful model system for studying variation in thermal 
 
 ### Field Collections and Environmental Data
 
-Plankton were collected within the top 3 meters of Lake Champlain (coordinates: 44.481149, -73.225451) with a combination of horizontal and vertical tows of a 500 um mesh plankton net. These collections were not intended for quantitative measurement of abundance, so the precise volume of water filtered was not tracked. Surface water temperature was measured at the time of collection using a handheld thermometer. Plankton were transferred to an insulated flask and immediately transported to the laboratory at the University of Vermont, where the tow contents were divided among several 500 mL beakers and placed in a benchtop incubator (IVYX Scientic) set to the temperature recorded at the time of collection. The USGS maintains a continuous temperature record at a nearby site (\~650 meters from our sampling site; coordinates: 44.47616017, -73.2215166), which allowed us to examine more fine-scale patterns across the entire collection period for this project (`r paste(range(collection_summary$collection_date), collapse = " to ")`). Temperatures recorded at the time of collection closely matched the maximum daily temperatures from the continuous temperature record (Supp. Fig. 1).
+Plankton were collected within the top three meters of Lake Champlain (coordinates: 44.481149, -73.225451) with a combination of horizontal and vertical tows of a 500 um mesh plankton net. These collections were not intended for quantitative measurement of abundance, so the precise volume of water filtered was not tracked. Surface water temperature was measured at the time of collection using a handheld thermometer. Plankton were transferred to an insulated flask and immediately transported to the laboratory at the University of Vermont, where the tow contents were divided among several 500 mL beakers and placed in a benchtop incubator (IVYX Scientific) set to the temperature recorded at the time of collection. The USGS maintains a continuous temperature record at a nearby site (\~650 meters from our sampling site; coordinates: 44.47616017, -73.2215166), which allowed us to examine more fine-scale patterns across the entire collection period for this project (`r paste(range(collection_summary$collection_date), collapse = " to ")`). Temperatures recorded at the time of collection closely matched the maximum daily temperatures from the continuous temperature record (Supp. Fig. 1).
 
 ### Trait Measurements
 
@@ -186,24 +186,31 @@ knitr::include_graphics("../Output/Figures/markdown/supp-fig-temp-acc-1.png")
 ```
 
 ```{r supp-fig-2, echo = F, fig.show="hold", out.width="75%"}
+#| fig.cap = "A summary of the temperature ramping rates observed over the course of the experiments. Ramping rates were calculated over minute intervals for each assay. Assays were binned into four groups based on their starting temperatures. Ramping rates are plotted over time, with shading representing the number of observations. Bins with a single observation are omitted."
+
+knitr::include_graphics("../Output/Figures/markdown/supp-fig-ramp-rate.png")
+```
+
+
+```{r supp-fig-3, echo = F, fig.show="hold", out.width="75%"}
 #| fig.cap = "Pictures of the different pathogen phenotypes"
 
 knitr::include_graphics(c("../Output/Figures/markdown/pathogen_spot.jpeg", "../Output/Figures/markdown/pathogen_cloudy.jpeg"))
 ```
 
-```{r supp-fig-3, echo = F, out.width="80%"}
+```{r supp-fig-4, echo = F, out.width="80%"}
 #| fig.cap = "L. sicilis size distributions"
 
 knitr::include_graphics("../Output/Figures/markdown/supp-fig-lsic-morph-size-1.png") 
 ```
 
-```{r supp-fig-4, echo = F, out.width="75%"}
+```{r supp-fig-5, echo = F, out.width="75%"}
 #| fig.cap = "Pathogen effect sizes"
 
 knitr::include_graphics("../Output/Figures/markdown/supp-fig-pathogen-effect-1.png") 
 ```
 
-```{r supp-fig-5, echo = F, fig.show="hold", out.width="75%"}
+```{r supp-fig-6, echo = F, fig.show="hold", out.width="75%"}
 #| fig.cap = "Non-linear distributed lag results"
 
 knitr::include_graphics(c("../Output/Figures/markdown/supp-fig-dlnm-plot-1.png", "../Output/Figures/markdown/supp-fig-dlnm-plot-2.png")) #Use this when filling in figures from analysis 

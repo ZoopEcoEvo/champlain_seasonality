@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2025-07-16
+2025-08-22
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -13,6 +13,7 @@ Seasonality in Lake Champlain Copepod Thermal Limits
 - [Other patterns in variation](#other-patterns-in-variation)
 - [Distribution Lag Non-Linear Model (DLNM
   approach)](#distribution-lag-non-linear-model-dlnm-approach)
+- [Miscellany](#miscellany)
 
 ## Copepod Collection
 
@@ -122,10 +123,10 @@ ggplot() +
   #            aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
   geom_point(data = tseries_data, 
              aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
-             size = 1.5, shape = 16, alpha = 0.7,
+             size = 1.5, shape = 16, alpha = 0.9,
              position = position_jitter(width = 0, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
-  guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
+  guides(colour = guide_legend(override.aes = list(alpha = 1, size = 5))) + 
   labs(x = "Date", 
        y = "Temperature (°C)", 
        colour = "Species",
@@ -728,10 +729,10 @@ ggplot(arr_combined, aes(x = mean_lim, y = arr)) +
   geom_smooth(method = "lm", se = F, 
               linewidth = 2, colour = "grey30") + 
   geom_point(data = filter(arr_combined, dataset != "new data"), 
-             size = 4, colour = "grey") + 
+             size = 3, colour = "black", shape = 1, stroke = 1.4) + 
   geom_point(data = filter(arr_combined, dataset == "new data"),
              aes(colour = group), 
-             size = 4) + 
+             size = 4.5) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Thermal Limit", 
        y = "ARR", 
@@ -1216,6 +1217,44 @@ for(lag_species in sp_list){
 ```
 
 <img src="../Figures/markdown/supp-fig-dlnm-plot-1.png" style="display: block; margin: auto;" /><img src="../Figures/markdown/supp-fig-dlnm-plot-2.png" style="display: block; margin: auto;" />
+
+## Miscellany
+
+``` r
+run_starts = temp_record %>% 
+  group_by(run) %>% 
+  filter(minute_passed <= 3) %>% 
+  summarise(start_temp = mean(temp_C)) %>% 
+  mutate("temp_bin" = cut_number(start_temp, 4),
+         temp_bin = case_when(
+           temp_bin == "[2.7,9.26]" ~ "[2.7°C - 9.26°C]",
+           temp_bin == "(9.26,13.9]" ~ "[9.26°C - 13.9°C]",
+           temp_bin == "(13.9,21]" ~ "[13.9°C - 21°C]",
+           temp_bin == "(21,30.5]" ~ "[21°C - 30.5°C]"
+         ))
+
+ramp_record2 = ramp_record %>% 
+  group_by(run, minute_interval) %>% 
+  summarise(mean_ramp = mean(ramp_per_minute)) %>% 
+  ungroup() %>% 
+  left_join(run_starts) %>% 
+  mutate(temp_bin = fct_reorder(temp_bin, start_temp, .fun = mean))
+
+ggplot(ramp_record2, aes(x = minute_interval, y = mean_ramp)) + 
+  facet_wrap(temp_bin~.) + 
+  geom_hline(yintercept = 0.3, colour = "grey") + 
+  geom_hline(yintercept = 0.1, colour = "grey") + 
+  geom_hex(aes(fill = cut(..count.., c(2, 5, 10, 20, 30, 40, 50))),
+           bins = 30) + 
+  scale_fill_viridis_d(name="Number of Observations",
+                       labels = c("<5", "5-9", "10-19", "20-29", "30-39", "40-50"),
+                       option = "mako") + 
+  labs(y = "Ramp Rate (deg. C / min.)",
+       x = "Time into run (minute)") + 
+  theme_matt_facets(base_size = 12)
+```
+
+<img src="../Figures/markdown/supp-fig-ramp-rate-1.png" style="display: block; margin: auto;" />
 
 ``` r
 
