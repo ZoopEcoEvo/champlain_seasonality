@@ -1,6 +1,6 @@
 Seasonality in Lake Champlain Copepod Thermal Limits
 ================
-2025-08-22
+2025-08-23
 
 - [Copepod Collection](#copepod-collection)
 - [Temperature Variability](#temperature-variability)
@@ -105,25 +105,17 @@ tseries_data = full_data %>%
   mutate(sp_name = fct_reorder(sp_name, ctmax, .desc = T))
 
 ggplot() + 
-  # geom_vline(data = unique(select(tseries_data, collection_date)), 
-  #            aes(xintercept = as.Date(collection_date)),
-  #            colour = "grey90",
-  #            linewidth = 1) + 
   geom_line(data = collection_conditions, 
             aes(x = as.Date(date), y = mean_temp),
             colour = "black", 
             linewidth = 1) + 
-  # geom_errorbar(data = species_summaries,
-  #               aes(x = as.Date(collection_date),
-  #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
-  #                   colour = sp_name),
-  #               position = position_dodge(width = 1),
-  #               width = 5, linewidth = 1) +
-  # geom_point(data = adult_summaries, 
-  #            aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
-  geom_point(data = tseries_data, 
+  geom_point(data = filter(tseries_data, species != "osphranticum_labronectum"), 
              aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
              size = 1.5, shape = 16, alpha = 0.9,
+             position = position_jitter(width = 0, height = 0)) + 
+    geom_point(data = filter(tseries_data, species == "osphranticum_labronectum"), 
+             aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
+             size = 2, shape = 16, alpha = 0.9,
              position = position_jitter(width = 0, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
   guides(colour = guide_legend(override.aes = list(alpha = 1, size = 5))) + 

@@ -85,7 +85,7 @@ theme_matt_facets = function(base_size = 18,
 species_cols = c("Leptodiaptomus minutus" = "#ffd029",
                  "Leptodiaptomus minutus juvenile" = "#e3d8af",
                  "Leptodiaptomus minutus male" = "#ffe896",
-                 "Leptodiaptomus sicilis" = "#D86F29",
+                 "Leptodiaptomus sicilis" = "#ff8326",
                  "Leptodiaptomus sicilis male" = "#E28C00",
                  "Skistodiaptomus sp" = "#C5C35A",
                  "Skistodiaptomus sp male" = "#d9d893", 
@@ -100,7 +100,7 @@ species_cols = c("Leptodiaptomus minutus" = "#ffd029",
                  "Leptodora kindti male" = "lightblue3",
                  "Leptodora kindti" = "lightblue4",
                  "Leptodora kindti juvenile" = "lightblue",
-                 "Osphranticum labronectum" = "pink")
+                 "Osphranticum labronectum" = "firebrick3")
 ```
 
 ## Copepod Collection
@@ -185,25 +185,17 @@ tseries_data = full_data %>%
   mutate(sp_name = fct_reorder(sp_name, ctmax, .desc = T))
 
 ggplot() + 
-  # geom_vline(data = unique(select(tseries_data, collection_date)), 
-  #            aes(xintercept = as.Date(collection_date)),
-  #            colour = "grey90",
-  #            linewidth = 1) + 
   geom_line(data = collection_conditions, 
             aes(x = as.Date(date), y = mean_temp),
             colour = "black", 
             linewidth = 1) + 
-  # geom_errorbar(data = species_summaries,
-  #               aes(x = as.Date(collection_date),
-  #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
-  #                   colour = sp_name),
-  #               position = position_dodge(width = 1),
-  #               width = 5, linewidth = 1) +
-  # geom_point(data = adult_summaries, 
-  #            aes(x = as.Date(collection_date), y = mean_ctmax, colour = sp_name, size = sample_size)) + 
-  geom_point(data = tseries_data, 
+  geom_point(data = filter(tseries_data, species != "osphranticum_labronectum"), 
              aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
              size = 1.5, shape = 16, alpha = 0.9,
+             position = position_jitter(width = 0, height = 0)) + 
+    geom_point(data = filter(tseries_data, species == "osphranticum_labronectum"), 
+             aes(x = as.Date(collection_date), y = ctmax, colour = sp_name),
+             size = 2, shape = 16, alpha = 0.9,
              position = position_jitter(width = 0, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
   guides(colour = guide_legend(override.aes = list(alpha = 1, size = 5))) + 
@@ -367,6 +359,14 @@ sample_dates_plot = full_data %>%
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
 ```
+
+```{r main-fig-sp-summaries, fig.width=14, fig.height=5}
+
+ggarrange(sample_dates_plot, sp_ctmax_temp, 
+          nrow = 1, 
+          labels = "AUTO")
+```
+
 
 The samples captured the broad seasonal changes in calanoid copepod community composition in the lake. We note, however, that rare species (e.g. *Senecella* and *Limnocalanus*) were often preferentially sampled, so are over-represented in the data set. 
 
@@ -981,8 +981,8 @@ sp_ctmax_temp = full_data %>%
          sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
   ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
   facet_wrap(sp_name~.) + 
-  geom_smooth(method = "lm", se = F, linewidth = 1.5, colour = "grey30") + 
   geom_point(size = 2, alpha = 0.4) + 
+  geom_smooth(method = "lm", se = F, linewidth = 1.5, colour = "grey30") + 
   labs(x = "Collection Temp. (°C)", 
        y = "CTmax (°C)") + 
   scale_colour_manual(values = species_cols) + 
@@ -1133,6 +1133,29 @@ ctmax_resids = model_data %>%
 #write.csv(model_coefs, "Output/Data/ARR_data.csv")
 ```
 
+```{r, include = F}
+
+morph_comp = full_data %>% 
+  filter(species == "leptodiaptomus_sicilis") %>% 
+   mutate(morph = case_when(
+    size >= 0.89 ~ "Large",
+    size < 0.89 ~ "Small")) %>% 
+  select(collection_date, collection_temp, ctmax, size, morph)
+
+morph.model = lm(data = morph_comp, 
+                 ctmax ~ morph * collection_temp)
+
+#performance::check_model(morph.model)
+
+car::Anova(morph.model)
+
+emmeans::emmeans(morph.model, specs = "morph", at = list(collection_temp = 5)) %>% pairs()
+
+# Individual size is strongly impacted by developmental temperature. The presence of two morphs may reflect two different generations with differing developmental conditions. The large morph is present during the Fall while the smaller morph is present during the Winter and Spring. Individuals that are mature during the Fall were presumably born during the previous Winter/Spring, largely developing during the coldest time of year. These individuals reappear in the community in the late Fall, when water temperatures are still relatively warm - offspring produced by the large morphs during the Fall mature under these warmer conditions, producing the smaller morph. The effects of these developmental differences can also be seen in the thermal limit data - the smaller morph (which developed at higher temperatures) tended to have higher upper thermal limits than the larger morph (which developed at cooler temperatures). This suggests a layered impact of developmental phenotypic plasticity and acclimation, which together produce a 'bump' in L. sicilis CTmax during the coldest period of time. During the Fall and early winter, CTmax measurements were made on individuals from the large morph, with acclimation to cooling driving a decrease in CTmax. Eventually, individuals from the small morph mature and replace the previous generation. This results in an apparent increase in CTmax just before the coldest time of year, driven by the effects of developmental plasticity. Surface waters continue to cool, with acclimation then driving a small decrease in CTmax. 
+
+```
+
+
 ```{r main-fig-ARR-synth-plot, fig.width=9, fig.height=6}
 arr_combined = synth_arr %>%
   filter(measure == "upper" & mean_lim > 20) %>% 
@@ -1152,7 +1175,7 @@ ggplot(arr_combined, aes(x = mean_lim, y = arr)) +
              size = 3, colour = "black", shape = 1, stroke = 1.4) + 
   geom_point(data = filter(arr_combined, dataset == "new data"),
              aes(colour = group), 
-             size = 4.5) + 
+             size = 6) + 
   scale_colour_manual(values = species_cols) + 
   labs(x = "Thermal Limit", 
        y = "ARR", 
