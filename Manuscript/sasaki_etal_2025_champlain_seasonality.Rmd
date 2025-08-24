@@ -137,7 +137,7 @@ The second model examined the effect of developing eggs, lipid reserves, and vis
 CTmax increased with increasing collection temperatures for all species, suggesting widespread effects of acclimation. These acclimation effects varied in magnitude, however, across species. Species-specific ARR estimates, or the change in CTmax per degree change in collection temperature, varied from `r paste(round(min(arr_data$arr), 2), "to", round(max(arr_data$arr), 2))` (*L. sicilis* and *S. calanoides*, respectively). The magnitude of the ARR estimates tended to decrease with increasing average thermal limits (Fig. 6), mirroring the pattern observed across other copepod taxa [@sasaki2021], suggesting a potential trade-off between acclimation capacity and baseline thermal tolerance.
 
 ```{r, figure6, echo = F, out.width = "300px"}
-#| fig.cap = "The negative relationship between Acclimation Response Ratios and upper thermal limits. Values from Lake Champlain species measured in this study are shown in color, while values from a recent data synthesis study (Sasaki and Dam 2021) are shown in grey."
+#| fig.cap = "The negative relationship between Acclimation Response Ratios and upper thermal limits. Values from Lake Champlain species measured in this study are shown in color, while values from a recent data synthesis study (Sasaki and Dam 2021) are shown as empty circles."
 
 knitr::include_graphics("../Output/Figures/markdown/main-fig-ARR-synth-plot-1.png") #Use this when filling in figures from analysis 
 ```
@@ -180,7 +180,7 @@ The effects of climate change on the distribution of biodiversity across the pla
 # Supplementary Material
 
 ```{r supp-fig-1, echo = F, out.width="80%"}
-#| fig.cap = "Match between collection temperature and continuous temperature data."
+#| fig.cap = "Correlation between the temperature measured at the time of collection and the maximum daily temperature recorded by the nearby USGS continuous temperature sensor."
 
 knitr::include_graphics("../Output/Figures/markdown/supp-fig-temp-acc-1.png") 
 ```
@@ -192,25 +192,25 @@ knitr::include_graphics("../Output/Figures/markdown/supp-fig-ramp-rate.png")
 ```
 
 ```{r supp-fig-3, echo = F, fig.show="hold", out.width="75%"}
-#| fig.cap = "Pictures of the different pathogen phenotypes"
+#| fig.cap = "Pictures of the different pathogen phenotypes. Arrows were added to highlight the relevant features."
 
 knitr::include_graphics(c("../Output/Figures/markdown/pathogen_spot.jpeg", "../Output/Figures/markdown/pathogen_cloudy.jpeg"))
 ```
 
 ```{r supp-fig-4, echo = F, out.width="80%"}
-#| fig.cap = "L. sicilis size distributions"
+#| fig.cap = "Leptodiaptomus sicilis size distributions for each sample date, highlighting the presence of the two distinct size morphs throughout the sampling period."
 
 knitr::include_graphics("../Output/Figures/markdown/supp-fig-lsic-morph-size-1.png") 
 ```
 
 ```{r supp-fig-5, echo = F, out.width="75%"}
-#| fig.cap = "Pathogen effect sizes"
+#| fig.cap = "Pathogen effect sizes (i.e. potential effect of the pathogen on CTmax). Contrasts between individuals with and without pathogen phenotypes, based on the estimated marginal means from a mixed effects model examining CTmax as a function of species and collection temperature (with interaction), along with the pathogen phenotype."
 
 knitr::include_graphics("../Output/Figures/markdown/supp-fig-pathogen-effect-1.png") 
 ```
 
 ```{r supp-fig-6, echo = F, fig.show="hold", out.width="75%"}
-#| fig.cap = "Non-linear distributed lag results"
+#| fig.cap = "Response surfaces from the distributed lag non-linear model showing the deviation of CTmax (color of the shading) as a result of temperature deviation (x-axis) and the time before collection (y-axis), for the two Leptodiaptomus species."
 
 knitr::include_graphics(c("../Output/Figures/markdown/supp-fig-dlnm-plot-1.png", "../Output/Figures/markdown/supp-fig-dlnm-plot-2.png")) #Use this when filling in figures from analysis 
 ```
