@@ -82,25 +82,25 @@ theme_matt_facets = function(base_size = 18,
     )
 }
 
-species_cols = c("Leptodiaptomus minutus" = "#ffd029",
+species_cols = c("Leptodiaptomus minutus" = "#ffd94a",
                  "Leptodiaptomus minutus juvenile" = "#e3d8af",
                  "Leptodiaptomus minutus male" = "#ffe896",
-                 "Leptodiaptomus sicilis" = "#ff8326",
+                 "Leptodiaptomus sicilis" = "#ff7f0f",
                  "Leptodiaptomus sicilis male" = "#E28C00",
-                 "Skistodiaptomus sp" = "#C5C35A",
+                 "Skistodiaptomus sp" = "#ccc94d",
                  "Skistodiaptomus sp male" = "#d9d893", 
                  "Skistodiaptomus sp juvenile" = "#e6e6aa", 
                  "Epischura lacustris juvenile" = "plum1", 
-                 "Epischura lacustris male" = "plum3", 
-                 "Epischura lacustris" = "plum4", 
-                 "Limnocalanus macrurus" = "skyblue4", 
+                 "Epischura lacustris male" = "plum2", 
+                 "Epischura lacustris" = "plum3", 
+                 "Limnocalanus macrurus" = "#98d9e4", 
                  "Limnocalanus macrurus male" = "skyblue3", 
                  "Limnocalanus macrurus juvenile" = "skyblue", 
-                 "Senecella calanoides" = "darkseagreen3",
+                 "Senecella calanoides" = "skyblue3",
                  "Leptodora kindti male" = "lightblue3",
                  "Leptodora kindti" = "lightblue4",
                  "Leptodora kindti juvenile" = "lightblue",
-                 "Osphranticum labronectum" = "firebrick3")
+                 "Osphranticum labronectum" = "grey30")
 ```
 
 ## Copepod Collection
@@ -358,6 +358,22 @@ sample_dates_plot = full_data %>%
   #theme_ridges(grid = T) + 
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
+```
+
+```{r fig.width=7, fig.height=5}
+sp_ctmax_temp = full_data %>% 
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  mutate(sp_name = as.factor(sp_name),
+         sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
+  ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
+  facet_wrap(sp_name~.) + 
+  geom_point(size = 2, alpha = 0.4) + 
+  geom_smooth(method = "lm", se = F, linewidth = 1.5, colour = "grey30") + 
+  labs(x = "Collection Temp. (°C)", 
+       y = "CTmax (°C)") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt() + 
+  theme(legend.position = "none")
 ```
 
 ```{r main-fig-sp-summaries, fig.width=14, fig.height=5}
@@ -787,62 +803,64 @@ Organisms are unlikely to acclimate instantaneously to changes in temperature. T
 #We can see that, in general, copepods are responding to proximate cues from the thermal environment, with correlations generally dropping off substantially as acclimation window duration increases. An exception is *Epischura lacustris*, which appears to be responding to maximum temperatures experienced over a 20 day time period. 
 
 ### Pulling predictors and measuring correlations for much finer timescales; 1-56 days
-
-num_colls = full_data %>% 
-  filter(sex == "female") %>% 
-  select(collection_date, sp_name) %>%  
-  distinct() %>%  
-  count(sp_name) %>% 
+# 
+num_colls = full_data %>%
+  filter(sex == "female") %>%
+  select(collection_date, sp_name) %>%
+  distinct() %>%
+  count(sp_name) %>%
   filter(n >= 5)
+# 
+# corr_vals = data.frame()
+# 
+# dur_vals = c(1:50)
+# for(i in dur_vals){
+#   
+#   duration_temps = get_predictors(daily_values = daily_temp_data, 
+#                                   raw_temp = select(temp_data, -hour), 
+#                                   n_days = i) %>% 
+#     filter(date %in% as_date(unique(full_data$collection_date)))
+#   
+#   corr_data = full_data %>%
+#     select(sp_name, collection_date, collection_temp, sex, ctmax) %>% 
+#     filter(sp_name %in% num_colls$sp_name) %>% 
+#     #filter(sex == "female") %>% 
+#     mutate(collection_date = as.Date(collection_date)) %>% 
+#     inner_join(duration_temps, join_by(collection_date == date)) %>% 
+#     pivot_longer(cols = c(collection_temp, contains("day_")),
+#                  values_to = "value", 
+#                  names_to = "predictor") %>%  
+#     group_by(sp_name, predictor) %>% 
+#     summarise(correlation = cor.test(ctmax, value)$estimate,
+#               p.value = cor.test(ctmax, value)$p.value,
+#               ci_low = cor.test(ctmax, value)$conf.int[1],
+#               ci_high = cor.test(ctmax, value)$conf.int[2],
+#               .groups = "keep") %>% 
+#     filter(predictor != "collection_temp") %>% 
+#     mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
+#     separate(predictor, "_day_", into = c(NA, "parameter")) %>% 
+#     mutate(duration = i)
+#   
+#   corr_vals = bind_rows(corr_vals, corr_data)
+# }
 
-corr_vals = data.frame()
+# coll_corr = full_data %>%
+#   filter(sp_name %in% num_colls$sp_name) %>% 
+#   filter(sex == "female") %>% 
+#   group_by(sp_name) %>% 
+#   summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
+#             p.value = cor.test(ctmax, collection_temp)$p.value,
+#             ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
+#             ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
+#   mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
+#   mutate(duration = 0,
+#          parameter = "coll_temp")
+# 
+# corr_vals = corr_vals %>%  
+#   mutate(duration = as.numeric(duration)) %>% 
+#   bind_rows(coll_corr)
 
-dur_vals = c(1:50)
-for(i in dur_vals){
-  
-  duration_temps = get_predictors(daily_values = daily_temp_data, 
-                                  raw_temp = select(temp_data, -hour), 
-                                  n_days = i) %>% 
-    filter(date %in% as_date(unique(full_data$collection_date)))
-  
-  corr_data = full_data %>%
-    select(sp_name, collection_date, collection_temp, sex, ctmax) %>% 
-    filter(sp_name %in% num_colls$sp_name) %>% 
-    #filter(sex == "female") %>% 
-    mutate(collection_date = as.Date(collection_date)) %>% 
-    inner_join(duration_temps, join_by(collection_date == date)) %>% 
-    pivot_longer(cols = c(collection_temp, contains("day_")),
-                 values_to = "value", 
-                 names_to = "predictor") %>%  
-    group_by(sp_name, predictor) %>% 
-    summarise(correlation = cor.test(ctmax, value)$estimate,
-              p.value = cor.test(ctmax, value)$p.value,
-              ci_low = cor.test(ctmax, value)$conf.int[1],
-              ci_high = cor.test(ctmax, value)$conf.int[2],
-              .groups = "keep") %>% 
-    filter(predictor != "collection_temp") %>% 
-    mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
-    separate(predictor, "_day_", into = c(NA, "parameter")) %>% 
-    mutate(duration = i)
-  
-  corr_vals = bind_rows(corr_vals, corr_data)
-}
-
-coll_corr = full_data %>%
-  filter(sp_name %in% num_colls$sp_name) %>% 
-  filter(sex == "female") %>% 
-  group_by(sp_name) %>% 
-  summarise(correlation = cor.test(ctmax, collection_temp)$estimate,
-            p.value = cor.test(ctmax, collection_temp)$p.value,
-            ci_low = cor.test(ctmax, collection_temp)$conf.int[1],
-            ci_high = cor.test(ctmax, collection_temp)$conf.int[2]) %>% 
-  mutate(sig = ifelse(p.value <0.05, "Sig.", "Non Sig.")) %>% 
-  mutate(duration = 0,
-         parameter = "coll_temp")
-
-corr_vals = corr_vals %>%  
-  mutate(duration = as.numeric(duration)) %>% 
-  bind_rows(coll_corr)
+# write.csv(corr_vals, file = "/Users/matthewsasaki/Desktop/Project_Folders/champlain_seasonality/Output/Data/corr_vals.csv", row.names = F)
 
 ```
 
@@ -973,22 +991,6 @@ One of the main aims of this project is to examine the patterns and processes dr
 ### Variation with temperature 
 
 We expect one of the primary drivers of copepod thermal limits to be temperature, as individuals acclimate to seasonal changes. Shown below are the seasonal patterns of when copepods were included in CTmax measurements (a proxy for the season of occurrence), and thermal limits for each species plotted against the temperature at the time of collection. We generally see an increase in thermal limits with increasing collection temperature.
-
-```{r fig.width=7, fig.height=5}
-sp_ctmax_temp = full_data %>% 
-  filter(sp_name != "Osphranticum labronectum") %>% 
-  mutate(sp_name = as.factor(sp_name),
-         sp_name = fct_reorder(sp_name, ctmax, .desc = T)) %>% 
-  ggplot(aes(x = collection_temp, y = ctmax, colour = sp_name)) + 
-  facet_wrap(sp_name~.) + 
-  geom_point(size = 2, alpha = 0.4) + 
-  geom_smooth(method = "lm", se = F, linewidth = 1.5, colour = "grey30") + 
-  labs(x = "Collection Temp. (°C)", 
-       y = "CTmax (°C)") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt() + 
-  theme(legend.position = "none")
-```
 
 The interaction between seasonal changes in temperature and the acclimation of thermal limits likely affects vulnerability of each species to warming. Shown below are warming tolerance values for each species, calculated as the difference between individual CTmax and the temperature at the time of collection. All species maintained some degree of buffer between environmental temperatures and upper thermal limits, but *L. minutus* appears to approach its upper thermal limit during the warmest collections during the summer. 
 
@@ -1627,7 +1629,7 @@ ggplot(ramp_record2, aes(x = minute_interval, y = mean_ramp)) +
   facet_wrap(temp_bin~.) + 
   geom_hline(yintercept = 0.3, colour = "grey") + 
   geom_hline(yintercept = 0.1, colour = "grey") + 
-  geom_hex(aes(fill = cut(..count.., c(2, 5, 10, 20, 30, 40, 50))),
+  geom_hex(aes(fill = cut(after_stat(count), c(2, 5, 10, 20, 30, 40, 50))),
            bins = 30) + 
   scale_fill_viridis_d(name="Number of Observations",
                        labels = c("<5", "5-9", "10-19", "20-29", "30-39", "40-50"),
@@ -1719,7 +1721,8 @@ hind1_data %>%
   geom_hline(yintercept = 5, 
              colour = "grey") + 
   geom_point(alpha = 0.5) +
-  geom_smooth(se = F) + 
+  geom_smooth(data = filter(hind1_data, species %in% c("Senecella calanoides", "Limnocalanus macrurus", "Leptodiaptomus sicilis")), se = F) + 
+  coord_cartesian(xlim = c(120,300), ylim = c(-6, 5.1)) + 
   labs(x = "Day of Year", 
        y = "Predicted Warming Tolerance \n(°C Above Daily Max)") + 
   theme_matt() + 
@@ -1757,13 +1760,13 @@ hind2_data = hind_temp_data %>%
 
 # table(hind2_data$species)
 hind2_data %>%  
-  filter(lim_diff <= 5) %>%  
   ggplot(aes(x = doy, y = lim_diff, colour = species)) +
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = 5, 
              colour = "grey") + 
   geom_point(alpha = 0.5) +
   geom_smooth() + 
+  coord_cartesian(xlim = c(120,300), ylim = c(0, 5.1)) + 
   labs(x = "Day of Year", 
        y = "Predicted Warming Tolerance \n(°C Above Daily Max)") + 
   theme_matt() + 

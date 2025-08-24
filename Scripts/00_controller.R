@@ -54,6 +54,8 @@ temp_data = read.csv(file = "Output/Data/champlain_temps.csv") %>%
 lag_temps = read.csv(file = "Output/Data/lag_temps.csv") %>% 
   mutate(date = lubridate::as_date(date))
 
+corr_vals = read.csv(file = "Output/Data/corr_vals.csv")
+
 # hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
 #   mutate(date = as_date(date))
 
