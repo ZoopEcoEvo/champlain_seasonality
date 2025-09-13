@@ -887,8 +887,6 @@ This table contains the top three factors for each species (based on correlation
 
 ```{r predictor-correlations, include = F}
 corr_vals %>%  
-  filter(sig == "Sig.") %>% 
-  drop_na(correlation) %>% 
   group_by(sp_name) %>%
   arrange(desc(correlation)) %>% 
   slice_head(n = 3) %>% 
@@ -900,8 +898,6 @@ Shown here is a graphical summary of the duration of the best predictors for eac
 
 ```{r main-fig-acc-durations}
 duration_plot = corr_vals %>%  
-  filter(sig == "Sig.") %>% 
-  drop_na(correlation) %>% 
   group_by(sp_name) %>%
   arrange(desc(correlation)) %>% 
   slice_head(n = 1) %>% 
@@ -1655,14 +1651,16 @@ if(predict_vuln == F){
 ```
 
 ## Hindcasting vulnerability with different acclimation scenarios
-Using the observed thermal limit data, we can produce a hindcast of thermal stress for Lake Champlain copepods. For these initial assays, we will define thermal stress as any time when maximum daily water temperature is within 5°C of copepod CTmax or higher (i.e. warming tolerance is less than 5°C). We will use three different scenarios: 1) each species has a unique but fixed thermal limit (average measured CTmax), 2) species have unique thermal limits and are able to acclimate (constant ARR across all species used to predict CTmax based on average daily temperatures), and 3) species have unique thermal limits and species-specific acclimation (CTmax predicted using whichever environmental factor and duration is the strongest candidate for driving acclimation - from the correlation analysis). In all cases, data is filtered to just thermal limits of adult females. 
+Using the observed thermal limit data, we can produce a hindcast of thermal stress for Lake Champlain copepods. We will use three different scenarios: 1) each species has a unique but fixed thermal limit (average female CTmax), 2) species have unique thermal limits and are able to acclimate (constant ARR across all species used to predict CTmax based on average daily temperatures), and 3) species have unique thermal limits and species-specific acclimation (CTmax predicted using whichever environmental factor and duration is the strongest candidate for driving acclimation from the correlation analysis). 
+
+Temperature data spans from 2014-10-01 to 2025-01-09. 
 
 ### Scenario 1
 ```{r}
 mean_ctmax = full_data %>% 
   filter(sex == "female") %>%  
   group_by(sp_name) %>% 
-  summarize("mean_ctmax" = mean(ctmax)) %>% 
+  summarize("mean_ctmax" = round(mean(ctmax), digits = 2)) %>% 
   arrange(mean_ctmax)
 
 knitr::kable(mean_ctmax)
@@ -1687,20 +1685,9 @@ knitr::kable(mean_ctmax)
 #   theme_matt()
 ```
 
-In the simplest scenario, species thermal limits are static through time, represented by the average CTmax of adult female copepods. In this scenario, only three of the seven observed species are exposed to thermal stress (temperatures within 5°C of CTmax). Temperatures approached the thermal limit of *Leptodiaptomus sicilis* on a handful of days. By contrast, *Senecella calanoides* and *Limnocalanus macrurus* were both exposed to substantial thermal stress throughout a large portion of the year, likely explaining why these species are absent from the community for the summer and fall periods. 
+In the simplest scenario, species thermal limits are static through time, represented by the average CTmax of adult female copepods. Temperatures approached the thermal limit of *Leptodiaptomus sicilis* on a handful of days. By contrast, *Senecella calanoides* and *Limnocalanus macrurus* were both exposed to substantial thermal stress throughout a large portion of the year, likely explaining why these species are absent from the community for the summer and fall periods. 
 
 ```{r supp-fig-hind1_scenario, fig.width=10, fig.height=5}
-hind1_data = hind_temp_data %>% 
-  group_by(date) %>% 
-  summarize("daily_max" = max(temp),
-            "daily_mean" = mean(temp),) %>% 
-  bind_cols(pivot_wider(mean_ctmax, names_from = sp_name, values_from = mean_ctmax)) %>%  
-  pivot_longer(cols = c(-date, -daily_max, -daily_mean),
-               names_to = "species", 
-               values_to = "mean_ctmax") %>%  
-  mutate(lim_diff = mean_ctmax - daily_max) %>%  
-  mutate(doy = yday(date),
-         "method" = "No_acclimation")
 
 hind_daily_temp_data = hind_temp_data %>%
   ungroup() %>% 
@@ -1712,65 +1699,75 @@ hind_daily_temp_data = hind_temp_data %>%
             max_temp = max(temp)) %>% 
   mutate("range_temp" = max_temp - min_temp)
 
+hind1_data = hind_daily_temp_data %>% 
+  select(date, mean_temp, max_temp) %>% 
+  bind_cols(pivot_wider(mean_ctmax, names_from = sp_name, values_from = mean_ctmax)) %>%  
+  pivot_longer(cols = c(-date, -max_temp, -mean_temp),
+               names_to = "species", 
+               values_to = "mean_ctmax") %>%  
+  mutate(warming_tol = mean_ctmax - max_temp, 
+         doy = yday(date),
+         "method" = "No acclimation", 
+         species = fct_reorder(species, mean_ctmax, .fun = "mean")) %>% 
+  select(date, doy, "env_temp" = mean_temp, max_temp, species, mean_ctmax, warming_tol, method)
+
 #table(hind1_data$species)
 
 hind1_data %>% 
-  filter(lim_diff <= 5) %>%  
-  ggplot(aes(x = doy, y = lim_diff, colour = species)) +
+  ggplot(aes(x = date, y = warming_tol, colour = species)) +
+  facet_wrap(.~species, nrow = 7) + 
   geom_hline(yintercept = 0) + 
-  geom_hline(yintercept = 5, 
-             colour = "grey") + 
   geom_point(alpha = 0.5) +
-  geom_smooth(data = filter(hind1_data, species %in% c("Senecella calanoides", "Limnocalanus macrurus", "Leptodiaptomus sicilis")), se = F) + 
-  coord_cartesian(xlim = c(120,300), ylim = c(-6, 5.1)) + 
+  scale_colour_manual(values = species_cols) + 
   labs(x = "Day of Year", 
        y = "Predicted Warming Tolerance \n(°C Above Daily Max)") + 
   theme_matt() + 
-  theme(legend.position = "right")
+  theme(legend.position = "none")
 ```
 
 ### Scenario 2
 In the second scenario, thermal limits vary within and between species. A simple model is used to predict species thermal limits based on mean daily temperature (CTmax as a function of species and collection temperature, but without the interaction between these two factors). These predicted thermal limits are then compared against the maximum daily temperature to estimate thermal stress, as in Scenario 1. Including this simple form of acclimation in the model reduced the degree of thermal stress for each species, eliminating it entirely for *Leptodiaptomus sicilis*. Note that the magnitude of the predicted stress is  low enough that removing the 5°C buffer around the predicted thermal limits would actually limit predicted thermal stress to just a few days for *Senecella calanoides*. 
 
 ```{r supp-fig-hind2_scenario, fig.height=5, fig.width=10}
-hindcast_model1 = lm(data = filter(full_data, sex == "female"),
-                     ctmax ~ collection_temp + sp_name)
+  
+hind2_model = lm(data = full_data %>%  
+  filter(sex == "female") %>% 
+  select("env_temp" = collection_temp, sp_name, ctmax),
+                     ctmax ~ env_temp + sp_name)
 
-hind2_data = hind_temp_data %>% 
-  group_by(date) %>% 
-  summarize("collection_temp" = mean(temp),
-            "daily_max" = max(temp)) %>% 
-  bind_cols(
-    pivot_wider(mean_ctmax, 
-                names_from = sp_name, 
-                values_from = mean_ctmax)) %>% 
-  pivot_longer(cols = c(-date, -daily_max, -collection_temp),
-               names_to = "sp_name", 
-               values_to = "mean_ctmax") %>% 
-  select(-mean_ctmax) %>% 
-  mutate("pred_ctmax" = predict.lm (hindcast_model1, newdata = .)) %>% 
-  select(date, "daily_mean" = collection_temp, daily_max, "species" = sp_name, pred_ctmax) %>% 
-  mutate(lim_diff = pred_ctmax - daily_max) %>% 
-  #filter(lim_diff <= 0) %>%  
+
+hind2_data = tibble()
+
+for(i in 1:dim(mean_ctmax)[1]){
+
+  sp_data = hind_daily_temp_data %>% 
+    select(date, "env_temp" = mean_temp, max_temp) %>% 
+    mutate(sp_name = mean_ctmax$sp_name[i])
+  
+  hind2_data = bind_rows(hind2_data, sp_data)
+  
+}
+
+hind2_data = hind2_data %>% 
+  mutate("pred_ctmax" = predict.lm(hind2_model, newdata = hind2_data),
+         warming_tol = pred_ctmax - max_temp) %>% 
   mutate(doy = yday(date),
-         "method" = "Constant_acclimation")
+         "method" = "Shared acclimation",
+         species = fct_reorder(sp_name, pred_ctmax, .fun = "mean")) %>% 
+  select(date, doy, env_temp, max_temp, species, pred_ctmax, warming_tol, method)
 
-# ggplot(hind2_data, aes(x = daily_mean, y = pred_ctmax, colour = species)) +
-#   geom_smooth(method = "lm") 
 
-# table(hind2_data$species)
-hind2_data %>%  
-  ggplot(aes(x = doy, y = lim_diff, colour = species)) +
+hind2_data %>% 
+  ggplot(aes(x = date, y = warming_tol, colour = species)) +
+  facet_wrap(.~species, nrow = 7) + 
   geom_hline(yintercept = 0) + 
-  geom_hline(yintercept = 5, 
-             colour = "grey") + 
   geom_point(alpha = 0.5) +
-  geom_smooth() + 
-  coord_cartesian(xlim = c(120,300), ylim = c(0, 5.1)) + 
+  scale_colour_manual(values = species_cols) + 
   labs(x = "Day of Year", 
        y = "Predicted Warming Tolerance \n(°C Above Daily Max)") + 
   theme_matt() + 
-  theme(legend.position = "right")
+  theme(legend.position = "none")
+
 ```
 
 ### Scenario 3
@@ -1778,8 +1775,6 @@ The final scenario allows the environmental variable used to predict CTmax to va
 
 ```{r}
 hind_preds = corr_vals %>%  
-  filter(sig == "Sig.") %>% 
-  drop_na(correlation) %>% 
   group_by(sp_name) %>%
   arrange(desc(correlation)) %>% 
   slice_head(n = 1) %>% 
@@ -1789,24 +1784,25 @@ knitr::kable(hind_preds, align = "c")
 ```
 
 ```{r}
-hind3_data = hind2_data %>% # Contains data for species that won't change from scenario 2
-  filter(!(species %in% corr_vals$sp_name))
 
 preds_to_pull = hind_preds %>%  
   select(Species, Predictor, Duration) 
+
+
+hind3_data = tibble()
 
 for(i in 1:length(preds_to_pull$Species)){
   
   duration = preds_to_pull$Duration[i]
   
-  if(duration == 0){ #The prior day temperature metrics should be used
+  if(duration == 0){ # Will use the data from the 'collection date'
     
-    predictors = hind_daily_temp_data %>% 
-      mutate(date = date) 
+    predictors = hind_daily_temp_data
     
     parameter = "mean_temp" #using mean temperature as a proxy for collection temp
     
     model_data = full_data %>%
+      select(collection_date, collection_temp, sp_name, ctmax, sex) %>% 
       filter(sp_name %in% preds_to_pull$Species[i]) %>% 
       filter(sex == "female") %>% 
       mutate(collection_date = as_date(collection_date)) %>% 
@@ -1824,8 +1820,10 @@ for(i in 1:length(preds_to_pull$Species)){
         inner_join(hind_daily_temp_data, by = c("date")) %>% 
         mutate("species" = preds_to_pull$Species[i],
                "doy" = yday(date),
-               lim_diff = pred_ctmax - max_temp) %>% 
-        select(date, daily_mean = mean_temp, daily_max = max_temp, species, pred_ctmax, lim_diff, doy)
+               "warming_tol" = pred_ctmax - max_temp,
+               "param" = parameter, 
+               "duration" = duration) %>% 
+        select(date, doy, species, param, duration, pred_ctmax, warming_tol)
       
       hind3_data = bind_rows(hind3_data, sp_data)
     }else{
@@ -1861,8 +1859,11 @@ for(i in 1:length(preds_to_pull$Species)){
         inner_join(hind_daily_temp_data, by = c("date")) %>% 
         mutate("species" = preds_to_pull$Species[i],
                "doy" = yday(date),
-               lim_diff = pred_ctmax - max_temp) %>% 
-        select(date, daily_mean = mean_temp, daily_max = max_temp, species, pred_ctmax, lim_diff, doy)
+               "warming_tol" = pred_ctmax - max_temp,
+               "param" = parameter, 
+               "duration" = duration) %>% 
+        select(date, doy, species, param, duration, pred_ctmax, warming_tol)
+      
       
       hind3_data = bind_rows(hind3_data, sp_data)
       
@@ -1875,33 +1876,32 @@ for(i in 1:length(preds_to_pull$Species)){
 
 
 hind3_data = hind3_data %>% 
-  mutate("method" = "Variable_acclimation")
+  mutate("method" = "Species-specific acc.",
+         species = fct_reorder(species, pred_ctmax, .fun = "mean")) 
+
+
+hind3_data %>% 
+  ggplot(aes(x = date, y = warming_tol, colour = species)) +
+  facet_wrap(.~species, nrow = 7) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(alpha = 0.5) +
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Day of Year", 
+       y = "Predicted Warming Tolerance \n(°C Above Daily Max)") + 
+  theme_matt() + 
+  theme(legend.position = "none")
+
+
 ```
 
 This third approach did not affect the predicted patterns in *Limnocalanus* or *Senecella* (neither species has been observed in enough collections to estimate the effects of different environmental factors). Changing the acclimation approach did affect patterns in thermal limits in the other species though. The figure below shows how predicted warming tolerance varies over the year in the seven species, based on the three different prediction methods. In general, constant thermal limits (the 'no acclimation' method) resulted in larger warming tolerance during the winter and lower warming tolerance during the summer, although this effect was small in most species.     
+
 ```{r supp-fig-hind_cast_summary, fig.width=13, fig.height=10}
-synthesis = bind_rows(
-  select(hind1_data, date, doy, daily_mean, daily_max, species, "pred_ctmax" = mean_ctmax, lim_diff, method),
-  select(hind2_data, date, doy, daily_mean, daily_max,  species, pred_ctmax, lim_diff, method),
-  select(hind3_data, date, doy, daily_mean, daily_max,  species, pred_ctmax, lim_diff, method)) %>% 
-  mutate(method = fct_relevel(method, "No_acclimation", "Constant_acclimation", "Variable_acclimation")) %>% 
-  filter(!(species == "Osphranticum labronectum" & method == "Variable_acclimation"))
+synthesis = bind_rows(hind1_data, hind2_data, hind3_data) %>% 
+  select(date, doy, species, warming_tol, method) %>% 
+  mutate(method = fct_relevel(method, "No acclimation", "Shared acclimation", "Species-specific acc.")) 
 
-climatology = synthesis %>% 
-  group_by(species, doy, method) %>%  
-  summarise("mean_diff" = mean(lim_diff),
-            "min_diff" = min(lim_diff),
-            "max_diff" = max(lim_diff)) %>% 
-  mutate(method = fct_relevel(method, "No_acclimation", "Constant_acclimation", "Variable_acclimation"))
-
-acc_effects = synthesis %>% 
-  pivot_wider(id_cols = c(date, species, doy), 
-              names_from = method, 
-              values_from = lim_diff) %>%  
-  mutate("const_acc_effect" = Constant_acclimation - No_acclimation,
-         "var_acc_effect" = Variable_acclimation - No_acclimation)
-
-ggplot(synthesis, aes(x = doy, y = lim_diff, colour = method)) + 
+ggplot(synthesis, aes(x = doy, y = warming_tol, colour = method)) + 
   facet_wrap(species~.) + 
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = 5, colour = "grey") + 
@@ -1913,26 +1913,22 @@ ggplot(synthesis, aes(x = doy, y = lim_diff, colour = method)) +
   theme(strip.text.x.top = element_text(size = 10))
 ```
 
-```{r supp-fig-acc_scenario_effects, fig.width=9, fig.height=7}
+```{r main-fig-wt-hindcast-comparison, fig.width=9, fig.height=7}
 wt_hindcast_summary = synthesis %>%  
   mutate("year" = year(date)) %>% 
   group_by(species, year, method) %>% 
-  summarise("min_wt" = min(lim_diff),
-            "max_wt" = max(lim_diff)) %>% 
-  pivot_longer(cols = c(min_wt, max_wt), 
-               names_to = "metric", 
-               values_to = "wt") %>% 
-  group_by(species, method, metric) %>% 
-  summarise("mean_wt" = mean(wt))
+  summarise("min_wt" = min(warming_tol)) %>% 
+  group_by(species, method) %>% 
+  summarise("mean_wt" = mean(min_wt), 
+            "se_wt" = sd(min_wt) / sqrt(n()))
 
 wt_hindcast_summary %>% 
-  filter(metric == "min_wt") %>% 
 ggplot(aes(x = method, y = mean_wt, group = species, colour = species)) + 
-  #facet_wrap(.~metric, scales = "free_y") + 
   geom_hline(yintercept = 0) + 
-  geom_hline(yintercept = 5) + 
   geom_line(linewidth = 2) + 
   geom_point(size = 3) + 
+  geom_errorbar(aes(ymin = mean_wt - se_wt, ymax = mean_wt + se_wt),
+                linewidth = 1.3, width = 0.1) + 
   labs(x = "Scenario", 
        y = "Mean Yearly Minimum WT (°C)") + 
   scale_color_manual(values = species_cols) + 

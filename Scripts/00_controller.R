@@ -18,7 +18,7 @@ process_all_data = F #Runs data analysis
 process_sequences = F #Analyzes the COI sequence data
 make_report = F #Runs project summary
 predict_vuln = F #Runs the thermal stress hindcast portion: This can be slow! 
-knit_manuscript = T #Compiles manuscript draft
+knit_manuscript = F #Compiles manuscript draft
 
 ############################
 ### Read in the RAW data ###
@@ -56,8 +56,8 @@ lag_temps = read.csv(file = "Output/Data/lag_temps.csv") %>%
 
 corr_vals = read.csv(file = "Output/Data/corr_vals.csv")
 
-# hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%  
-#   mutate(date = as_date(date))
+hind_temp_data = read.csv(file = "Output/Data/hindcast_temps.csv") %>%
+  mutate(date = as_date(date))
 
 synth_arr = read.csv(file = "Raw_data/genus_w_arr.csv") %>% 
   select(-X)
