@@ -906,17 +906,18 @@ duration_plot = corr_vals %>%
          sp_name = fct_reorder(sp_name, duration, .fun = mean, .desc = T)) %>% 
   arrange(sp_name) %>% 
   select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, num) %>% 
+  mutate(Predictor = if_else(Predictor == "coll_temp", "collection temp.", Predictor)) %>% 
   ggplot(aes(x = Species, y = Duration, fill = Predictor, group = num)) + 
   geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.6),
            colour = "black") + 
-  scale_fill_manual(values = c("coll_temp" = "black", "max" = "white", "min" = "grey")) + 
+  scale_fill_manual(values = c("collection temp." = "black", "max" = "white", "min" = "grey")) + 
   labs(x = "", 
        y = "Duration \n(days)") + 
   theme_matt() + 
   theme(axis.text.x = element_blank())
 ```
 
-```{r main-fig-acc-correlations, fig.width=6, fig.height=8}
+```{r main-fig-acc-correlations, fig.width=6.5, fig.height=8}
 correlation_coef_plot = corr_vals %>%  
   filter(sig == "Sig." | parameter == "coll_temp") %>% 
   drop_na(correlation) %>% 
@@ -927,13 +928,15 @@ correlation_coef_plot = corr_vals %>%
   select("Species" = sp_name, "Predictor" = parameter, "Duration" = duration, "Correlation" = correlation, num) %>% 
   mutate(Predictor = if_else(Predictor == "coll_temp", Predictor, "best")) %>% 
   ungroup() %>% 
-  mutate(Species = fct_reorder(Species, Duration, .fun = max, .desc = T)) %>% 
+  mutate(Species = fct_reorder(Species, Duration, .fun = max, .desc = T),
+         Predictor = if_else(Predictor == "coll_temp", "collection temp.", Predictor),
+         Predictor = fct_relevel(Predictor, "collection temp.", "best")) %>% 
   ggplot(aes(x = Species, y = Correlation, fill = Predictor, group = num)) + 
   geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.6),
            colour = "black") + 
   labs(y = "Correlation \nCoefficient",
        fill = "Correlate") +
-  scale_fill_manual(values = c("coll_temp" = "black", "best" = "white")) + 
+  scale_fill_manual(values = c("collection temp." = "black", "best" = "white")) + 
   scale_y_continuous(breaks = c(0, 1), limits = c(0,1)) +
   theme_matt() + 
   theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5))
