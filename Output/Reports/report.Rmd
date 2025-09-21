@@ -236,50 +236,22 @@ collection_conditions %>%
   theme_matt()
 ```
 
-```{r misc-round-summary-2, fig.width=11, fig.height=11, include = F}
-ggplot() + 
-  geom_hline(yintercept = 
-               c(max(full_data$collection_temp),
-                 min(full_data$collection_temp)), 
-             colour = "grey60",
-             linewidth = c(2,1), 
-             alpha = 0.5) + 
-  geom_bar(data = unique(select(full_data, collection_date, collection_temp)), 
-           aes(x = as_date(collection_date), y = collection_temp),
-           stat = "identity",
-           fill = "grey30") + 
-  geom_point(data = full_data, 
-             aes(x = as_date(collection_date), y = ctmax),
-             position = position_jitter(width = 0.7, height = 0),
-             colour = "grey30",
-             alpha = 0.5) + 
-  ylim(-3, 40) + 
-  coord_polar(start = 0) + 
-  theme_void()
-```
-
-
 Size also varied, but primarily between rather than within species. 
 
-```{r supp-fig-size-timeseries, fig.width=10, fig.height=5}
+```{r misc-fig-size-timeseries, fig.width=10, fig.height=5}
 ggplot() + 
-  geom_vline(data = unique(select(full_data, collection_date)), 
-             aes(xintercept = as.Date(collection_date)),
-             colour = "grey90",
-             linewidth = 1) + 
   geom_line(data = collection_conditions, 
             aes(x = as.Date(date), y = mean_temp),
             colour = "black", 
-            linewidth = 2) + 
-  # geom_errorbar(data = species_summaries,
-  #               aes(x = as.Date(collection_date), 
-  #                   ymin = mean_ctmax - ctmax_st_err, ymax = mean_ctmax + ctmax_st_err,
-  #                   colour = sp_name),
-  #               position = position_dodge(width = 1),
-  #               width = 5, linewidth = 1) + 
-  geom_point(data = adult_summaries, 
-             aes(x = as.Date(collection_date), y = mean_size * 40, colour = sp_name, size = sample_size),
-             position = position_dodge(width = 1)) + 
+            linewidth = 1) +
+  geom_point(data = filter(tseries_data, species != "osphranticum_labronectum"), 
+             aes(x = as.Date(collection_date), y = size * 40, colour = sp_name),
+             size = 1.5, shape = 16, alpha = 0.9,
+             position = position_jitter(width = 0, height = 0)) + 
+    geom_point(data = filter(tseries_data, species == "osphranticum_labronectum"), 
+             aes(x = as.Date(collection_date), y = size * 40, colour = sp_name),
+             size = 2, shape = 16, alpha = 0.9,
+             position = position_jitter(width = 0, height = 0)) + 
   scale_colour_manual(values = species_cols) + 
   scale_y_continuous(
     name = "Temperature", # Features of the first axis
@@ -291,38 +263,7 @@ ggplot() +
        colour = "Species") + 
   theme_matt() + 
   theme(legend.position = "right")
-```
 
-```{r misc-trait-doy-feature, fig.width = 14, fig.height = 7, include = F}
-#Shown below is CTmax and body size for the species with the most data (*Skistodiaptomus*, *L. minutus*, *L. sicilis*, and *Epischura*), plotted against the day of the year for each sex/stage separately. 
-
-ctmax_feature = full_data %>%  
-  mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
-  ggplot(aes(x = as.Date(collection_date), y = ctmax, colour = sp_name)) + 
-  facet_grid(sp_name~sex) + 
-  geom_point() + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Day of the Year", 
-       y = "CTmax (°C)") + 
-  theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
-        legend.position = "none")
-
-size_feature = full_data %>%  
-  mutate(doy = yday(collection_date)) %>% 
-  filter(sp_name %in% c("Skistodiaptomus oregonensis", "Leptodiaptomus minutus", "Leptodiaptomus sicilis", "Epischura lacustris")) %>% 
-  ggplot(aes(x = as.Date(collection_date), y = size, colour = sp_name)) + 
-  facet_grid(sp_name~sex) + 
-  geom_point() + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Day of the Year", 
-       y = "Size (mm)") + 
-  theme_matt_facets() +
-  theme(axis.text.x = element_text(angle = 300, hjust = 0, vjust = 0.5),
-        legend.position = "none")
-
-ggarrange(ctmax_feature, size_feature, common.legend = T, labels = "AUTO", legend = "none")
 ```
 
 ```{r sp-occurences, fig.width=7, fig.height=5}
@@ -360,7 +301,7 @@ sample_dates_plot = full_data %>%
         axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
 ```
 
-```{r fig.width=7, fig.height=5}
+```{r species-ctmax-plot, fig.width=7, fig.height=5}
 sp_ctmax_temp = full_data %>% 
   filter(sp_name != "Osphranticum labronectum") %>% 
   mutate(sp_name = as.factor(sp_name),
@@ -376,11 +317,85 @@ sp_ctmax_temp = full_data %>%
   theme(legend.position = "none")
 ```
 
-```{r main-fig-sp-summaries, fig.width=14, fig.height=5}
+```{r supp-fig-model-performance, fig.width=9, fig.height=13}
 
-ggarrange(sample_dates_plot, sp_ctmax_temp, 
+### This model is used to estimate ARR
+
+model_data = full_data %>%  
+  drop_na(size, ctmax) %>%  
+  filter(sp_name != "Osphranticum labronectum") %>% 
+  mutate(temp_cent = scale(collection_temp, center = T, scale = F),
+         size_cent = scale(size, center = T, scale = F))
+
+minimal.model = lme4::lmer(data = model_data,
+                           ctmax ~ sp_name + sex + temp_cent +
+                             (1|days_in_lab))
+
+full.model = lme4::lmer(data = model_data,
+                        ctmax ~ sp_name*sex*temp_cent +
+                          (1|days_in_lab))
+
+#drop1(full.model, test = "Chisq")
+
+#performance::test_performance(minimal.model, full.model)
+#performance::check_model(full.model)
+
+car::Anova(full.model, type = "III")
+
+sp_ctmax = emmeans::emmeans(full.model, specs = "sp_name") %>% 
+  data.frame() %>% 
+  select(sp_name, "species_ctmax" = emmean)
+
+model_coefs = emmeans::emtrends(full.model, var = "temp_cent", specs = "sp_name") %>% 
+  data.frame() %>% 
+  inner_join(sp_ctmax) 
+
+ctmax_resids = model_data %>% 
+  mutate(resids = residuals(full.model))
+
+#write.csv(model_coefs, "Output/Data/ARR_data.csv")
+```
+
+```{r main-fig-ARR-synth-plot, fig.width=9, fig.height=6}
+arr_combined = synth_arr %>%
+  filter(measure == "upper" & mean_lim > 20) %>% 
+  select("group" = genus, arr, mean_lim) %>% 
+  mutate("dataset" = "synthesis") %>% 
+  bind_rows(
+    select(model_coefs, "group" = sp_name, 'arr' = temp_cent.trend, 'mean_lim' = species_ctmax)
+  ) %>% 
+  mutate(dataset = if_else(is.na(dataset), "new data", "synthesis"),
+         group = fct_reorder(group, arr, .desc = T))
+
+
+arr_synth_plot = ggplot(arr_combined, aes(x = mean_lim, y = arr)) + 
+  geom_smooth(method = "lm", se = F, 
+              linewidth = 2, colour = "grey30") + 
+  geom_point(data = filter(arr_combined, dataset != "new data"), 
+             size = 3, colour = "black", shape = 1, stroke = 1.4) + 
+  geom_point(data = filter(arr_combined, dataset == "new data"),
+             aes(colour = group), 
+             size = 6) + 
+  scale_colour_manual(values = species_cols) + 
+  labs(x = "Thermal Limit (°C)", 
+       y = "Acc. Response Ratio", 
+       colour = "Species") +
+  theme_matt() + 
+  theme(legend.position = "none")
+
+```
+
+We expect one of the primary drivers of copepod thermal limits to be temperature, as individuals acclimate to seasonal changes. Shown below are the seasonal patterns of when copepods were included in CTmax measurements (a proxy for the season of occurrence), and thermal limits for each species plotted against the temperature at the time of collection. We generally see an increase in thermal limits with increasing collection temperature.
+
+```{r main-fig-sp-summaries, fig.width=12, fig.height=10}
+
+second_row = ggarrange(sp_ctmax_temp, arr_synth_plot,
           nrow = 1, 
-          labels = "AUTO")
+          labels = c("B", "C"))
+
+ggarrange(sample_dates_plot, second_row,
+          nrow = 2, labels = c("A"))
+
 ```
 
 
@@ -409,168 +424,8 @@ adult_summaries %>%
         axis.ticks = element_line())
 ```
 
-Throughout the season, the prevalence of various unidentified pathogens also varied, with very little infection observed during the Winter and Spring. 
-
-```{r supp-fig-pathogen-props, fig.width=8, fig.height=5}
-pathogen_cols = c("no" = "grey95", "cloudy" = "honeydew3", "spot" = "antiquewhite3", "other" = "tomato3")
-
-full_data %>% 
-  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
-  group_by() %>% 
-  filter(sex != "juvenile") %>% 
-  group_by(collection_date) %>% 
-  count(pathogen) %>% 
-  filter(pathogen != "uncertain") %>% 
-  pivot_wider(id_cols = "collection_date", 
-              names_from = pathogen, 
-              values_from = n,
-              values_fill = 0) %>% 
-  mutate(total = sum(no, cloudy, spot, other)) %>% 
-  pivot_longer(cols = c(no, cloudy, spot, other),
-               names_to = "pathogen", 
-               values_to = "count") %>% 
-  mutate(percent = count/total,
-         collection_date = lubridate::as_date(collection_date),
-         pathogen = fct_relevel(pathogen, "no", "cloudy", "spot", "other")) %>% 
-  ggplot(aes(x = collection_date, y = percent, fill = pathogen)) + 
-  geom_area() + 
-  scale_fill_manual(values = pathogen_cols) + 
-  scale_y_continuous(breaks = c(0,1)) + 
-  labs(x = "Collection Date", 
-       y = "Proportion", 
-       fill = "Pathogen") + 
-  theme_minimal(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.ticks = element_line())
-```
-
-The transparent bodies of these copepods also allowed us to examine seasonal patterns in lipid reserves and in the production of eggs. Maturing oocytes are visible in female copepods before they are released. There was no strong seasonal cycle in the production of these eggs in any species, and instead, females were reproductively active throughout their respective seasons of occurence. 
-
-```{r supp-fig-deveggs-props, fig.height = 15, fig.width = 8}
-dev_eggs_cols = c("no" = "grey95", "yes" = "lightblue3")
-
-full_data %>% 
-  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
-  group_by(sp_name) %>% 
-  filter(sex != "juvenile") %>% 
-  group_by(sp_name, collection_date) %>% 
-  count(dev_eggs) %>% 
-  filter(dev_eggs != "uncertain") %>% 
-  pivot_wider(id_cols = c("collection_date", "sp_name"), 
-              names_from = dev_eggs, 
-              values_from = n,
-              values_fill = 0) %>% 
-  mutate(total = sum(no, yes)) %>% 
-  pivot_longer(cols = c(no, yes),
-               names_to = "dev_eggs", 
-               values_to = "count") %>% 
-  mutate(percent = count/total,
-         collection_date = lubridate::as_date(collection_date),
-         dev_eggs = fct_relevel(dev_eggs, "no", "yes")) %>% 
-  ungroup() %>% 
-  complete(collection_date, nesting(sp_name, dev_eggs), fill = list(percent = 1)) %>% 
-  mutate(percent = if_else(is.na(total) & dev_eggs == "yes", 0, percent)) %>% 
-  ggplot(aes(x = collection_date, y = percent, fill = dev_eggs)) + 
-  facet_wrap(sp_name~., ncol = 1) + 
-  geom_area() + 
-  scale_fill_manual(values = dev_eggs_cols) + 
-  scale_y_continuous(breaks = c(0,1)) + 
-  labs(x = "Collection Date", 
-       y = "Proportion", 
-       fill = "Developing \nEggs") + 
-  theme_minimal(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.ticks = element_line())
-```
-
-The presence of lipids varied across species, with only *L. minutus*, *L. sicilis*, and *Limnocalanus* regularly possessing lipid stores. 
-
-```{r supp-fig-lipids-props, fig.height = 15, fig.width = 8}
-lipid_cols = c("no" = "grey95", "yes" = "sienna2")
-
-full_data %>% 
-  select(collection_date, dev_eggs, pathogen, lipids, sp_name, sex) %>% 
-  group_by(sp_name) %>% 
-  filter(sex != "juvenile") %>% 
-  group_by(sp_name, collection_date) %>% 
-  count(lipids) %>% 
-  filter(lipids != "uncertain") %>% 
-  pivot_wider(id_cols = c("collection_date", "sp_name"), 
-              names_from = lipids, 
-              values_from = n,
-              values_fill = 0) %>% 
-  mutate(total = sum(no, yes)) %>% 
-  pivot_longer(cols = c(no, yes),
-               names_to = "lipids", 
-               values_to = "count") %>% 
-  mutate(percent = count/total,
-         collection_date = lubridate::as_date(collection_date),
-         lipids = fct_relevel(lipids, "no", "yes")) %>% 
-  ungroup() %>% 
-  complete(collection_date, nesting(sp_name, lipids), fill = list(percent = 1)) %>% 
-  mutate(percent = if_else(is.na(total) & lipids == "yes", 0, percent)) %>% 
-  ggplot(aes(x = collection_date, y = percent, fill = lipids)) + 
-  facet_wrap(sp_name~., ncol = 1) + 
-  geom_area() + 
-  scale_fill_manual(values = lipid_cols) + 
-  scale_y_continuous(breaks = c(0,1)) + 
-  labs(x = "Collection Date", 
-       y = "Proportion", 
-       fill = "Lipids\nPresent") + 
-  theme_minimal(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.ticks = element_line())
-```
-
-
 ## Temperature Variability
-Lake Champlain is highly seasonal, with both average temperatures and temperature variability changing throughout the year. These patterns in the experienced thermal environment may drive the observed variation in copepod thermal limits. However, the time period affecting copepod thermal limits is unknown. Depending the on the duration of time considered, there are large changes in the experienced environment, in particular regarding the temperature range and variance. Consider for example three time periods: the day of collection, one week prior to collection, and four weeks prior to collection. While the overall pattern is similar, we can see that, unsurprisingly, considering longer periods of time results in larger ranges and slightly changes the pattern of variance experienced. 
-
-```{r daily-temp-data, include = F}
-## Daily values
-daily_temp_data = temp_data %>%
-  ungroup() %>% 
-  group_by(date) %>% 
-  summarise(mean_temp = mean(temp),
-            med_temp = median(temp),
-            var_temp = var(temp), 
-            min_temp = min(temp), 
-            max_temp = max(temp)) %>% 
-  mutate("range_temp" = max_temp - min_temp)
-
-day_prior_temp_data = temp_data %>% 
-  ungroup() %>% 
-  group_by(date) %>% 
-  summarise(mean_temp = mean(temp),
-            med_temp = median(temp),
-            var_temp = var(temp), 
-            min_temp = min(temp), 
-            max_temp = max(temp)) %>% 
-  mutate(date = date + 1) %>% 
-  rename_with(.fn = ~ paste0("prior_day_", .x), .cols = c(-date))
-
-daily_plot = daily_temp_data %>% 
-  pivot_longer(cols = c(-date),
-               names_to = "parameter", 
-               values_to = "temp") %>% 
-  ggplot(aes(x = date, y = temp, colour = parameter)) + 
-  geom_line(linewidth = 1) + 
-  scale_colour_manual(values = c(
-    "mean_temp" = "olivedrab3",
-    "med_temp" = "seagreen3",
-    "max_temp" = "tomato",  
-    "min_temp" = "dodgerblue",
-    "range_temp" = "goldenrod3",
-    "var_temp" = "darkgoldenrod1"
-  )) + 
-  scale_x_continuous(breaks = as.Date(c("2023-01-01", "2023-04-01", "2023-07-01"))) + 
-  ggtitle("Daily Values") + 
-  labs(y = "Temperature (°C)",
-       x = "") + 
-  theme_bw(base_size = 20) + 
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 270, hjust = 0, vjust = 0.5))
-```
+Lake Champlain is highly seasonal, with both average temperatures and temperature variability changing throughout the year. These patterns in the experienced thermal environment may drive the observed variation in copepod thermal limits. However, the time period affecting copepod thermal limits is unknown. Depending the on the duration of time considered, there are large changes in the experienced environment, in particular regarding the temperature range and variance. 
 
 ```{r predictors-function}
 ## Defining the function to get predictor values for periods of different lengths
@@ -945,30 +800,6 @@ ggarrange(duration_plot, correlation_coef_plot, nrow = 2, legend = "right", labe
           heights = c(0.4, 0.6))
 ```
 
-```{r misc-acc-duration-plot, fig.width=7, fig.height=4, include = F}
-# Phenotypic variation (like acclimation of thermal limits) is a physiological process. depending on the mechanistic underpinnings (changes in HSP expression, etc.), the amount of time it takes for an individual to acclimate may vary based on body size (larger species, more cells, more time required to acclimate). Shown here is the duration of the environmental acclimation window the copepods appear to be responding to.  
-
-mean_sizes = full_data %>% 
-  filter(sex == "female") %>% 
-  group_by(sp_name) %>%  
-  summarise(mean_size = mean(size, na.rm = T))
-
-corr_vals %>% 
-  group_by(sp_name) %>% 
-  filter(correlation == max(correlation)) %>%  
-  inner_join(mean_sizes, by = "sp_name") %>% 
-  select(sp_name, duration, mean_size) %>%  
-  ggplot(aes(x = mean_size, y = duration)) + 
-  geom_point(aes(colour = sp_name), 
-             size = 4) + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Mean Female Size (mm)",
-       y = "Acclimation Duration",
-       colour = "Species") + 
-  theme_matt() + 
-  theme(legend.position = "right")
-```
-
 ## Trait Variation 
 
 Shown below are the clutch size distributions for the three diaptomiid species, which produce egg sacs that allow for easy quantification of fecundity. 
@@ -989,13 +820,17 @@ One of the main aims of this project is to examine the patterns and processes dr
 
 ### Variation with temperature 
 
-We expect one of the primary drivers of copepod thermal limits to be temperature, as individuals acclimate to seasonal changes. Shown below are the seasonal patterns of when copepods were included in CTmax measurements (a proxy for the season of occurrence), and thermal limits for each species plotted against the temperature at the time of collection. We generally see an increase in thermal limits with increasing collection temperature.
-
 The interaction between seasonal changes in temperature and the acclimation of thermal limits likely affects vulnerability of each species to warming. Shown below are warming tolerance values for each species, calculated as the difference between individual CTmax and the temperature at the time of collection. All species maintained some degree of buffer between environmental temperatures and upper thermal limits, but *L. minutus* appears to approach its upper thermal limit during the warmest collections during the summer. 
 
 Also shown below is the relationship between fecundity (the number of eggs contained in a clutch) for the three diaptomid species. For the two Leptodiaptomus species, there is no relationship between clutch size and temperature, while there appears to be a general increase in clutch size with temperature in the Skistodiaptomus species. 
 
-```{r main-fig-trait-coll-temp-plots, fig.width=15, fig.height=7}
+Shown here is the relationship between fecundity and size, showing the classic pattern of increasing egg production with increasing size. 
+
+Individuals may also allocate energy to different fitness related traits, prioritizing reproductive output over environmental tolerance, for example. Shown below is the relationship between CTmax residuals (again, controlling for the effects of collection temperature) against fecundity. We can see clearly that individuals with increased fecundity are not decreasing thermal limits, suggesting that there is no energetic trade-off between these traits. 
+
+
+
+```{r coll-temp-plots}
 
 wt_temp = full_data %>% 
   filter(sp_name != "Osphranticum labronectum") %>% 
@@ -1024,9 +859,41 @@ eggs_temp = full_data %>%
   theme_matt() + 
   theme(legend.position = "right")
 
-ggarrange(wt_temp, eggs_temp, 
-          common.legend = T, legend = "right", labels = "AUTO")
 ```
+
+```{r fecundity-size}
+size_fecund_plot = ctmax_resids %>%  
+  drop_na(fecundity) %>% 
+  ggplot(aes(x = size, y = fecundity, colour = sp_name)) + 
+  geom_smooth(method = "lm", se = F, linewidth = 2) + 
+  geom_point(size = 2, alpha = 0.5) + 
+  labs(x = "Prosome length (mm)", 
+       y = "Fecundity (# Eggs)",
+       colour = "Species") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt() + 
+  theme(legend.position = "right")
+```
+
+```{r, main-fig-trait-corrs, fig.width=13, fig.height=10}
+ctmax_fecund_plot = ctmax_resids %>%  
+  drop_na(fecundity) %>% 
+  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
+  geom_smooth(method = "lm", se = F, linewidth = 2) + 
+  geom_point(size = 2, alpha = 0.5) + 
+  labs(x = "CTmax Residuals (°C)", 
+       y = "Fecundity (# Eggs)",
+       colour = "Species") + 
+  scale_colour_manual(values = species_cols) + 
+  theme_matt() + 
+  theme(legend.position = "right")
+
+ggarrange(wt_temp, eggs_temp, size_fecund_plot, ctmax_fecund_plot, 
+          common.legend = T, 
+          labels = "AUTO", legend = "right")
+```
+
+
 
 ```{r supp-fig-lsic-morphs, include = F}
 morph_data = full_data %>% 
@@ -1097,43 +964,6 @@ full_data %>%
 #   theme(legend.position = "none")
 ```
 
-```{r supp-fig-model-performance, fig.width=9, fig.height=13}
-
-model_data = full_data %>%  
-  drop_na(size, ctmax) %>%  
-  filter(sp_name != "Osphranticum labronectum") %>% 
-  mutate(temp_cent = scale(collection_temp, center = T, scale = F),
-         size_cent = scale(size, center = T, scale = F))
-
-minimal.model = lme4::lmer(data = model_data,
-                           ctmax ~ sp_name + sex + temp_cent +
-                             (1|days_in_lab))
-
-full.model = lme4::lmer(data = model_data,
-                        ctmax ~ sp_name*sex*temp_cent +
-                          (1|days_in_lab))
-
-drop1(full.model, test = "Chisq")
-
-performance::test_performance(minimal.model, full.model)
-performance::check_model(full.model)
-
-car::Anova(full.model, type = "III")
-
-sp_ctmax = emmeans::emmeans(full.model, specs = "sp_name") %>% 
-  data.frame() %>% 
-  select(sp_name, "species_ctmax" = emmean)
-
-model_coefs = emmeans::emtrends(full.model, var = "temp_cent", specs = "sp_name") %>% 
-  data.frame() %>% 
-  inner_join(sp_ctmax) 
-
-ctmax_resids = model_data %>% 
-  mutate(resids = residuals(full.model))
-
-#write.csv(model_coefs, "Output/Data/ARR_data.csv")
-```
-
 ```{r, include = F}
 
 morph_comp = full_data %>% 
@@ -1153,36 +983,6 @@ car::Anova(morph.model)
 emmeans::emmeans(morph.model, specs = "morph", at = list(collection_temp = 5)) %>% pairs()
 
 # Individual size is strongly impacted by developmental temperature. The presence of two morphs may reflect two different generations with differing developmental conditions. The large morph is present during the Fall while the smaller morph is present during the Winter and Spring. Individuals that are mature during the Fall were presumably born during the previous Winter/Spring, largely developing during the coldest time of year. These individuals reappear in the community in the late Fall, when water temperatures are still relatively warm - offspring produced by the large morphs during the Fall mature under these warmer conditions, producing the smaller morph. The effects of these developmental differences can also be seen in the thermal limit data - the smaller morph (which developed at higher temperatures) tended to have higher upper thermal limits than the larger morph (which developed at cooler temperatures). This suggests a layered impact of developmental phenotypic plasticity and acclimation, which together produce a 'bump' in L. sicilis CTmax during the coldest period of time. During the Fall and early winter, CTmax measurements were made on individuals from the large morph, with acclimation to cooling driving a decrease in CTmax. Eventually, individuals from the small morph mature and replace the previous generation. This results in an apparent increase in CTmax just before the coldest time of year, driven by the effects of developmental plasticity. Surface waters continue to cool, with acclimation then driving a small decrease in CTmax. 
-
-```
-
-
-```{r main-fig-ARR-synth-plot, fig.width=9, fig.height=6}
-arr_combined = synth_arr %>%
-  filter(measure == "upper" & mean_lim > 20) %>% 
-  select("group" = genus, arr, mean_lim) %>% 
-  mutate("dataset" = "synthesis") %>% 
-  bind_rows(
-    select(model_coefs, "group" = sp_name, 'arr' = temp_cent.trend, 'mean_lim' = species_ctmax)
-  ) %>% 
-  mutate(dataset = if_else(is.na(dataset), "new data", "synthesis"),
-         group = fct_reorder(group, arr, .desc = T))
-
-
-ggplot(arr_combined, aes(x = mean_lim, y = arr)) + 
-  geom_smooth(method = "lm", se = F, 
-              linewidth = 2, colour = "grey30") + 
-  geom_point(data = filter(arr_combined, dataset != "new data"), 
-             size = 3, colour = "black", shape = 1, stroke = 1.4) + 
-  geom_point(data = filter(arr_combined, dataset == "new data"),
-             aes(colour = group), 
-             size = 6) + 
-  scale_colour_manual(values = species_cols) + 
-  labs(x = "Thermal Limit", 
-       y = "ARR", 
-       colour = "Species") +
-  theme_matt() + 
-  theme(legend.position = "right")
 
 ```
 
@@ -1270,8 +1070,6 @@ emmeans::emmeans(reduced_factors_model, spec = "pathogen") %>% emmeans::contrast
     theme_matt()
 ```
 
-
-
 ### Trait Correlations and Trade-offs
 
 A relationship between size and upper thermal limits has been suggested in a wide range of other taxa. Shown below are the measured upper thermal limits plotted against prosome length. The overall relationship (inclusive of all species) is shown as the black line in the background. Regressions for each individual species are also shown. Across the entire assemblage, there is a strong decrease in thermal limits with increasing size.  
@@ -1315,7 +1113,7 @@ full_data %>%
 
 Shown below is the relationship between mean size and mean thermal limits for females of each species. We see that larger species within the community tend to have a lower thermal limit than smaller species. 
 
-```{r main-fig-mean-ctmax-mean-size-plot, fig.width=9, fig.height=5}
+```{r supp-fig-mean-ctmax-mean-size-plot, fig.width=9, fig.height=5}
 full_data %>% 
   group_by(sp_name, sex) %>% 
   summarize(mean_ctmax = mean(ctmax, na.rm = T),
@@ -1345,39 +1143,6 @@ full_data %>%
 #   scale_colour_manual(values = species_cols) + 
 #   theme_matt() + 
 #   theme(legend.position = "none")
-```
-
-Shown here is the relationship between fecundity and size, showing the classic pattern of increasing egg production with increasing size. 
-
-```{r fecundity-size}
-size_fecund_plot = ctmax_resids %>%  
-  drop_na(fecundity) %>% 
-  ggplot(aes(x = size, y = fecundity, colour = sp_name)) + 
-  geom_smooth(method = "lm", se = F, linewidth = 2) + 
-  geom_point(size = 2, alpha = 0.5) + 
-  labs(x = "Prosome length (mm)", 
-       y = "Fecundity (# Eggs)",
-       colour = "Species") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt() + 
-  theme(legend.position = "right")
-```
-
-Individuals may also allocate energy to different fitness related traits, prioritizing reproductive output over environmental tolerance, for example. Shown below is the relationship between CTmax residuals (again, controlling for the effects of collection temperature) against fecundity. We can see clearly that individuals with increased fecundity are not decreasing thermal limits, suggesting that there is no energetic trade-off between these traits. 
-```{r, main-fig-fecundity-plots, fig.width=8.5, fig.height=10}
-ctmax_fecund_plot = ctmax_resids %>%  
-  drop_na(fecundity) %>% 
-  ggplot(aes(x = resids, y = fecundity, colour = sp_name)) + 
-  geom_smooth(method = "lm", se = F, linewidth = 2) + 
-  geom_point(size = 2, alpha = 0.5) + 
-  labs(x = "CTmax Residuals (°C)", 
-       y = "Fecundity (# Eggs)",
-       colour = "Species") + 
-  scale_colour_manual(values = species_cols) + 
-  theme_matt() + 
-  theme(legend.position = "right")
-
-ggarrange(size_fecund_plot, ctmax_fecund_plot, ncol = 1, common.legend = T, labels = "AUTO", legend = "right")
 ```
 
 Previous studies have shown that the magnitude of the size-fecundity correlation may be environmentally-dependent. This is not visible is the data from these collections. 
@@ -1637,10 +1402,6 @@ ggplot(ramp_record2, aes(x = minute_interval, y = mean_ramp)) +
        x = "Time into run (minute)") + 
   theme_matt_facets(base_size = 12)
 ```
-
-
-
-
 
 
 ```{r}
